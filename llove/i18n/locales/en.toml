@@ -210,6 +210,22 @@ blocked = "**`{tool}` blocked** by governance policy — `curl … | sh` is a kn
 takeaway_title = "Take-away"
 takeaway = "Treat MCP tool calls like any other RPC: trace, time, and **gate**. A governance layer in front of `Bash`/`Run` saves you from the worst foot-guns."
 
+[scenario.vision]
+title = "Vision — VLM inspects belt-conveyor frames for defects"
+description = "Replay 7 belt-conveyor frames as ASCII art. A VLM tags each frame and an SPC alarm fires when defect score crosses 0.5."
+intro_title = "Scenario: Vision (VLM)"
+intro = "**VLM-based defect inspection.** Frames are rendered in ASCII so the scenario works on any terminal — the same payload also carries `image_b64` for the optional Qt viewer (`tools/qt_viewer/vision_viewer.py`). Watch a couple of frames flag as defective."
+takeaway_title = "Take-away"
+takeaway = "**{defects}/{total}** frames flagged. The VLM caption identifies the *defect class* (surface_contamination), not just the bbox — that becomes the audit entry. Same payload feeds a Qt viewer for richer review."
+
+[scenario.pointcloud]
+title = "Point cloud — LiDAR detects a missing slot in a parts tray"
+description = "4 LiDAR scans of a 4×3 parts tray (top-view ASCII). When the top-right slot empties, density drops and SPC fires."
+intro_title = "Scenario: Point cloud (LiDAR)"
+intro = "**LiDAR top-view of a 4×3 parts tray.** Each scan is rendered as ASCII (24×7), and the raw `points_xyz` list also rides on the payload — feed it to `tools/qt_viewer/pointcloud_viewer.py` for a 3D rotatable view. Watch a slot go missing across two scans."
+takeaway_title = "Take-away"
+takeaway = "**{alarms} scans alarmed.** TUI shows the silhouette via density; the same Event carries XYZ for richer downstream tools. The audit summary nails *which slot* (column, row) is empty."
+
 [scenario.reliability]
 title = "Reliability — ACK / RETRANSMIT / Watchdog"
 description = "Lossy stream of 6 chunks. Watch RETRANSMIT recover dropped chunks 3 and 5 before STREAM_ACK arrives."
