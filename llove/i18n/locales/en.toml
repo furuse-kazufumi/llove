@@ -15,6 +15,33 @@ reset = "⟲ Reset"
 help = "? Help"
 quit = "✕ Quit"
 
+[ui.help]
+title = "[bold]💗 llove — Help[/bold]\n"
+body = """
+[bold]Mouse / clickable controls (top row)[/bold]
+  ⏸ Pause / ▶ Resume   pause or resume the data stream
+  ⟲ Reset              clear the rolling rows in every pane
+  ? Help               open this help (you're here)
+  ✕ Quit               exit llove
+
+[bold]Keyboard shortcuts[/bold]
+  q       quit
+  r       reset views
+  space   pause / resume
+  h       open / close this help
+  esc     close this help
+
+[bold]Panes (read-only)[/bold]
+  📡 SensorEvent stream — rolling sensor readings + 40-pt sparkline
+  📊 SPC chart           — CUSUM control status + recent alarm log
+  📋 Audit log           — audit / LLM call / RAG hit events, newest first
+  💬 Narration           — scenario commentary (when running --scenario)
+
+[bold]Tip[/bold]
+  Footer entries (q Quit, r Reset, ...) are also clickable.
+"""
+close = "Close (esc)"
+
 [ui.pane.sensor_stream]
 title = "📡 SensorEvent stream  · 📖 read-only"
 subtitle_init = "(waiting for data)"
