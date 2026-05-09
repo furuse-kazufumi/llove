@@ -1,19 +1,11 @@
-"""LLM backends scenario — Ollama / OpenAI / Anthropic side-by-side.
-
-We don't actually call any backend (offline, deterministic). The point is to
-show the unified ABC: same prompt, same code path, different cost/latency.
-"""
+"""LLM backends scenario — Ollama / OpenAI / Anthropic side-by-side."""
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
 
-from llove.demo.scenarios.base import DemoScenario, narrate
+from llove.demo.scenarios.base import DemoScenario, narrate, narrate_key
 from llove.events import Event, EventKind
-
-_INTRO = (
-    "**llmesh.llm** lets you swap backends with one constructor change. "
-    "Same prompt → 3 different backends, no other code changes."
-)
+from llove.i18n import t
 
 _PROMPT = "Explain CUSUM control charts in 2 sentences."
 
@@ -47,24 +39,28 @@ _RESULTS = [
 
 class LLMBackendsScenario(DemoScenario):
     name = "backends"
-    title = "LLM backends — Ollama / OpenAI / Anthropic"
-    description = (
-        "Same prompt across local + 2 cloud backends. Compare tokens / latency / cost "
-        "with the unified ABC."
-    )
+    i18n_key = "backends"
     default_pause = 0.6
 
     async def events(self) -> AsyncIterator[Event]:
-        yield narrate(_INTRO, title="Scenario: LLM backends")
-        yield narrate(f"prompt: `{_PROMPT}`", title="Prompt")
+        yield narrate_key("scenario.backends.intro", title_key="scenario.backends.intro_title")
+        yield narrate(
+            t("scenario.backends.prompt", q=_PROMPT),
+            title=t("scenario.backends.prompt_title"),
+        )
         for r in _RESULTS:
             yield narrate(
-                f"calling **{r['backend']}** — model `{r['model']}`  ({r['note']})",
-                title=r["backend"],
+                t(
+                    "scenario.backends.calling",
+                    backend=r["backend"],
+                    model=r["model"],
+                    note=r["note"],
+                ),
+                title=str(r["backend"]),
             )
             yield Event(
                 kind=EventKind.LLM_CALL,
-                source_id=r["backend"],
+                source_id=str(r["backend"]),
                 payload={
                     "backend": r["backend"],
                     "model": r["model"],
@@ -74,10 +70,9 @@ class LLMBackendsScenario(DemoScenario):
                     "kind": "completion",
                 },
             )
-        total_local = sum(r["latency_ms"] for r in _RESULTS if r["cost_usd"] == 0)
-        total_cloud = sum(r["latency_ms"] for r in _RESULTS if r["cost_usd"] > 0)
+        total_local = sum(int(r["latency_ms"]) for r in _RESULTS if float(r["cost_usd"]) == 0)
+        total_cloud = sum(int(r["latency_ms"]) for r in _RESULTS if float(r["cost_usd"]) > 0)
         yield narrate(
-            f"local total = {total_local} ms (free) · cloud total = {total_cloud} ms "
-            "(low cost). **Use local for dev, cloud for hard prompts.**",
-            title="Take-away",
+            t("scenario.backends.takeaway", local_ms=total_local, cloud_ms=total_cloud),
+            title=t("scenario.backends.takeaway_title"),
         )
