@@ -25,6 +25,14 @@
 **LLMesh の SensorEvent / SPC / RAG / Audit / Trace** を 1 つの TUI（ターミナル UI）で美しく流し、
 そのまま **1 ファイル HTML にエクスポート** して Slack / Issue / プレゼンに貼れます。
 
+> **v0.3.0a1 (pre-release):** llmesh ノード identity を全デモの先頭で
+> AUDIT に流す統合 / shogi MVP2a (Ed25519 per-move 署名付きの実対局
+> ループ + `llove play shogi`) / F15 ブラウザ並み表示の URI / Camera /
+> Viewer 基盤 / F16 chess (`[chess]` extras) / F21 タイピングデモ
+> (8 ジャンル辞書) / F17 WindowManager 最小骨組み (Free/Locked
+> Container + IconSet 3 段 + layout.toml). 全 216 件 PASS.
+> 詳細は [CHANGELOG.md](CHANGELOG.md) と [ROADMAP.md](ROADMAP.md) を参照.
+
 ```bash
 pip install llmesh-llove        # PyPI 配布名 (llmesh-mcp と統一)
 llove demo                       # 30 秒で動くフル機能デモ
