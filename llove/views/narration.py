@@ -56,7 +56,9 @@ class NarrationView(Static, View):
             head += f"  [bold]{title}[/bold]"
         body = self._lite_markdown(text)
         self._entries.appendleft(f"{head}\n  {body}")
-        self.update("\n\n".join(self._entries))
+        rendered = "\n\n".join(self._entries)
+        self.last_render = rendered
+        self.update(rendered)
 
     @staticmethod
     def _lite_markdown(text: str) -> str:
