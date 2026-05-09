@@ -33,7 +33,7 @@ def _render_topview(missing: tuple[int, int] | None) -> str:
     for y in range(_GRID_H):
         grid[y][0] = "|"
         grid[y][_GRID_W - 1] = "|"
-    # Slots: 4 columns × 3 rows. Slot (col, row) -> centre cell.
+    # Slots: 4 columns by 3 rows. Slot (col, row) -> centre cell.
     for col in range(4):
         for row in range(3):
             cx = 3 + col * 5
