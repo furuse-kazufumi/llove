@@ -8,9 +8,9 @@ from .sensor_stream import SensorStreamView
 from .spc_chart import SPCChartView
 
 __all__ = [
-    "View",
     "AuditLogView",
     "NarrationView",
-    "SensorStreamView",
     "SPCChartView",
+    "SensorStreamView",
+    "View",
 ]

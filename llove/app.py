@@ -97,7 +97,7 @@ class LoveApp(App):
     def action_reset(self) -> None:
         for v in self._views:
             if hasattr(v, "_rows"):
-                v._rows.clear()  # noqa: SLF001 — public reset helper coming in v0.2.
+                v._rows.clear()
 
     def action_toggle_pause(self) -> None:
         self._paused = not self._paused

@@ -29,10 +29,10 @@ jobs:
         run: ruff check llove/
 
       - name: Run tests with coverage
-        run: python -m pytest --cov=llove --cov-fail-under=70 -q
+        run: python -m pytest --cov=llove --cov-fail-under=80 -q
 
-      - name: Bandit (project config)
-        run: bandit -r llove/ -c pyproject.toml -ll
+      - name: Bandit (all severities, project config)
+        run: bandit -r llove/ -c pyproject.toml
 
       - name: Smoke check — export HTML headlessly
         shell: bash

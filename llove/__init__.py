@@ -16,9 +16,9 @@ from .sources.base import DataSource
 from .views.base import View
 
 __all__ = [
+    "DataSource",
     "Event",
     "EventKind",
-    "DataSource",
     "View",
     "__version__",
 ]

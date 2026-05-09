@@ -36,15 +36,15 @@ def get_scenario(name: str) -> DemoScenario:
 
 
 __all__ = [
-    "DemoScenario",
     "SCENARIOS",
-    "get_scenario",
-    "narrate",
     "AuditChainScenario",
+    "DemoScenario",
     "FirewallScenario",
     "LLMBackendsScenario",
     "MultimodalSPCScenario",
     "RAGStoresScenario",
     "ReliabilityScenario",
     "SCADAScenario",
+    "get_scenario",
+    "narrate",
 ]
