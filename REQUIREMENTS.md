@@ -43,6 +43,25 @@ Claude HTML Artifacts のように、**自己完結・共有可能・インタ�
 
 | F16 | **マルチゲーム LLM 対局アリーナ** — shogi (F12) と同じ枠組みで chess / go / mahjong / カードゲームを LLM 間対局できる (新要求 2026-05-09) | (a) **共通骨格**: F12 で確立した `Engine` + `Player ABC` + `Loop` + `Provider` 抽象を `llove/games/<game>/` に展開。各ゲームは独立の extras で分離 (`[chess]`, `[go]`, `[mahjong]`, `[poker]`, `[card]`, または一括 `[games-all]`) (b) **CLI 統一**: `llove play <game> --player1 <provider:model> --player2 <provider:model> [--players N for multi-player games]`。例: `llove play chess --player1 anthropic:claude-haiku-4-5 --player2 ollama:llama3:70b` (c) **対象ゲーム**: ① **chess** (`python-chess`, MIT、合法手・stalemate・en passant・castling 完備、参考: 14k★ GitHub) ② **go** (碁、`sente` or `katago` python bind、9x9 / 13x13 / 19x19 切替) ③ **mahjong** (麻雀、`mahjong` package = nekobean/mahjong、Riichi ルール、点数計算同梱) ④ **poker** (`pokerkit` Texas Hold'em / Omaha、`treys` for hand evaluation) ⑤ **bridge** (`endplay` package) ⑥ **hanafuda** こいこい (花札、自前実装) ⑦ **大富豪 / 七並べ / 神経衰弱 / speed** (自前実装、簡単な card game pack) ⑧ **blackjack** (dealer vs LLM 複数) (d) **参考プロジェクト**: **OpenSpiel** (DeepMind, 50+ ゲーム、C++ + Python、Apache-2.0) を inspiration とし、可能なら拡張ゲームのソース足場として一部利用検討。**pgx** (JAX-based、shogi/chess/go/backgammon/connect4 等の RL gym) も参考 (e) **共通機能**: Ed25519 署名 (F12 同様) / 棋譜 export (各ゲームの標準フォーマット — chess: PGN, go: SGF, mahjong: tenhou.net JSON, card: 自前 JSONL) / バッチ評価 `--games N` で勝率比較 / 観戦モード (`llove view`) (f) **TUI 表現**: ゲーム盤を ASCII / 半角換算で表示、SensorStream に評価値・残り時間・残り牌、SPC alarm に大局急変・違法手・連続王手の千日手、Audit に手順・棋譜、Narration に LLM の手読み解説 (g) **マルチプレイヤー対応**: 麻雀・大富豪は 3〜4 名 LLM。各 LLM 独立の identity (`llmesh.identity` per-player)、署名は誰が打牌したかをチェイン (h) **不完全情報ゲーム対応**: 麻雀・ポーカーは「自分の手だけ見える」prompt 設計が必須 — 共通 Player ABC を「観測 → 行動」非対称型に拡張、`Engine.observation_for(player)` を追加 (i) **roadmap**: v0.7.0「Game Arena」を新設、shogi (F12 完了) → chess (最小コスト) → go → mahjong → poker → カードゲーム小品の順 (j) **llmesh 普及貢献**: 各ゲーム対局を 2 つの llmesh ノード間で行う場合 `llmesh:peer:<NodeID>` プロバイダで peer の `<game>.think` MCP ツール経由 — llmesh-mcp が「LLM 同士のメッシュ越しゲーム」基盤に育つ (k) **fail-closed**: 各ゲームの extras が無い場合は `pip install llmesh-llove[chess]` 等の案内のみ表示し、shogi など他ゲームの動作は影響しない |
 
+### 2.1.1 設計原則 — llmesh と llove の責務分担 (2026-05-09 確定)
+
+llove の表示完成度が上がるほど、llmesh のデータ層を**シンプルに**保てる。
+「将棋の駒のような表示工夫は llove 側でやる」が原則。
+
+- **llmesh が流すべきもの**: 構造化された生データ・状態・識別子・署名。
+  例: SFEN / USI / SGF / PGN / sensor float / event tag / did:key。
+  「画面で何色か」「絵文字や ASCII art で見せるか」「アニメーションするか」は **流さない**。
+- **llove が責任を持つもの**: 漢字駒・色付け・絵文字・ASCII art・
+  Rich markup・Sixel 化・テーマ・国際化・盤面アニメ・効果音 (将来)。
+- **メリット**: (a) llmesh API が小さく安定する、(b) 同じ生データから
+  複数の見た目を出せる (国際化、テーマ切替、ASCII / Sixel / Qt の自動分岐)、
+  (c) llove 側のリッチ化が llmesh の API breaking change を起こさない、
+  (d) F15 のレンダラ多様化と相性が良い。
+- **適用例**:
+  - shogi: llmesh は `usi` を流すだけ → llove が `▲７六歩 (2.4秒)` に整形 + 漢字駒 + 後手 `[bright_red]` で表示
+  - sensor: llmesh は `(name, value, ts)` だけ → llove が単位 / sparkline / 色を付ける
+  - 麻雀: llmesh は牌コード `1m,2m,3m,...` → llove が 🀇🀈🀉 や ASCII 牌に変換
+
 ### 2.2 非機能要件
 
 - **CLI 起動 → 最初の画面が見えるまで 1 秒以内**（合成データ時）
