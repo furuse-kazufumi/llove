@@ -249,8 +249,8 @@ def test_resolve_renderer_includes_pure_python_handler_when_registered() -> None
 
 
 def test_image2d_viewer_renders_with_camera_changes(tmp_path: Path) -> None:
-    PIL = pytest.importorskip("PIL")
-    Image = PIL.Image  # type: ignore[attr-defined]
+    pytest.importorskip("PIL.Image")
+    from PIL import Image
 
     p = tmp_path / "a.png"
     Image.new("RGB", (40, 30), (255, 0, 0)).save(p)
