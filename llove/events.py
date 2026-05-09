@@ -22,6 +22,7 @@ class EventKind(StrEnum):
     RAG_HIT = "rag_hit"
     LLM_CALL = "llm_call"
     TRACE_SPAN = "trace_span"
+    NARRATION = "narration"  # demo / tutorial commentary text for the narration pane
     INFO = "info"
 
 
