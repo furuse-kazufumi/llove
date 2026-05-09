@@ -6,11 +6,12 @@ from datetime import datetime
 from textual.widgets import Static
 
 from llove.events import Event, EventKind
+from llove.i18n import t
 from llove.views.base import View
 
 
 class SPCChartView(Static, View):
-    """Status banner + recent alarm log."""
+    """Status banner + recent alarm log. All labels translated via i18n."""
 
     name = "spc_chart"
     title = "SPC chart (CUSUM)"
@@ -24,13 +25,13 @@ class SPCChartView(Static, View):
     """
 
     def __init__(self, *, limit: int = 6) -> None:
-        super().__init__("● status: waiting for data")
+        super().__init__(t("ui.pane.spc_chart.status_waiting"))
         self._limit = limit
         self._alarms: list[str] = []
         self._last_value: float | None = None
         self._alarm_count = 0
-        self.border_title = "📊 SPC chart — CUSUM control  · view"
-        self.border_subtitle = "watching for drift"
+        self.border_title = t("ui.pane.spc_chart.title")
+        self.border_subtitle = t("ui.pane.spc_chart.subtitle_init")
 
     def feed(self, event: Event) -> None:
         if event.kind == EventKind.SENSOR:
@@ -47,17 +48,19 @@ class SPCChartView(Static, View):
             self._alarms.insert(0, f"  {ts}  ALARM {sid}  cusum={cusum}")
             self._alarms = self._alarms[: self._limit]
             self._alarm_count += 1
-            self.border_subtitle = f"⚠ {self._alarm_count} alarm(s)"
+            self.border_subtitle = t(
+                "ui.pane.spc_chart.subtitle_alarmed", count=self._alarm_count
+            )
             self._refresh(alarmed=True)
 
     def _refresh(self, *, alarmed: bool) -> None:
         if alarmed:
-            head = "[bold red]●[/bold red] status: ALARM"
+            head = t("ui.pane.spc_chart.status_alarm")
         elif self._last_value is None:
-            head = "[dim]●[/dim] status: waiting for data"
+            head = t("ui.pane.spc_chart.status_waiting")
         else:
-            head = f"[bold green]●[/bold green] status: nominal  (value={self._last_value:.2f})"
-        body = "\n".join(self._alarms) if self._alarms else "  (no alarms)"
-        body = f"  Recent alarms:\n{body}"
+            head = t("ui.pane.spc_chart.status_nominal", value=f"{self._last_value:.2f}")
+        body = "\n".join(self._alarms) if self._alarms else t("ui.pane.spc_chart.no_alarms")
+        body = f"{t('ui.pane.spc_chart.recent_alarms')}\n{body}"
         ts = datetime.now().strftime("%H:%M:%S")
-        self.update(f"{head}    [dim]as of {ts}[/dim]\n\n{body}")
+        self.update(f"{head}    {t('ui.pane.spc_chart.as_of', ts=ts)}\n\n{body}")
