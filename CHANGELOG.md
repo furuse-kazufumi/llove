@@ -5,6 +5,39 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+### Added — shogi MVP2a + llmesh identity AUDIT + F15/F16 roadmap
+
+- **`llove play shogi`** CLI: real game loop between two `Player`
+  instances. `--no-tui` for JSONL stdout, default TUI mode supports
+  `--stream`. Auto-logs to `out/shogi/play-<ts>.jsonl`.
+- **`llove/shogi/`** package: thin `Engine` over `python-shogi`
+  (`[shogi]` extras, GPL-3.0 isolated), async `Player` ABC, `MockPlayer`
+  variants (`script` / `illegal` / `resign`), and `run_game` loop
+  enforcing 3-strike forfeit, mate / sennichite / max-ply termination.
+- **Per-move Ed25519 signing** is now part of the spec. Each move signs
+  canonical bytes `"{ply}|{side}|{usi}|{sfen_after}"`.
+- **`llove.identity`** + `LoveApp` first-event: every demo's leading
+  AUDIT carries the local llmesh `did:key`. Discovery walks env →
+  `D:/projects/llmesh/config` → `~/.llmesh` → XDG → llmesh SDK. Missing
+  identity nudges to `pip install llmesh-mcp` (en/ja).
+- `tests/test_identity.py`, `tests/test_shogi_engine.py`,
+  `tests/test_shogi_loop.py` — 24 new cases, full suite green.
+
+### Added — F15 / F16 / design principle (REQUIREMENTS + ROADMAP)
+
+- **F15: Browser-grade Display** (v0.6.0). Image / PDF / table / chart /
+  geo / 3D / audio / video / HTML / JSON, with: external CLI tools
+  allowed (chafa / pdftoppm / mpv / gnuplot / w3m), multi-renderer
+  choice in a settings modal, Qt as first-class fallback, unified 2D /
+  3D viewer base (camera + pan/zoom/rotate). HTML and video are
+  roadmap items; video is the very last step.
+- **F16: Multi-Game LLM Arena** (v0.7.0). chess / go / mahjong / poker /
+  bridge / hanafuda / 大富豪 / blackjack on the same `Engine + Player +
+  Loop + Provider` abstraction.
+- **2.1.1 Design principle**: *llmesh stays simple, llove does the
+  presentation* — SFEN / USI / sensor floats / did:key on the wire,
+  kanji pieces / colours / Sixel / themes in llove.
+
 ### Added — `shogi` scenario (MVP1 complete)
 - 17th demo scenario (`llove demo --scenario shogi`). Two LLMs replay a
   scripted 20-half-move game (Yagura opening + 2-file / 8-file pawn
