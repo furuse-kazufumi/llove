@@ -16,7 +16,7 @@ help = "? Help"
 quit = "✕ Quit"
 
 [ui.pane.sensor_stream]
-title = "📡 SensorEvent stream  · view"
+title = "📡 SensorEvent stream  · 📖 read-only"
 subtitle_init = "(waiting for data)"
 subtitle_active = "{count} pts | latest {latest}"
 header = "time      sensor                value"
@@ -24,7 +24,7 @@ sparkline_label = "sparkline (last 40):"
 empty = "(no data yet)"
 
 [ui.pane.spc_chart]
-title = "📊 SPC chart — CUSUM control  · view"
+title = "📊 SPC chart — CUSUM control  · 📖 read-only"
 subtitle_init = "watching for drift"
 subtitle_alarmed = "⚠ {count} alarm(s)"
 status_alarm = "[bold red]●[/bold red] status: ALARM"
@@ -35,12 +35,12 @@ no_alarms = "  (no alarms)"
 as_of = "[dim]as of {ts}[/dim]"
 
 [ui.pane.audit_log]
-title = "📋 Audit log — audit / LLM / RAG events  · view"
+title = "📋 Audit log — audit / LLM / RAG events  · 📖 read-only"
 subtitle_init = "newest first"
 empty = "(no audit events yet)"
 
 [ui.pane.narration]
-title = "💬 Narration — what's happening, in plain words  · view"
+title = "💬 Narration — what's happening, in plain words  · 📖 read-only"
 subtitle_init = "(scenario commentary)"
 subtitle_active = "beat {beat} · {latest}"
 empty = "[dim](no narration yet — waiting for the scenario to begin)[/dim]"
