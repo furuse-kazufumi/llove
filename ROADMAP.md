@@ -93,23 +93,24 @@
       (`out/shogi/shogi-<ts>.jsonl`) + Reset で対局やり直し（ログも作り直し）+
       先後 LLM 名表示 + ユニットテスト (`tests/test_shogi.py`)。
 
-- [ ] **対局シナリオ `shogi` MVP2a** — *最小の実対局ループ*。
-      - [ ] `[shogi]` extras: `python-shogi` (GPL-3.0、本体 MIT は extras 経由で隔離)
-      - [ ] 合法手チェッカ統合 — 駒の動き / 二歩 / 王手放置 / 行き所のない駒 / 持ち駒打ち
-      - [ ] LLM プロバイダ抽象化 (`llove/shogi/players/`):
-            - `mock` (scripted、MVP1 互換)
-            - `anthropic` (Claude — `anthropic` SDK)
-            - `ollama` (**ローカル LLM**、Llama 3 / Qwen / DeepSeek-R1 等、`httpx` で Ollama HTTP API)
-      - [ ] CLI: `llove play shogi --sente <provider:model> --gote <provider:model>`
-            例: `llove play shogi --sente anthropic:claude-haiku-4-5 --gote ollama:llama3:70b`
-      - [ ] ゲームループ — 違法手 3 回で投了、詰み / 投了 / 千日手で終局
-      - [ ] system prompt を locale 別 TOML に外出し
-      - [ ] 既存 `--log` JSONL に対局全体を継続記録
+- [x] **対局シナリオ `shogi` MVP2a** — *最小の実対局ループ*。**v0.3.0a1 完了**
+      - [x] `[shogi]` extras: `python-shogi` (GPL-3.0、本体 MIT は extras 経由で隔離)
+      - [x] 合法手チェッカ統合 — 駒の動き / 二歩 / 王手放置 / 行き所のない駒 / 持ち駒打ち / 打ち歩詰め (`Engine.push_usi`、`is_legal` に委譲)
+      - [x] LLM プロバイダ抽象化 (`llove/shogi/players/`): `mock` (script/illegal/resign の 3 variant)
+      - [ ] LLM プロバイダ実装 (MVP2b へ移行): `anthropic` / `ollama` / `llmesh:peer`
+      - [x] CLI: `llove play shogi --sente <provider:model> --gote <provider:model>` (mock 同士は動作)
+      - [x] ゲームループ — 違法手 3 回で投了、詰み / 投了 / 千日手 / max_ply で終局 (`run_game`)
+      - [x] **Per-move Ed25519 署名は仕様** — canonical = `"{ply}|{side}|{usi}|{sfen_after}"` (llmesh identity 利用)
+      - [x] 既存 `--log` JSONL に対局全体を継続記録 + `--no-tui --stream` で stdout JSONL 出力可
+      - [ ] system prompt を locale 別 TOML に外出し (MVP2b で実装)
 
-- [ ] **対局シナリオ `shogi` MVP2b** — *プロバイダ拡張 + バッチ評価*。
-      - [ ] `openai` / `llamacpp` / `lmstudio` プロバイダ
+- [ ] **対局シナリオ `shogi` MVP2b** — *プロバイダ拡張 + メッシュ越し対局 + バッチ評価*。
+      - [ ] `anthropic` / `ollama` / `openai` / `llamacpp` / `lmstudio` プロバイダ
+      - [ ] **`llmesh:peer:<NodeID>` プロバイダ — first-class 対応** (llmesh-mcp v3.2 に `game.think` 汎用 MCP ツール追加)
       - [ ] バッチ実行 `--games N` で AvsB の勝率比較
       - [ ] KIF 形式 export `out/shogi/<ts>.kif`（標準棋譜フォーマット）
+      - [ ] system prompt を locale 別 TOML に外出し
+      - [ ] HMAC-chain スタイル署名 (オプション、MVP2a の独立署名から拡張)
 
 - [ ] **対局シナリオ `shogi` MVP3** — *人間対戦モード*。
       - [ ] `human` プロバイダ（キーボード入力、合法手 highlight）
