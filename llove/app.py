@@ -5,7 +5,7 @@ import asyncio
 
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical
-from textual.widgets import Button, Footer, Header
+from textual.widgets import Button, Footer, Header, Static
 
 from llove.events import Event
 from llove.sources.base import DataSource
