@@ -8,6 +8,7 @@ from textual.containers import Horizontal, Vertical
 from textual.widgets import Button, Footer, Header, Static
 
 from llove.events import Event
+from llove.i18n import t
 from llove.sources.base import DataSource
 from llove.views.audit_log import AuditLogView
 from llove.views.base import View
