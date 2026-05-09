@@ -32,6 +32,7 @@ Claude HTML Artifacts のように、**自己完結・共有可能・インタ�
 | F5 | 別データソース（JSON Lines / SQLite / Phoenix Trace）も読める | プラグイン的に Source 追加可能、`pip install llove` だけで JSON / SQLite は読める |
 | F6 | キーボード駆動 + マウスもクリックできる | Textual の標準サポート、Vim 風キーバインドも提供 |
 | F7 | デモ環境 / テスト環境 / 開発環境を同梱 | demo コマンド + Mock LLMesh + devcontainer + docker-compose + GitHub プレビュー用スケッチ |
+| F8 | LLMesh の **各機能** を体験できるシナリオ別 demo | `llove demo --list` で一覧、`llove demo --scenario <name>` で個別起動。シナリオごとに narration pane が解説を流し、何が起きているか自然言語で読める |
 
 ### 2.2 非機能要件
 
