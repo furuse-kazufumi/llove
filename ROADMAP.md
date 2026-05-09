@@ -249,24 +249,21 @@
 
 ### 入る機能（順序）
 
-- [ ] `llove/games/` 共通骨格 (Engine / Player / Loop / Provider 抽象を
-      shogi から切り出し汎用化)
-- [ ] **chess** (`[chess]` extras: python-chess 14k★ MIT) — PGN export、
-      Stockfish 評価値オプション
-- [ ] **go** (`[go]` extras: sente / katago bind) — 9x9 → 13x13 → 19x19、
-      SGF export
-- [ ] **mahjong** (`[mahjong]` extras: nekobean/mahjong) — Riichi ルール、
-      不完全情報対応 (`Engine.observation_for(player)`)、tenhou.net JSON
+- [x] `llove/games/base/` 共通骨格 (Engine / Player / Loop / Move /
+      Observation / TermReason / GameOutcome / 汎用 Ed25519 署名) — **v0.3.0a1 完了**
+- [x] **chess 最小実装** (`llove/games/chess/`、`[chess]` extras: python-chess 14k★ MIT) — **v0.3.0a1 完了**.
+      PGN export、Stockfish 評価値オプションは未着手
+- [x] **F21 タイピングデモ** (`llove/games/typing/`) — F16 抽象の 1-player 検証 (v0.3.0a1)
+- [ ] **F22 LLM テトリスデモ** (`llove/games/tetris/`) — F16 抽象を「リアルタイム 1-player」へ拡張
+- [ ] **go** (`[go]` extras: sente / katago bind) — 9x9 → 13x13 → 19x19、SGF export
+- [ ] **mahjong** (`[mahjong]` extras: nekobean/mahjong) — Riichi ルール、不完全情報対応 (`Engine.observation_for(player)`)、tenhou.net JSON
 - [ ] **poker** (`[poker]` extras: pokerkit / treys) — Texas Hold'em
 - [ ] **bridge** (`[bridge]` extras: endplay) — PBN export
-- [ ] **カードゲーム小品** (`[card]` extras): こいこい / 大富豪 /
-      七並べ / 神経衰弱 / speed / blackjack
-- [ ] **CLI 統一**: `llove play <game> --player1 ... --player2 ...
-      [--players N]`
-- [ ] **共通機能**: Ed25519 署名 / 棋譜 export / `--games N` バッチ
-      勝率 / 観戦モード / multi-LLM identity per player
-- [ ] **llmesh peer 越し対局**: `llmesh:peer:<NodeID>` プロバイダで
-      `<game>.think` MCP ツール経由 — llmesh-mcp に v3.2 追加
+- [ ] **カードゲーム小品** (`[card]` extras): こいこい / 大富豪 / 七並べ / 神経衰弱 / speed / blackjack
+- [ ] **CLI 統一**: `llove play <game> --player1 ... --player2 ... [--players N]` (shogi 用 `llove play shogi` は実装済、汎用化は go/mahjong 着手時)
+- [x] **共通機能 — Ed25519 署名** (per-move、shogi で実装済 / games/base に汎用化済)
+- [ ] **共通機能 — 棋譜 export / `--games N` バッチ勝率 / 観戦モード / multi-LLM identity per player**
+- [ ] **llmesh peer 越し対局**: `llmesh:peer:<NodeID>` プロバイダで `<game>.think` MCP ツール経由 — llmesh-mcp に v3.2 追加 (shogi MVP2b と同期で実装)
 
 ### 参考プロジェクト
 
