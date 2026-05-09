@@ -207,6 +207,22 @@ blocked = "**`{tool}` がガバナンスポリシーで遮断** — `curl … | 
 takeaway_title = "ポイント"
 takeaway = "MCP ツール呼び出しを RPC と思って、trace・time・**gate** を入れる。`Bash` / `Run` の手前にガバナンス層を置くだけで、最悪の罠の大半を防げる。"
 
+[scenario.vision]
+title = "ビジョン — VLM がベルトコンベア画像から不良品を検出"
+description = "ベルトコンベア 7 フレームを ASCII art で再生。VLM がキャプションを付与し、不良スコアが 0.5 を超えたフレームで SPC アラーム。"
+intro_title = "シナリオ: ビジョン (VLM)"
+intro = "**VLM による不良品検査。** フレームは ASCII で描画 — どんなターミナルでも動きます。同じ payload に `image_b64` も載せているので、別途 Qt ビューア (`tools/qt_viewer/vision_viewer.py`) で写真として再生可能。途中 2 フレームが不良判定される様子を観察。"
+takeaway_title = "ポイント"
+takeaway = "**{defects}/{total} フレーム** で不良検出。VLM のキャプションは bbox だけでなく **不良クラス** (surface_contamination) まで指定 — それがそのまま audit に残る。同じ payload を Qt ビューアに流せばリッチなレビューも可能。"
+
+[scenario.pointcloud]
+title = "点群 — LiDAR が部品トレイの欠品スロットを検知"
+description = "4×3 部品トレイの LiDAR 4 スキャン (ASCII top-view)。右上スロットが空になり、密度低下で SPC アラーム。"
+intro_title = "シナリオ: 点群 (LiDAR)"
+intro = "**4×3 部品トレイの LiDAR top-view。** 各スキャンは 24×7 の ASCII で描画、生の `points_xyz` も payload に載せます — `tools/qt_viewer/pointcloud_viewer.py` に流せば 3D で回転表示。スロットが 2 スキャン連続で空になる様子を観察。"
+takeaway_title = "ポイント"
+takeaway = "**{alarms} スキャンでアラーム発火**。TUI は密度でシルエットを示し、同じ Event に XYZ が乗るので外部ツールでもリッチに視覚化可能。audit サマリは **どのスロット (col, row)** かまで特定。"
+
 [scenario.reliability]
 title = "信頼性プロトコル — ACK / RETRANSMIT / Watchdog"
 description = "6 チャンクのストリームを損失下で送信。RETRANSMIT が #3 と #5 を回復し、STREAM_ACK で完了。"
