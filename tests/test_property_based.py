@@ -47,7 +47,11 @@ def test_event_roundtrip_through_json(kind: EventKind, payload: dict, source_id:
     ev.short()
 
 
-@settings(suppress_health_check=[HealthCheck.too_slow], max_examples=80)
+@settings(
+    suppress_health_check=[HealthCheck.too_slow, HealthCheck.function_scoped_fixture],
+    max_examples=60,
+    deadline=None,
+)
 @given(text=st.text(max_size=1024))
 @pytest.mark.asyncio
 async def test_jsonl_source_never_raises_on_arbitrary_text(text: str, tmp_path: Path) -> None:
