@@ -65,7 +65,10 @@ class NarrationView(Static, View):
         body = self._lite_markdown(text)
         self._entries.appendleft(f"{head}\n  {body}")
         self._beats += 1
-        latest = title if title else t("ui.pane.narration.title")
+        # border_subtitle is parsed as Textual markup, so escape any '[' the
+        # user-supplied title may contain (same protection as `safe_title`).
+        latest_raw = title if title else t("ui.pane.narration.title")
+        latest = str(latest_raw).replace("[", r"\[")
         self.border_subtitle = t(
             "ui.pane.narration.subtitle_active", beat=self._beats, latest=latest
         )
