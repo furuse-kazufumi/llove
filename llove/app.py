@@ -5,7 +5,7 @@ import asyncio
 
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical
-from textual.widgets import Footer, Header
+from textual.widgets import Button, Footer, Header
 
 from llove.events import Event
 from llove.sources.base import DataSource
@@ -19,14 +19,27 @@ from llove.views.spc_chart import SPCChartView
 class LoveApp(App):
     """Multi-pane Textual app for llove.
 
-    Default layout: SensorStream | SPCChart on top, AuditLog below.
-    With ``with_narration=True``: a fourth NarrationView is added at the bottom
-    so demo scenarios can show running commentary.
+    Default layout (top → bottom):
+        Header  (auto title + clock)
+        Control row  (clickable Pause / Reset / Help / Quit buttons)
+        Top row      SensorStream | SPCChart  (read-only displays)
+        Audit log row                          (read-only display)
+        Narration row (optional, when running a scenario)
+        Footer  (keybinding hints; clicking a hint invokes the action)
     """
 
     CSS = """
     Screen {
         background: $surface;
+    }
+    #control-row {
+        height: 3;
+        padding: 0 1;
+        background: $boost;
+    }
+    #control-row Button {
+        margin: 0 1;
+        min-width: 12;
     }
     .top-row {
         height: 1fr;
@@ -53,6 +66,15 @@ class LoveApp(App):
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
+        # Explicit control row — these are obviously clickable, distinguishing
+        # them from the read-only display panes below.
+        with Horizontal(id="control-row"):
+            self._btn_pause = Button("⏸ Pause", id="btn-pause", variant="primary")
+            self._btn_reset = Button("⟲ Reset", id="btn-reset", variant="warning")
+            yield self._btn_pause
+            yield self._btn_reset
+            yield Button("? Help", id="btn-help", variant="default")
+            yield Button("✕ Quit", id="btn-quit", variant="error")
         with Vertical():
             with Horizontal(classes="top-row"):
                 self._sensor = SensorStreamView()
