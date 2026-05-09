@@ -15,6 +15,7 @@ from collections import deque
 from textual.widgets import Static
 
 from llove.events import Event, EventKind
+from llove.i18n import t
 from llove.views.base import View
 
 _RE_BOLD = re.compile(r"\*\*([^*]+)\*\*")
