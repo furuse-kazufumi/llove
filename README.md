@@ -3,8 +3,8 @@
 [![CI](https://github.com/furuse-kazufumi/llove/actions/workflows/ci.yml/badge.svg)](https://github.com/furuse-kazufumi/llove/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/furuse-kazufumi/llove/actions/workflows/codeql.yml/badge.svg)](https://github.com/furuse-kazufumi/llove/actions/workflows/codeql.yml)
 [![codecov](https://codecov.io/gh/furuse-kazufumi/llove/branch/main/graph/badge.svg)](https://codecov.io/gh/furuse-kazufumi/llove)
-[![PyPI](https://img.shields.io/pypi/v/llove.svg)](https://pypi.org/project/llove/)
-[![Python](https://img.shields.io/pypi/pyversions/llove.svg)](https://pypi.org/project/llove/)
+[![PyPI](https://img.shields.io/pypi/v/llmesh-llove.svg)](https://pypi.org/project/llmesh-llove/)
+[![Python](https://img.shields.io/pypi/pyversions/llmesh-llove.svg)](https://pypi.org/project/llmesh-llove/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
@@ -26,8 +26,8 @@
 そのまま **1 ファイル HTML にエクスポート** して Slack / Issue / プレゼンに貼れます。
 
 ```bash
-pip install llove
-llove demo            # 30 秒で動くフル機能デモ
+pip install llmesh-llove        # PyPI 配布名 (llmesh-mcp と統一)
+llove demo                       # 30 秒で動くフル機能デモ
 ```
 
 ---

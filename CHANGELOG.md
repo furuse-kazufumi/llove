@@ -3,7 +3,22 @@
 All notable changes to **llove** are recorded here.
 This project follows [Semantic Versioning](https://semver.org).
 
-## [Unreleased]
+## [0.2.2] - 2026-05-09
+
+### Changed
+- **PyPI distribution name renamed** `llove` → **`llmesh-llove`** to match the
+  LLMesh ecosystem convention (`llmesh-mcp`). The `llove` PyPI name was too
+  similar to existing PyPI projects and could not be registered.
+  - **Install**: `pip install llmesh-llove` (was `pip install llove`).
+  - **Import** is unchanged: `import llove`.
+  - hatch `packages = ["llove"]` keeps the import path stable.
+
+### Fixed
+- `NarrationView.feed` no longer crashes on event titles that contain `[`.
+  Hypothesis caught a falsifying example (`title='[@=:'`) where the title
+  was assigned to `border_subtitle` without escaping, and Textual's markup
+  parser raised `MarkupError`. Same defensive `\[` escape that already
+  protected `safe_title` is now also applied to `latest`.
 
 ### Added
 - **`vision` scenario** — VLM-based belt-conveyor inspection across 7 ASCII
