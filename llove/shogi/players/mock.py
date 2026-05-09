@@ -75,14 +75,17 @@ class MockPlayer(Player):
             )
 
         if self.model == "illegal":
-            # Simulate a fixed 50ms "thinking" so the audit pane shows a
-            # plausible timing field. The "9z9z" USI fails parse, which
-            # the engine maps to ``parse_error`` — counted as one strike.
-            await asyncio.sleep(0.05)
+            # Simulate a fixed 50 ms "thinking" so the audit pane shows a
+            # plausible timing field. ``thinking_ms_override`` (typically
+            # 0 in tests) collapses the sleep so a CI run is millisecond-fast.
+            base_ms = 50
+            ms = self._thinking_ms_override if self._thinking_ms_override is not None else base_ms
+            if ms > 0:
+                await asyncio.sleep(ms / 1000.0)
             return ThinkResult(
                 move=Move(
                     usi="9z9z",
-                    thinking_ms=50,
+                    thinking_ms=ms,
                     commentary="(mock:illegal — deliberately malformed)",
                 )
             )
@@ -98,12 +101,13 @@ class MockPlayer(Player):
                 resign=True,
                 resign_reason="mock:script exhausted — no further moves in the demo",
             )
-        usi, thinking_ms, commentary = self._script[self._cursor]
+        usi, script_ms, commentary = self._script[self._cursor]
         self._cursor += 1
-        # Sleep in real time only when the LoveApp is driving us; tests pass
-        # ``default_pause = 0.0`` by setting ``thinking_ms`` themselves.
-        if thinking_ms > 0:
-            await asyncio.sleep(thinking_ms / 1000.0)
+        ms = self._thinking_ms_override if self._thinking_ms_override is not None else script_ms
+        # Sleep in real time only when the LoveApp is driving us. Tests
+        # pass ``thinking_ms_override=0`` to collapse the wait.
+        if ms > 0:
+            await asyncio.sleep(ms / 1000.0)
         return ThinkResult(
-            move=Move(usi=usi, thinking_ms=thinking_ms, commentary=commentary)
+            move=Move(usi=usi, thinking_ms=ms, commentary=commentary)
         )
