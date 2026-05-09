@@ -1,0 +1,48 @@
+# Local quality gates — run automatically before each commit.
+# Install once with: `pip install pre-commit && pre-commit install`
+# Run on demand with: `pre-commit run --all-files`
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-added-large-files
+        args: ["--maxkb=500"]
+      - id: check-merge-conflict
+      - id: detect-private-key
+        # firewall scenario contains demo PEM/JWT/secret patterns on purpose,
+        # to show the L1 secret-detection layer in action. They are not real keys.
+        exclude: ^llove/demo/scenarios/firewall\.py$
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.4
+    hooks:
+      - id: ruff
+        args: ["--fix"]
+      - id: ruff-format
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.8.0
+    hooks:
+      - id: bandit
+        args: ["-c", "pyproject.toml", "-r", "llove"]
+        additional_dependencies: ["bandit[toml]"]
+        pass_filenames: false
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0
+    hooks:
+      - id: mypy
+        files: ^llove/
+        additional_dependencies:
+          - "click>=8.1"
+          - "pydantic>=2.6"
+          - "rich>=13.7"
+          - "textual>=0.80"

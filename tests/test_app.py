@@ -6,6 +6,7 @@ We use it to:
     2. Verify keyboard bindings respond
     3. Verify the narration variant adds the extra pane
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -116,9 +117,7 @@ async def test_app_continues_when_a_view_raises() -> None:
         def feed(self, event: Event) -> None:
             raise RuntimeError("boom")
 
-    src = _StaticSource(
-        [Event(kind=EventKind.SENSOR, payload={"sensor_id": "s1", "value": 1.0})]
-    )
+    src = _StaticSource([Event(kind=EventKind.SENSOR, payload={"sensor_id": "s1", "value": 1.0})])
     app = LoveApp(src)
     async with app.run_test(size=(120, 40)) as pilot:
         # Inject the bad view into the dispatch list after compose ran.

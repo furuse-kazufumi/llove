@@ -1,4 +1,5 @@
 """Tests for view widgets — exercise the feed() path without spinning a TUI."""
+
 from __future__ import annotations
 
 from llove.events import Event, EventKind

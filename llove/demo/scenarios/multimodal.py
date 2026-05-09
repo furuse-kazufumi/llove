@@ -1,4 +1,5 @@
 """Multimodal SPC scenario — UnifiedSPC + VLMFeatureExtractor."""
+
 from __future__ import annotations
 
 import random
@@ -28,11 +29,11 @@ class MultimodalSPCScenario(DemoScenario):
         self._rng = random.Random(seed)
 
     async def events(self) -> AsyncIterator[Event]:
-        yield narrate_key(
-            "scenario.multimodal.intro", title_key="scenario.multimodal.intro_title"
-        )
+        yield narrate_key("scenario.multimodal.intro", title_key="scenario.multimodal.intro_title")
 
-        yield narrate_key("scenario.multimodal.phase_a", title_key="scenario.multimodal.phase_a_title")
+        yield narrate_key(
+            "scenario.multimodal.phase_a", title_key="scenario.multimodal.phase_a_title"
+        )
         for _ in range(8):
             yield Event(
                 kind=EventKind.SENSOR,
@@ -49,7 +50,9 @@ class MultimodalSPCScenario(DemoScenario):
                 },
             )
 
-        yield narrate_key("scenario.multimodal.phase_b", title_key="scenario.multimodal.phase_b_title")
+        yield narrate_key(
+            "scenario.multimodal.phase_b", title_key="scenario.multimodal.phase_b_title"
+        )
         for _ in range(4):
             yield Event(
                 kind=EventKind.SENSOR,
@@ -66,7 +69,9 @@ class MultimodalSPCScenario(DemoScenario):
                 },
             )
 
-        yield narrate_key("scenario.multimodal.phase_c", title_key="scenario.multimodal.phase_c_title")
+        yield narrate_key(
+            "scenario.multimodal.phase_c", title_key="scenario.multimodal.phase_c_title"
+        )
         for i in range(6):
             yield Event(
                 kind=EventKind.SENSOR,

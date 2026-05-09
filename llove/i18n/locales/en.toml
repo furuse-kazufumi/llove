@@ -148,6 +148,68 @@ step3 = "**Step 3.** Operator runs `verify_chain()` — entry #4's `prev_hmac` n
 takeaway_title = "Take-away"
 takeaway = "Tamper-evident, not tamper-proof. The attacker cannot silently rewrite history; the broken link is forensic evidence."
 
+[scenario.cost]
+title = "Cost — token spend hits the daily budget"
+description = "Replay 7 LLM calls; running cost crosses the daily USD budget and an SPC alarm fires."
+intro_title = "Scenario: Cost budget"
+intro = "**Token spend matters.** This scenario replays 7 LLM calls — local + cheap cloud + a few large `gpt-4o` runs. Daily budget is **{budget}**; we watch the running total cross it and an SPC alarm fire."
+breached_title = "Budget breached"
+breached = "After call **#{n}** the running total reached **{total}** and crossed the daily budget. SPC alarm fired on `daily_cost_usd`."
+llm_explain_title = "LLM root-cause"
+llm_explain = "**LLM explainer**: the 3 large `gpt-4o` calls account for ~95% of today's spend. Earlier `gpt-4o-mini` and local `llama3.2` calls were under budget on their own."
+takeaway_title = "Take-away"
+takeaway = "Total spend = **{total}** for one session. **Route long prompts to cheaper models** (haiku, mini, local) and gate `gpt-4o` behind a quality requirement — not the default."
+
+[scenario.chat]
+title = "Chat — live LLM dialogue with a firewall block"
+description = "Replay a 9-turn user/assistant conversation; one prompt-injection turn is blocked by L0 mid-stream."
+intro_title = "Scenario: Chat stream"
+intro = "**Live chat**: user/assistant turns flow through the LLM call pane. Mid-conversation, an injection prompt is intercepted by the firewall and recorded in audit — the rest of the conversation continues."
+blocked_title = "Firewall block"
+blocked = "Turn intercepted by **layer {layer}** before reaching the model. Logged to audit; the user can simply re-ask."
+takeaway_title = "Take-away"
+takeaway = "Chat is just LLM_CALL events with `role` and `turn`. The firewall sits **in front of** the model, so an injection attempt never costs tokens — and is always auditable."
+
+[scenario.bench]
+title = "Bench — same prompt, 3 models, 3-axis verdict"
+description = "Replay the same prompt across local + 2 cloud models and judge by latency / cost / LLM-as-judge quality."
+intro_title = "Scenario: 3-axis benchmark"
+intro = "**Multi-axis bench**: same prompt → 3 models → judge picks a winner per axis (latency, cost, quality). Quality is rated by LLM-as-judge on faithfulness + completeness."
+prompt_title = "Prompt"
+prompt = "prompt: `{q}`"
+verdict_title = "Verdict"
+verdict = "**Verdict** — fastest: `{latency_winner}` · cheapest paid: `{cost_winner}` · best quality: `{quality_winner}`. No model wins all three."
+takeaway_title = "Take-away"
+takeaway = "Single-axis benchmarks lie. Cheapest is rarely fastest, fastest is rarely highest-quality. Pick the axis that matches the **business cost of being wrong** for this query."
+
+[scenario.drift]
+title = "Drift — production model output shifts over weeks"
+description = "Average response length creeps up week 1 → week 6; CUSUM detects the drift and the LLM diagnoses retrieval staleness."
+intro_title = "Scenario: Model drift"
+intro = "**Output distribution drift**. Production chat model `prod_chat_v1` had stable response lengths in week 1. Weeks 4 and 6 show creeping growth — the prompt didn't change, but retrieval did. SPC catches it."
+phase_a_title = "Phase A — week 1 (baseline)"
+phase_a = "Phase A — **baseline week**: avg response length ~150 tokens, jitter ±8."
+phase_b_title = "Phase B — week 4 (slow drift)"
+phase_b = "Phase B — **week 4**: a slow upward drift of ~+25 tokens. CUSUM accumulates."
+phase_c_title = "Phase C — week 6 (alarm)"
+phase_c = "Phase C — **week 6**: drift accelerates to +55 tokens. CUSUM crosses the threshold → alarm."
+llm_title = "LLM"
+llm = "**LLM**: the prompt template hasn't changed. CUSUM = {cusum}. Likely root cause is **retrieval staleness** — the indexed corpus is now larger and the model is including more context per answer."
+takeaway_title = "Take-away"
+takeaway = "Drift is rarely the **model**'s fault. Watch the surrounding pipeline (retrieval, prompts, cache) before re-fine-tuning."
+
+[scenario.mcp_call]
+title = "MCP — tool calls + a timeout + a governance block"
+description = "Six MCP tool spans: 3 fast successes, one timeout-then-recover, and one shell call blocked by policy."
+intro_title = "Scenario: MCP tool calls"
+intro = "**MCP** = Model Context Protocol. Each tool call is a TRACE_SPAN. We replay 6 spans across `filesystem`, `http`, and `shell` servers — including a **timeout** that recovers on retry and a **governance block** on a shell pipe-to-interpreter."
+timeout_title = "Timeout"
+timeout = "**Timeout** on `{tool}` (>5 s, no response). Caller will retry once with backoff — that's a llmesh reliability primitive, not magic."
+blocked_title = "Governance block"
+blocked = "**`{tool}` blocked** by governance policy — `curl … | sh` is a known foothold pattern. Audit entry recorded with full args preview."
+takeaway_title = "Take-away"
+takeaway = "Treat MCP tool calls like any other RPC: trace, time, and **gate**. A governance layer in front of `Bash`/`Run` saves you from the worst foot-guns."
+
 [scenario.reliability]
 title = "Reliability — ACK / RETRANSMIT / Watchdog"
 description = "Lossy stream of 6 chunks. Watch RETRANSMIT recover dropped chunks 3 and 5 before STREAM_ACK arrives."

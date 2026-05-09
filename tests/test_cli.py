@@ -1,4 +1,5 @@
 """CLI smoke tests using Click's test runner."""
+
 from __future__ import annotations
 
 from pathlib import Path

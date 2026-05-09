@@ -1,4 +1,5 @@
 """JSONLSource — read events from a JSON Lines file or stream-tail it."""
+
 from __future__ import annotations
 
 import asyncio
@@ -22,7 +23,9 @@ class JSONLSource(DataSource):
 
     name = "jsonl"
 
-    def __init__(self, path: str | Path, *, follow: bool = False, poll_seconds: float = 0.5) -> None:
+    def __init__(
+        self, path: str | Path, *, follow: bool = False, poll_seconds: float = 0.5
+    ) -> None:
         self._path = Path(path)
         self._follow = follow
         self._poll = poll_seconds

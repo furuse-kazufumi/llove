@@ -28,8 +28,19 @@ jobs:
       - name: Lint with ruff
         run: ruff check llove/
 
+      - name: Type-check with mypy
+        run: python -m mypy llove
+
       - name: Run tests with coverage
-        run: python -m pytest --cov=llove --cov-fail-under=80 -q
+        run: python -m pytest --cov=llove --cov-report=xml --cov-report=term --cov-fail-under=80 -q
+
+      - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.xml
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Bandit (all severities, project config)
         run: bandit -r llove/ -c pyproject.toml

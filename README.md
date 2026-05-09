@@ -1,5 +1,14 @@
 # 💗 llove
 
+[![CI](https://github.com/furuse-kazufumi/llove/actions/workflows/ci.yml/badge.svg)](https://github.com/furuse-kazufumi/llove/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/furuse-kazufumi/llove/actions/workflows/codeql.yml/badge.svg)](https://github.com/furuse-kazufumi/llove/actions/workflows/codeql.yml)
+[![codecov](https://codecov.io/gh/furuse-kazufumi/llove/branch/main/graph/badge.svg)](https://codecov.io/gh/furuse-kazufumi/llove)
+[![PyPI](https://img.shields.io/pypi/v/llove.svg)](https://pypi.org/project/llove/)
+[![Python](https://img.shields.io/pypi/pyversions/llove.svg)](https://pypi.org/project/llove/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
+
 > A cute, terminal-first **Artifact** for inspecting LLMesh data — with **llove**.
 
 ```

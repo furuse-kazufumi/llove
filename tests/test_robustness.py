@@ -3,6 +3,7 @@
 Goal: nothing here should raise. Every code path is fail-closed: bad input
 produces an empty / unchanged view rather than a stack trace.
 """
+
 from __future__ import annotations
 
 import asyncio

@@ -1,4 +1,5 @@
 """Data sources for llove."""
+
 from __future__ import annotations
 
 from .base import DataSource

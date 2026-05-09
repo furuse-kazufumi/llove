@@ -1,4 +1,5 @@
 """SPCChartView — show CUSUM-style alarms with a status banner."""
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -48,9 +49,7 @@ class SPCChartView(Static, View):
             self._alarms.insert(0, f"  {ts}  ALARM {sid}  cusum={cusum}")
             self._alarms = self._alarms[: self._limit]
             self._alarm_count += 1
-            self.border_subtitle = t(
-                "ui.pane.spc_chart.subtitle_alarmed", count=self._alarm_count
-            )
+            self.border_subtitle = t("ui.pane.spc_chart.subtitle_alarmed", count=self._alarm_count)
             self._refresh(alarmed=True)
 
     def _refresh(self, *, alarmed: bool) -> None:

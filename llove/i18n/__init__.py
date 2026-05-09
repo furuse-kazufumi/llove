@@ -23,6 +23,7 @@ Adding a new language is just adding ``llove/i18n/locales/<code>.toml``
 with the same key tree as ``en.toml``. See ``docs/i18n.md`` for the full
 contributor guide.
 """
+
 from __future__ import annotations
 
 import locale as _locale

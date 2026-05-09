@@ -6,6 +6,7 @@ These exercise the parts of llove that ingest external / arbitrary data:
     - NarrationView never lets Rich tags from user data escape into the UI
     - MockSource is deterministic for any seed and reasonable tick value
 """
+
 from __future__ import annotations
 
 import json
@@ -92,9 +93,9 @@ def test_narration_view_never_leaks_user_rich_tags(text: str, title: str | None)
         i = stripped.find("[", idx)
         if i == -1:
             break
-        assert i > 0 and stripped[i - 1] == "\\", (
-            f"unescaped '[' leaked into render at position {i}: {stripped!r}"
-        )
+        assert (
+            i > 0 and stripped[i - 1] == "\\"
+        ), f"unescaped '[' leaked into render at position {i}: {stripped!r}"
         idx = i + 1
 
 

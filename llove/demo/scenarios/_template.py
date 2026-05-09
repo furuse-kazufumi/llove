@@ -21,6 +21,7 @@ The Event payload is a free-form dict — views look up the keys they care
 about (sensor_id, value, cusum, tokens, ...) and ignore the rest, so you can
 add extra fields without breaking anything.
 """
+
 from __future__ import annotations
 
 from collections.abc import AsyncIterator

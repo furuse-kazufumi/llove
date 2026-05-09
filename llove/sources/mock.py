@@ -8,6 +8,7 @@ The data follows a 3-phase scenario inspired by SCADA incidents:
 The scenario is reproducible (default seed=42) so tests can assert exact event
 sequences. Pass ``seed=None`` for non-deterministic demo runs.
 """
+
 from __future__ import annotations
 
 import asyncio

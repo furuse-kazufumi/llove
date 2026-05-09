@@ -7,6 +7,7 @@ The view shows the most recent few entries with the latest at the top, so a
 demo can build a running story. Plain text is supported; very lightweight
 Rich tag substitution renders bold (``**word**``) and inline code (``\`x\```).
 """
+
 from __future__ import annotations
 
 import re

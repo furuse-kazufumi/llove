@@ -4,6 +4,7 @@ Every DataSource yields ``Event``s. Every View consumes them.
 A single union type keeps the wire format simple and makes serialisation
 to JSON Lines straightforward.
 """
+
 from __future__ import annotations
 
 from datetime import UTC, datetime

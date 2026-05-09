@@ -1,4 +1,5 @@
 """Views — Textual widgets that consume Events and render them."""
+
 from __future__ import annotations
 
 from .audit_log import AuditLogView

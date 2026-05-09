@@ -9,6 +9,7 @@ inspired by Claude HTML Artifacts:
 We deliberately keep this independent of Textual's experimental web mode so the
 output is robust even when running in a headless CI.
 """
+
 from __future__ import annotations
 
 import asyncio

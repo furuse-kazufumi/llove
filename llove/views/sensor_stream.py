@@ -1,4 +1,5 @@
 """SensorStreamView — rolling list of sensor readings with sparkline."""
+
 from __future__ import annotations
 
 import math

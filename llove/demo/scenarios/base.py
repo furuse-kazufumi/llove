@@ -5,6 +5,7 @@ Scenarios pull their human-facing strings from the i18n catalog under
 ``key`` (e.g. ``"firewall"``); title/description are then resolved lazily
 so locale switches at runtime work without re-instantiating.
 """
+
 from __future__ import annotations
 
 import asyncio

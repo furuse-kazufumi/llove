@@ -1,4 +1,5 @@
 """Tests for the unified Event model."""
+
 from __future__ import annotations
 
 from llove.events import Event, EventKind

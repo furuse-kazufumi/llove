@@ -5,6 +5,7 @@ their own metaclass; mixing the two produces a metaclass conflict at import.
 Subclasses are expected to override ``feed``; the default raises so missing
 implementations fail loudly during development.
 """
+
 from __future__ import annotations
 
 from llove.events import Event

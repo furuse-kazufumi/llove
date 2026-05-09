@@ -1,4 +1,5 @@
 """Smoke tests for every demo scenario."""
+
 from __future__ import annotations
 
 import pytest
@@ -19,9 +20,7 @@ async def test_scenario_yields_events(name: str) -> None:
     assert len(seen) > 0
     # Every scenario must include at least one narration event so users see
     # what is happening in the dedicated pane.
-    assert any(e.kind == EventKind.NARRATION for e in seen), (
-        f"{name} produced no narration events"
-    )
+    assert any(e.kind == EventKind.NARRATION for e in seen), f"{name} produced no narration events"
 
 
 def test_get_scenario_rejects_unknown() -> None:

@@ -7,6 +7,7 @@ threshold, an LLM is invoked to produce a Markdown incident report.
 All user-facing copy lives in the i18n catalog. The numerical scenario is
 deterministic with the default seed so SVG snapshots and tests reproduce.
 """
+
 from __future__ import annotations
 
 import random
@@ -67,7 +68,11 @@ class SCADAScenario(DemoScenario):
                 yield Event(
                     kind=EventKind.AUDIT,
                     source_id="scada",
-                    payload={"event": "cusum.alarm", "sensor_id": sensor_id, "cusum": round(cusum, 1)},
+                    payload={
+                        "event": "cusum.alarm",
+                        "sensor_id": sensor_id,
+                        "cusum": round(cusum, 1),
+                    },
                 )
 
         # LLM explanation

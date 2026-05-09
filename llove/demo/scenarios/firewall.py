@@ -1,4 +1,5 @@
 """Firewall scenario — show LLMesh PromptFirewall's 4 layers in action."""
+
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
@@ -34,7 +35,13 @@ class FirewallScenario(DemoScenario):
         for prompt, layer, action, reason in _SAMPLES:
             shown = prompt if len(prompt) <= 60 else prompt[:57] + "..."
             yield narrate(
-                t("scenario.firewall.prompt_line", shown=shown, layer=layer, action=action, reason=reason),
+                t(
+                    "scenario.firewall.prompt_line",
+                    shown=shown,
+                    layer=layer,
+                    action=action,
+                    reason=reason,
+                ),
             )
             yield Event(
                 kind=EventKind.AUDIT,
@@ -46,4 +53,6 @@ class FirewallScenario(DemoScenario):
                     "prompt_len": len(prompt),
                 },
             )
-        yield narrate_key("scenario.firewall.takeaway", title_key="scenario.firewall.takeaway_title")
+        yield narrate_key(
+            "scenario.firewall.takeaway", title_key="scenario.firewall.takeaway_title"
+        )

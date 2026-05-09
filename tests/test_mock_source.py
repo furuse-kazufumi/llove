@@ -1,4 +1,5 @@
 """Tests for the synthetic MockSource."""
+
 from __future__ import annotations
 
 import pytest

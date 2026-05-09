@@ -1,4 +1,5 @@
 """RAG stores scenario — compare Numpy / SQLite / LSH ANN backends."""
+
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
@@ -45,7 +46,12 @@ class RAGStoresScenario(DemoScenario):
 
         for store in _STORES:
             yield narrate(
-                t("scenario.rag.running", name=store["name"], scale=store["scale"], note=store["note"]),
+                t(
+                    "scenario.rag.running",
+                    name=store["name"],
+                    scale=store["scale"],
+                    note=store["note"],
+                ),
                 title=str(store["name"]),
             )
             for i in range(3):
