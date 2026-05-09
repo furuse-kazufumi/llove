@@ -37,6 +37,8 @@ SCENARIOS: dict[str, type[DemoScenario]] = {
     "bench": BenchmarkScenario,
     "drift": ModelDriftScenario,
     "mcp_call": MCPCallScenario,
+    "vision": VisionScenario,
+    "pointcloud": PointCloudScenario,
 }
 
 
