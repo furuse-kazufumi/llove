@@ -40,8 +40,7 @@ class MockSource(DataSource):
         sensor_id = "bearing_temp_07"
         baseline = 70.0
         while True:
-            t = self._step * self._tick
-            phase = self._phase(t)
+            phase = self._phase(self._step)
             value = self._sensor_value(baseline, phase)
 
             yield Event(
