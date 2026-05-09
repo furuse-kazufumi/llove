@@ -12,10 +12,12 @@ from llove.demo.scenarios.backends import LLMBackendsScenario
 from llove.demo.scenarios.base import DemoScenario, narrate
 from llove.demo.scenarios.bench import BenchmarkScenario
 from llove.demo.scenarios.chat import ChatStreamScenario
+from llove.demo.scenarios.coin_toss import CoinTossScenario
 from llove.demo.scenarios.cost import CostBudgetScenario
 from llove.demo.scenarios.drift import ModelDriftScenario
 from llove.demo.scenarios.firewall import FirewallScenario
 from llove.demo.scenarios.mcp_call import MCPCallScenario
+from llove.demo.scenarios.mindmap import MindmapScenario
 from llove.demo.scenarios.multimodal import MultimodalSPCScenario
 from llove.demo.scenarios.pointcloud import PointCloudScenario
 from llove.demo.scenarios.rag import RAGStoresScenario
@@ -39,6 +41,8 @@ SCENARIOS: dict[str, type[DemoScenario]] = {
     "mcp_call": MCPCallScenario,
     "vision": VisionScenario,
     "pointcloud": PointCloudScenario,
+    "mindmap": MindmapScenario,
+    "coin_toss": CoinTossScenario,
 }
 
 
@@ -55,11 +59,13 @@ __all__ = [
     "AuditChainScenario",
     "BenchmarkScenario",
     "ChatStreamScenario",
+    "CoinTossScenario",
     "CostBudgetScenario",
     "DemoScenario",
     "FirewallScenario",
     "LLMBackendsScenario",
     "MCPCallScenario",
+    "MindmapScenario",
     "ModelDriftScenario",
     "MultimodalSPCScenario",
     "PointCloudScenario",

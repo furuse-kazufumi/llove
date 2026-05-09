@@ -106,6 +106,21 @@ class LoveApp(App):
             self._views.append(self._narration)
 
     async def on_mount(self) -> None:
+        # If the source is a DemoScenario, let it rename pane titles so that
+        # non-LLMesh-flavoured demos (coin_toss, dice_roll, …) don't have to
+        # call their data "SensorEvent stream".
+        from llove.demo.scenarios.base import DemoScenario
+
+        if isinstance(self._source, DemoScenario):
+            s = self._source
+            if s.sensor_pane_title_key:
+                self._sensor.border_title = t(s.sensor_pane_title_key)
+            if s.spc_pane_title_key:
+                self._spc.border_title = t(s.spc_pane_title_key)
+            if s.audit_pane_title_key:
+                self._audit.border_title = t(s.audit_pane_title_key)
+            if s.narration_pane_title_key and self._narration is not None:
+                self._narration.border_title = t(s.narration_pane_title_key)
         self._task = asyncio.create_task(self._consume())
 
     async def on_unmount(self) -> None:

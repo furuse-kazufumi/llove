@@ -223,6 +223,29 @@ intro = "**4×3 部品トレイの LiDAR top-view。** 各スキャンは 24×7 
 takeaway_title = "ポイント"
 takeaway = "**{alarms} スキャンでアラーム発火**。TUI は密度でシルエットを示し、同じ Event に XYZ が乗るので外部ツールでもリッチに視覚化可能。audit サマリは **どのスロット (col, row)** かまで特定。"
 
+[scenario.mindmap]
+title = "マインドマップ — LLM がクエリを知識ツリーに展開"
+description = "「LLMesh とは？」を BFS 展開 — 18 ノード × 5 分岐。breadth が 12 を超えると SPC アラーム (探索が広がりすぎ)。"
+intro_title = "シナリオ: マインドマップ"
+intro = "**マインドマップのライブ構築。** LLM がシードクエリから関連概念を BFS で展開します。各ノードは TRACE_SPAN、ツリーの breadth で SPC アラーム — \"暴走的な探索\" を検出。最終ツリーは ASCII outline で上から読めるよう描画。"
+query_title = "シードクエリ"
+query = "**シード**: *LLMesh とは何で、どんな機能があるか？*  ルートノード: `LLMesh`。"
+alarm_title = "Breadth アラーム"
+alarm = "ツリー breadth = **{breadth}** が閾値 {threshold} を超過。クエリが多方向に分岐しすぎ — 本番ではプロンプトを絞るかサブクエリに分割するタイミング。"
+takeaway_title = "ポイント"
+takeaway = "**{breadth} ノード** を 1 回の展開で生成。マインドマップ = 特殊データではなく **TRACE_SPAN のツリー**。breadth に SPC をかけることで \"広すぎプロンプト\" を回答が脱線する前に検出。最終 audit Event に隣接情報も載るので別ツールでも好きに描画可能。"
+
+[scenario.coin_toss]
+title = "コイン投げ — 表の比率が 1/2 に収束 (学生向け)"
+sensor_pane_title = "🪙 投擲結果  · 📖 読み取り専用"
+description = "公平なコインを {n} 回投げ、表の比率が 0.50 へ近づく様子を観察。8 回以降に大きく外れた場合だけ SPC アラーム。LLMesh の知識ゼロで OK — 4 ペインの入門デモ。"
+intro_title = "シナリオ: コイン投げ"
+intro = "**コインを {n} 回投げます。** 1 回ごとに SensorStream (表の累積比率)、Audit log (各回の結果) に流れます。序盤に偏りが大きいと SPC アラームも発火。比率が **0.50** に近づく **大数の法則** を目視で体験。"
+alarm_title = "怪しいストリーク"
+alarm = "{n} 回時点で **表 {heads} 回 / 裏 {tails} 回** (比率 = **{ratio}**)。0.50 から大きく外れています — 序盤の運か、それとも歪んだコインか？ もう少し観察してみましょう。"
+takeaway_title = "ポイント"
+takeaway = "**表 {heads} / 裏 {tails}** — 最終比率 **{ratio}**。**大数の法則** の勝利: 試行回数が増えれば、公平なコインは必ず 0.50 付近に落ち着く。早めの SPC アラームは「本当に怪しいのか、ただの運か」を判定する助けになります。"
+
 [scenario.reliability]
 title = "信頼性プロトコル — ACK / RETRANSMIT / Watchdog"
 description = "6 チャンクのストリームを損失下で送信。RETRANSMIT が #3 と #5 を回復し、STREAM_ACK で完了。"

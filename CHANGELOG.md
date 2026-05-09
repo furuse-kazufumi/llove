@@ -3,6 +3,44 @@
 All notable changes to **llove** are recorded here.
 This project follows [Semantic Versioning](https://semver.org).
 
+## [Unreleased]
+
+### Added
+- **`mindmap` scenario** — LLM expands a seed query (`What is LLMesh?`)
+  into a knowledge tree via BFS. Each node is emitted as a TRACE_SPAN;
+  when tree breadth crosses 12 an SPC alarm fires. Final tree renders
+  as a Unicode-tree outline in the narration pane.
+- **`coin_toss` scenario** — entry-level student demo: 50 tosses of an
+  early-biased coin, watch the heads ratio settle near 0.5 (Law of
+  Large Numbers). Bilingual narration with mile-marker comments.
+- **Per-scenario pane title overrides** — `DemoScenario` now exposes
+  `sensor_pane_title_key` / `spc_pane_title_key` / `audit_pane_title_key`
+  / `narration_pane_title_key`. `LoveApp.on_mount` resolves any set keys
+  through the i18n catalog and rewrites the matching pane's
+  `border_title`, so non-LLMesh-flavoured demos can read naturally
+  (e.g. coin_toss now shows "🪙 Toss outcomes" instead of
+  "📡 SensorEvent stream").
+- **`scripts/snapshot_scenario.py`** — Pilot-driven SVG snapshot tool
+  for reviewing TUI presentation quality without launching a real
+  terminal. Patches in a CJK-aware monospace font fallback chain
+  (`MS Gothic` / `BIZ UDGothic` / `Noto Sans Mono CJK JP` / …) and
+  injects `lengthAdjust="spacingAndGlyphs"` on every `<text>` so
+  Japanese glyphs cannot overlap when a viewer falls back to a
+  proportional font.
+
+### Changed
+- **`cost` scenario** — also yields a `daily_cost_usd` SENSOR event
+  per LLM call so the SensorStream pane displays a clear running total
+  alongside the LLM_CALL audit entries (was: SensorStream stayed empty).
+
+### Process
+- Per [feedback_scenario_iterative]: from now on, each new scenario must
+  pass real-terminal (or Pilot SVG) review before its release commit,
+  not just the smoke test.
+- New [REQUIREMENTS](REQUIREMENTS.md) **F9** (per-scenario quality bar),
+  **F11** (student-friendly demos), **F12** (`shogi` two-LLM + human
+  duel scenario, planned in 4 MVPs); see ROADMAP.md "v0.2.x" section.
+
 ## [0.2.2] - 2026-05-09
 
 ### Changed

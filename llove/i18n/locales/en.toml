@@ -226,6 +226,29 @@ intro = "**LiDAR top-view of a 4×3 parts tray.** Each scan is rendered as ASCII
 takeaway_title = "Take-away"
 takeaway = "**{alarms} scans alarmed.** TUI shows the silhouette via density; the same Event carries XYZ for richer downstream tools. The audit summary nails *which slot* (column, row) is empty."
 
+[scenario.mindmap]
+title = "Mindmap — LLM expands a query into a knowledge tree"
+description = "Watch a BFS expansion of \"What is LLMesh?\" — 18 nodes across 5 branches. SPC fires when breadth crosses 12 (proxy for \"too broad\")."
+intro_title = "Scenario: Mindmap"
+intro = "**Live mindmap construction.** An LLM starts from a seed query and BFS-expands related concepts. Each node is a TRACE_SPAN; breadth drives an SPC alarm so we can detect \"runaway\" exploration. The final tree renders as an ASCII outline you can read top-to-bottom."
+query_title = "Seed query"
+query = "**Seed**: *What is LLMesh and what are its main capabilities?*  Root node: `LLMesh`."
+alarm_title = "Breadth alarm"
+alarm = "Tree breadth = **{breadth}** crossed the threshold of {threshold}. The query is exploring too many directions; in production you'd narrow the prompt or split into sub-queries."
+takeaway_title = "Take-away"
+takeaway = "**{breadth} nodes** in one expansion. Mindmap = a TRACE_SPAN tree, not a special data type. SPC on breadth catches \"too broad\" prompts before they drown the answer in tangents. The same adjacency rides on the final audit Event for downstream tools to render their own way."
+
+[scenario.coin_toss]
+title = "Coin toss — heads ratio settles near 1/2 (student-friendly)"
+sensor_pane_title = "🪙 Toss outcomes  · 📖 read-only"
+description = "Toss a fair coin {n} times and watch the heads ratio drift toward 0.50. SPC fires only if it strays far from 1/2 after 8+ tosses. No LLMesh knowledge required — just a friendly intro to the four panes."
+intro_title = "Scenario: Coin toss"
+intro = "**Toss a coin {n} times.** Each toss feeds the SensorStream (running heads ratio), the Audit log (every result), and — if early luck looks suspicious — the SPC alarm. Watch the ratio creep toward **0.50** (Law of Large Numbers in action)."
+alarm_title = "Suspicious streak"
+alarm = "After **{n}** tosses we have **{heads} heads / {tails} tails** (ratio = **{ratio}**). That's far from 0.50 — interesting! Could be early luck, could be a loaded coin. Keep watching."
+takeaway_title = "Take-away"
+takeaway = "**{heads} heads, {tails} tails** — final ratio **{ratio}**. The Law of Large Numbers wins: enough tosses, and a fair coin always hovers near 0.50. SPC alarms early help us spot whether the deviation is just bad luck or something to investigate."
+
 [scenario.reliability]
 title = "Reliability — ACK / RETRANSMIT / Watchdog"
 description = "Lossy stream of 6 chunks. Watch RETRANSMIT recover dropped chunks 3 and 5 before STREAM_ACK arrives."

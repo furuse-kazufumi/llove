@@ -89,6 +89,20 @@ class CostBudgetScenario(DemoScenario):
                 },
             )
 
+            # Mirror running cost as a SENSOR so the SensorStream pane shows
+            # a clear right-rising sparkline of daily spend instead of staying
+            # blank. The SPC alarm below targets the same `daily_cost_usd`.
+            yield Event(
+                kind=EventKind.SENSOR,
+                source_id="cost_meter",
+                payload={
+                    "sensor_id": "daily_cost_usd",
+                    "value": round(running_total, 5),
+                    "call_seq": i,
+                    "model": call["model"],
+                },
+            )
+
             if not breached and running_total > _DAILY_BUDGET_USD:
                 breached = True
                 yield Event(

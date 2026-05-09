@@ -64,6 +64,49 @@
 
 ---
 
+## v0.2.x — シナリオ磨き（順次マイナーリリース）
+
+**ゴール:** 既存 9 シナリオ (cost / chat / bench / drift / mcp_call / vision / pointcloud / mindmap +
+旧 7 種) を 1 個ずつ TUI 実機検証で品質を上げる。新規シナリオを足すより、既に量産した
+ものを「Sensor / SPC / Audit / Narration の 4 ペイン全部に意味のある情報が流れる」状態に
+仕上げてから次に進む。
+
+### 入る機能
+
+- [ ] `scripts/snapshot_scenario.py` で en/ja の SVG を全シナリオ分取る
+- [ ] cost に `daily_cost_usd` の SENSOR 追加 — **完了**（v0.2.x branch ローカル）
+- [ ] chat に「累積トークン数」or「ターン経過」の SENSOR 追加
+- [ ] bench に「latency / cost / quality」の 3 系列 SENSOR 追加
+- [ ] mcp_call に「tool latency」の SENSOR 追加
+- [ ] mindmap に「tree breadth」の SENSOR 追加 (alarm と連動)
+- [ ] narration pane の pause/scroll 挙動を確認（中間ビートが流れて消えないか）
+- [ ] shared util: ASCII-art 描画ヘルパ・累積カウンタ Sensor mixin を base.py に切り出す
+- [ ] LaTeX/数式シナリオ (REQUIREMENTS F10) — Unicode 変換 + Qt mathtext viewer
+- [ ] **学生向け入門シナリオ群** (REQUIREMENTS F11) — coin_toss / dice_roll / number_guess /
+      weather / game_of_life / pomodoro / prime_sieve から 2-3 個を選んで実装。
+      LLMesh 機能学習の前段としても使える「動かして遊べる」レベル。
+      - [x] coin_toss (v0.2.x ローカル) — pane title override 機構も同時導入
+
+- [ ] **対局シナリオ `shogi`** (REQUIREMENTS F12) — llove で最初の双方向シナリオ。
+      段階実装:
+      - [ ] **MVP1**: scripted 棋譜（実 LLM なし）。`python-shogi` で 9x9 ASCII 盤面・
+            持ち駒・棋譜をペインに流す。Sensor=mock 評価値、SPC=mock 形勢逆転。
+            既存量産シナリオと同じ「眺める」モードで動作確認。
+      - [ ] **MVP2**: 実 LLM 接続（Anthropic / OpenAI 各 1 体、`[llmesh]` extras 経由）。
+            合法手チェック+リトライ。10 手程度の実対局。
+      - [ ] **MVP3**: 人間対戦モード `llove play shogi --human-vs-llm`。キーボード入力、
+            合法手 highlight、投了。
+      - [ ] **MVP4**: Qt viewer (`tools/qt_viewer/shogi_viewer.py`) で本物の駒表示。
+
+### 受け入れ基準
+
+- 全シナリオで 4 ペイン全部に non-trivial な情報が流れる
+- en/ja 両方の SVG snapshot が `docs/snapshots/{en,ja}/<name>-tui.svg` に揃う
+- snapshot CI が「SensorStream pane が空白でない」「SPC pane が waiting/alarm のいずれか
+  状態を持つ」を assert する
+
+---
+
 ## v0.3.0 — Share with llove (HTML Export)
 
 **ゴール:** 1 ファイル HTML を吐いて Slack / Issue にそのまま貼れる。

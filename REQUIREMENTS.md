@@ -33,6 +33,10 @@ Claude HTML Artifacts のように、**自己完結・共有可能・インタ�
 | F6 | キーボード駆動 + マウスもクリックできる | Textual の標準サポート、Vim 風キーバインドも提供 |
 | F7 | デモ環境 / テスト環境 / 開発環境を同梱 | demo コマンド + Mock LLMesh + devcontainer + docker-compose + GitHub プレビュー用スケッチ |
 | F8 | LLMesh の **各機能** を体験できるシナリオ別 demo | `llove demo --list` で一覧、`llove demo --scenario <name>` で個別起動。シナリオごとに narration pane が解説を流し、何が起きているか自然言語で読める |
+| F9 | **シナリオ品質基準** — smoke test だけで完了扱いしない | 各シナリオは 4 ペインすべてに情報が流れる（SensorStream / SPC / Audit / Narration の空白ペイン禁止）。`scripts/snapshot_scenario.py` で en/ja 両方の SVG を取得し目視確認した上で commit |
+| F10 | **数式表示シナリオ**（バックログ） | LLM が LaTeX 記法で出した数式（例: `\int_0^\infty e^{-x^2} dx`）を TUI では Unicode に変換、`tools/qt_viewer/equation_viewer.py` で matplotlib mathtext によるリッチ表示。SPC は計算複雑度・推論時間で発火 |
+| F11 | **学生向け入門シナリオ群** — LLMesh 知識ゼロでも「動いてる！」と楽しめる初歩デモ | 数学・物理・身近な現象がベース。narration はくだけた文体（"わー、表がたくさん出てるね" 等）。SensorStream にすぐ動きが出る。SPC alarm の意味を 1 行で説明。例: `coin_toss`（コイン投げ → 0.5 への収束）/ `dice_roll`（サイコロ分布）/ `number_guess`（二分探索）/ `weather`（1 都市の気温推移）/ `game_of_life`（ASCII セル）/ `pomodoro`（集中タイマー）/ `prime_sieve`（エラトステネスの篩） |
+| F12 | **対局シナリオ** `shogi` — 2 つの LLM に共通盤面を見せて将棋させる + 人間対戦モード | (a) 共通盤面: 9x9 ASCII で TUI 表示・成駒・持ち駒も対応 (b) 合法手判定: `python-shogi` ([shogi] extras) で違反手はリトライ要求 (c) LLM プレイヤ: 各手番で LLM に局面 + 持ち駒 + 直近 N 手の棋譜を渡し USI (or `7g7f` 形式) で着手を返してもらう (d) 4 ペイン: SensorStream=評価値推移 / SPC=形勢逆転 alarm / Audit=棋譜 / Narration=LLM の指し手解説 (e) 人間対戦: `llove play shogi --human-vs-llm` で キーボードから入力、TUI が合法手候補をハイライト (f) 棋譜 export: KIF / SFEN で保存し再生可能 (g) Qt viewer (`tools/qt_viewer/shogi_viewer.py`): 本物の駒画像で局面表示・回転・盤面記号 |
 
 ### 2.2 非機能要件
 

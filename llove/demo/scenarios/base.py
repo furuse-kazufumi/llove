@@ -51,6 +51,15 @@ class DemoScenario(DataSource):
     i18n_key: str = "scenario"
     default_pause: float = 0.4  # seconds between events
 
+    # Optional per-scenario pane label overrides. Each is an i18n key the app
+    # resolves at mount time. None = use the default ui.pane.<name>.title.
+    # Use these to keep terminology natural in non-LLMesh-flavoured demos
+    # (e.g. coin_toss should say "Toss outcomes" not "SensorEvent stream").
+    sensor_pane_title_key: str | None = None
+    spc_pane_title_key: str | None = None
+    audit_pane_title_key: str | None = None
+    narration_pane_title_key: str | None = None
+
     @property
     def title(self) -> str:
         return t(f"scenario.{self.i18n_key}.title")
