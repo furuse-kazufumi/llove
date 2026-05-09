@@ -42,6 +42,10 @@ class SensorStreamView(Static, View):
             val = float(event.payload.get("value", 0.0))
         except (TypeError, ValueError):
             return
+        # Drop NaN / Inf — they cannot be normalised onto a sparkline.
+        import math as _math
+        if not _math.isfinite(val):
+            return
         ts = event.ts.strftime("%H:%M:%S")
         self._rows.append(f"{ts}  {sid:18}  {val:7.2f}")
         self._values.append(val)
