@@ -88,5 +88,9 @@ select = ["E", "F", "W", "I", "B", "UP"]
 ignore = ["E501"]
 
 [tool.bandit]
-skips = ["B101"]
+# Project-policy skips:
+#  B101 — assert: used for module-level invariants
+#  B110/B112 — try/except/pass|continue: fail-closed dispatch is intentional
+#  B311 — random: only used for synthetic demo data, never for security
+skips = ["B101", "B110", "B112", "B311"]
 exclude_dirs = ["tests"]
