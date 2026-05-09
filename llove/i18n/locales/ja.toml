@@ -13,7 +13,7 @@ help = "? ヘルプ"
 quit = "✕ 終了"
 
 [ui.help]
-title = "[bold]💗 llove — ヘルプ[/bold]\n"
+title = "[bold]💗 llove — ヘルプ[/bold]\n[bold yellow]ESC キー (または h / q / 閉じるボタン) で元の画面に戻ります。[/bold yellow]\n"
 body = """
 [bold]マウスでクリックできるコントロール (上部)[/bold]
   ⏸ 一時停止 / ▶ 再開     データストリームの一時停止/再開
