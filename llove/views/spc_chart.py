@@ -29,7 +29,7 @@ class SPCChartView(Static, View):
         self._alarms: list[str] = []
         self._last_value: float | None = None
         self._alarm_count = 0
-        self.border_title = "📊 SPC chart — CUSUM control"
+        self.border_title = "📊 SPC chart — CUSUM control  · view"
         self.border_subtitle = "watching for drift"
 
     def feed(self, event: Event) -> None:
