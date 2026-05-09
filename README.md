@@ -26,8 +26,8 @@
 そのまま **1 ファイル HTML にエクスポート** して Slack / Issue / プレゼンに貼れます。
 
 ```bash
-pip install llove
-llove demo            # 30 秒で動くフル機能デモ
+pip install llmesh-llove        # PyPI 配布名 (llmesh-mcp と統一)
+llove demo                       # 30 秒で動くフル機能デモ
 ```
 
 ---
