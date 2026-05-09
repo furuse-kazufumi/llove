@@ -64,8 +64,10 @@ class NarrationView(Static, View):
         body = self._lite_markdown(text)
         self._entries.appendleft(f"{head}\n  {body}")
         self._beats += 1
-        latest = title if title else "narration"
-        self.border_subtitle = f"beat {self._beats} · {latest}"
+        latest = title if title else t("ui.pane.narration.title")
+        self.border_subtitle = t(
+            "ui.pane.narration.subtitle_active", beat=self._beats, latest=latest
+        )
         rendered = "\n\n".join(self._entries)
         self.last_render = rendered
         self.update(rendered)
