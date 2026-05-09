@@ -61,7 +61,7 @@ class LoveApp(App):
     ]
 
     TITLE = "💗 llove"
-    SUB_TITLE = "Made with llove — Watch your LLMesh with llove"
+    SUB_TITLE = "Made with llove"
 
     def __init__(self, source: DataSource, *, with_narration: bool = False) -> None:
         super().__init__()
@@ -70,25 +70,22 @@ class LoveApp(App):
         self._paused = False
         self._task: asyncio.Task[None] | None = None
         self._with_narration = with_narration
+        # Pull localised app subtitle so it changes with --lang.
+        self.sub_title = t("ui.subtitle")
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
         # Explicit control row — these are obviously clickable, distinguishing
         # them from the read-only display panes below.
         with Horizontal(id="control-row"):
-            self._btn_pause = Button("⏸ Pause", id="btn-pause", variant="primary")
-            self._btn_reset = Button("⟲ Reset", id="btn-reset", variant="warning")
+            self._btn_pause = Button(t("ui.button.pause"), id="btn-pause", variant="primary")
+            self._btn_reset = Button(t("ui.button.reset"), id="btn-reset", variant="warning")
             yield self._btn_pause
             yield self._btn_reset
-            yield Button("? Help", id="btn-help", variant="default")
-            yield Button("✕ Quit", id="btn-quit", variant="error")
+            yield Button(t("ui.button.help"), id="btn-help", variant="default")
+            yield Button(t("ui.button.quit"), id="btn-quit", variant="error")
         # Hint bar makes the read/write split unambiguous at a glance.
-        yield Static(
-            "[bold]↑ buttons[/bold] = clickable controls   ·   "
-            "[bold]↓ panes[/bold] = read-only data displays   ·   "
-            "key shortcuts: q quit · r reset · space pause · h help",
-            id="hint-bar",
-        )
+        yield Static(t("ui.hint_bar"), id="hint-bar")
         with Vertical():
             with Horizontal(classes="top-row"):
                 self._sensor = SensorStreamView()
