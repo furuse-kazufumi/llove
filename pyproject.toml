@@ -18,8 +18,8 @@ include = [
 ]
 
 [project]
-name = "llove"
-version = "0.2.1"
+name = "llmesh-llove"
+version = "0.2.2"
 description = "llove — a cute, terminal-first Artifact for inspecting LLMesh data with llove"
 readme = "README.md"
 license = "MIT"
