@@ -34,7 +34,7 @@ class ReliabilityScenario(DemoScenario):
 
         # Step 1: send chunks
         yield narrate(
-            "**Step 1.** Sender pushes chunks 1–6. The network drops **#3** and **#5**.",
+            "**Step 1.** Sender pushes chunks 1-6. The network drops **#3** and **#5**.",
             title="Step 1 — send",
         )
         for i in range(1, 7):
