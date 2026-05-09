@@ -53,6 +53,42 @@ Claude HTML Artifacts のように、**自己完結・共有可能・インタ�
 
 | F21 | **タイピングゲームデモ `typing`** — ジャンル指定 → LLM が単語生成 → 入力に応じて単語の色が変わる → 打ち終わったら次へ (新要求 2026-05-09) | (a) **位置づけ**: F12/F16 (LLM 同士の対戦) と並ぶ「**LLM × 人間の協働**」デモ。学習用サンプルとしても優秀で、シンプル UI ゆえ llove の作り方を理解する最小ループに最適 (b) **基本フロー**: ① ジャンル指定 (`programming` / `shogi` / `physics` / `bci` / `multilingual` / 自由入力)、② LLM が単語をストリーミング生成 (バッファ補充)、③ 中央ペインに **現在の単語**、入力済み prefix が緑、未入力部分が灰、ミスタイプ部分が赤、④ 単語完了 → 単語消える、効果音/光、次の単語へ、⑤ SensorStream に WPM (words per minute) と accuracy、SPC alarm に「accuracy 低下」、Audit に履歴 (`word=foo, time=1234ms, errors=1`)、Narration に LLM 生成の解説 (c) **アーキテクチャ**: ① `TypingEngine` (F16 GameEngine 継承、ただし 1-player) — current_word / typed_prefix / words_queue / wpm / accuracy ② `WordSource` async generator — LLM プロバイダから単語をストリーミング ③ `HumanTypingPlayer` Textual `Input` から 1 文字単位イベント取得 ④ `LLMWordSource(provider="anthropic:claude-haiku-4-5")` 等で word generator (d) **ジャンル例 (LLM 普及狙い)**: `programming-rust` (F18 Rust 単語学習 — 予約語/型/トレイト)、`shogi-koma` (駒名)、`bci-terms` (神経科学用語、BCI 長期ビジョン連動)、`llmesh-did` (did:key を写経で識別子学習)、`multilingual-ja-en` (日英混合)、`math-symbols` (数式・ギリシャ文字)、`unix-commands` (bash コマンド) (e) **学習デモ価値**: シナリオ実装が ~200 行で済むため、llove ハンズオンの最小サンプルとして最適。Issue/PR ガイドで「最初の自作シナリオ」テンプレに採用 (f) **F15 viewer 連携**: 色分けは Rich markup / Textual `Static` でリアルタイム更新。学習者が F15 (l)+(q) のテキスト着色レンダラを試す試金石 (g) **F19 / F20 統合**: `:type <genre>` Command Palette ショートで起動、F19 Notebook セルから `llove.api.run_typing(genre="rust")` で組込実行 (h) **拡張案**: ① **対戦モード** (2 人 LLM が同じ単語を競争タイプ — 対局 + タイピングのハイブリッド) ② **辞書モード** (オフライン: `wordlist.txt` から取り出す、`mock` プロバイダ相当) ③ **タイムアタック** / **endless** モード切替 ④ **キーマップ可視化** (打鍵中のキー位置を ASCII キーボードに反映) (i) **roadmap**: v0.4 系 (シナリオ拡充) で実装. extras 不要 (LLM プロバイダは F16 と共用). 学習用デモ枠として F11 (学生向け入門シナリオ) の延長に位置付け (j) **llmesh 普及貢献**: `programming-llmesh-api` ジャンルで llmesh の関数名・MCP ツール名を写経 → 学習者が llmesh API を自然に覚える (k) **fail-closed**: LLM プロバイダ不在時は同梱 wordlist にフォールバック. ネットワーク失敗時は次の単語まで wordlist を使う |
 
+### 2.1.2 ウィンドウ哲学 — "do one thing well" で複雑化回避 (2026-05-09 確定)
+
+> ウィンドウ種を豊富にしておくことで、複雑化を回避する思惑があります。
+> (ユーザ発言)
+
+UNIX 哲学を Window Type に適用. **1 ウィンドウ種 = 1 責務**.
+
+- ❌ **避ける**: 1 つの「メガビュー」が画像+表+グラフ+チャット+設定を抱える、
+  1 ペインに全機能をモード切替で詰め込む、フラグ大量の汎用ウィンドウ
+- ✅ **取る**: 機能が増えるときは「既存を膨らませる」のではなく
+  **「新しいウィンドウ種を追加する」**. F17(m) で 60+ 種を用意した
+  のはそのための **語彙拡張**
+- **判断基準**: 新機能を追加するとき自問する — 「これは新ウィンドウ種か、
+  既存の延長か」. 5 秒以上迷ったら **新ウィンドウ種** を作る側に倒す.
+  既存ウィンドウ種に if-flag を 1 つ足すと、半年後には 30 個になる.
+
+### 効果
+
+1. **コード**: 各 View が 50-200 行に収まり、テストが容易
+2. **UX**: ユーザは「組み合わせ」で UI を構築. 学習曲線がフラット
+3. **拡張性**: 新ウィンドウ種は外部プラグインから差し込める (F17(n) Registry)
+4. **F18 Rust 移植**: 1 ウィンドウ種 = 1 小さな Rust モジュール
+5. **テンプレ機能 (F17(p)(r))**: 細かい部品を組み合わせてシナリオ別
+   レイアウトを宣言可能になる
+6. **F19 Notebook**: 各種ウィンドウを `llove.api.window("game.board")` で
+   セル出力に呼び出せる
+
+### 例: shogi 観戦のウィンドウ分割
+
+❌ 「ShogiWatcherWindow が盤面 + 棋譜 + 評価値 + 解説 + 持ち駒 + タイマー
+を全部描く」
+
+✅ `BoardView` / `KifuView` / `EvalChartView` / `CommentaryView` /
+`HandsPanelView` / `TimerPanelView` の **6 つの独立ウィンドウ種** を
+F17(r) シナリオ駆動レイアウトで配置
+
 ### 2.1.1 設計原則 — llmesh と llove の責務分担 (2026-05-09 確定)
 
 llove の表示完成度が上がるほど、llmesh のデータ層を**シンプルに**保てる。
