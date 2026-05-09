@@ -1,49 +1,37 @@
 """SCADA scenario — ExplainedCUSUM in action.
 
 Drives a bearing temperature sensor through 3 phases (normal → drift → recover)
-and shows how `ExplainedCUSUM` would react: when the cumulative sum crosses
+and shows how `ExplainedCUSUM` reacts: when the cumulative sum crosses
 threshold, an LLM is invoked to produce a Markdown incident report.
+
+All user-facing copy lives in the i18n catalog. The numerical scenario is
+deterministic with the default seed so SVG snapshots and tests reproduce.
 """
 from __future__ import annotations
 
 import random
 from collections.abc import AsyncIterator
 
-from llove.demo.scenarios.base import DemoScenario, narrate
+from llove.demo.scenarios.base import DemoScenario, narrate_key
 from llove.events import Event, EventKind
-
-_INTRO = (
-    "**SCADA + ExplainedCUSUM**: a bearing temperature sensor will drift past its "
-    "control limit. CUSUM detects the cumulative shift; the LLM explainer then attaches "
-    "a likely cause."
-)
-
-_HYPOTHESIS = (
-    "The cumulative drift began ~12 minutes ago, coinciding with a viscosity drop in "
-    "lubricant_flow_03. Bearing wear or lubricant degradation is plausible. Recommend "
-    "checking lubricant pressure and vibration spectrum."
-)
+from llove.i18n import t
 
 
 class SCADAScenario(DemoScenario):
     name = "scada"
-    title = "SCADA — ExplainedCUSUM with LLM hypothesis"
-    description = (
-        "A bearing temperature sensor drifts past its control limit. ExplainedCUSUM "
-        "detects the alarm and the LLM emits a hypothesis."
-    )
+    i18n_key = "scada"
     default_pause = 0.15
 
     def __init__(self, *, seed: int = 42) -> None:
         self._rng = random.Random(seed)
 
     async def events(self) -> AsyncIterator[Event]:
-        yield narrate(_INTRO, title="Scenario: SCADA")
+        yield narrate_key("scenario.scada.intro", title_key="scenario.scada.intro_title")
         sensor_id = "bearing_temp_07"
         baseline = 70.0
 
         # Phase 1: normal
-        yield narrate("Phase 1 — **normal**: reading hovers around 70 °C", title="Phase 1")
+        yield narrate_key("scenario.scada.phase1", title_key="scenario.scada.phase1_title")
         for _ in range(20):
             yield Event(
                 kind=EventKind.SENSOR,
@@ -56,10 +44,7 @@ class SCADAScenario(DemoScenario):
             )
 
         # Phase 2: drift
-        yield narrate(
-            "Phase 2 — **drift**: viscosity drops in `lubricant_flow_03`, bearing temp rises",
-            title="Phase 2",
-        )
+        yield narrate_key("scenario.scada.phase2", title_key="scenario.scada.phase2_title")
         cusum = 0.0
         for i in range(40):
             value = baseline + i * 0.25 + self._rng.gauss(0.0, 0.4)
@@ -79,7 +64,6 @@ class SCADAScenario(DemoScenario):
                         "threshold": 5.0,
                     },
                 )
-                # Real ExplainedCUSUM also writes an AuditTrail entry per alarm.
                 yield Event(
                     kind=EventKind.AUDIT,
                     source_id="scada",
@@ -87,7 +71,7 @@ class SCADAScenario(DemoScenario):
                 )
 
         # LLM explanation
-        yield narrate("**LLM explainer** triggered — building incident report", title="LLM")
+        yield narrate_key("scenario.scada.llm_triggered", title_key="scenario.scada.llm_title")
         yield Event(
             kind=EventKind.LLM_CALL,
             source_id="scada",
@@ -96,7 +80,7 @@ class SCADAScenario(DemoScenario):
                 "tokens": 237,
                 "latency_ms": 412,
                 "model": "llama3.2",
-                "hypothesis": _HYPOTHESIS,
+                "hypothesis": t("scenario.scada.hypothesis"),
             },
         )
         yield Event(
@@ -106,7 +90,7 @@ class SCADAScenario(DemoScenario):
         )
 
         # Phase 3: recovery
-        yield narrate("Phase 3 — **recovery** after maintenance action", title="Phase 3")
+        yield narrate_key("scenario.scada.phase3", title_key="scenario.scada.phase3_title")
         for i in range(20):
             value = baseline + max(0.0, 8.0 - i * 0.4) + self._rng.gauss(0.0, 0.4)
             yield Event(
@@ -114,8 +98,4 @@ class SCADAScenario(DemoScenario):
                 source_id="scada",
                 payload={"sensor_id": sensor_id, "value": round(value, 2), "quality": "good"},
             )
-        yield narrate(
-            "ExplainedCUSUM = **CUSUMChart + LLMExplainer** glued together. "
-            "Alarms fire on numerical drift; the LLM attaches a natural-language cause.",
-            title="Take-away",
-        )
+        yield narrate_key("scenario.scada.takeaway", title_key="scenario.scada.takeaway_title")
