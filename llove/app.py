@@ -11,12 +11,18 @@ from llove.events import Event
 from llove.sources.base import DataSource
 from llove.views.audit_log import AuditLogView
 from llove.views.base import View
+from llove.views.narration import NarrationView
 from llove.views.sensor_stream import SensorStreamView
 from llove.views.spc_chart import SPCChartView
 
 
 class LoveApp(App):
-    """Three-pane Textual app: SensorStream | SPCChart on top, AuditLog below."""
+    """Multi-pane Textual app for llove.
+
+    Default layout: SensorStream | SPCChart on top, AuditLog below.
+    With ``with_narration=True``: a fourth NarrationView is added at the bottom
+    so demo scenarios can show running commentary.
+    """
 
     CSS = """
     Screen {
@@ -37,12 +43,13 @@ class LoveApp(App):
     TITLE = "💗 llove"
     SUB_TITLE = "Made with llove — Watch your LLMesh with llove"
 
-    def __init__(self, source: DataSource) -> None:
+    def __init__(self, source: DataSource, *, with_narration: bool = False) -> None:
         super().__init__()
         self._source = source
         self._views: list[View] = []
         self._paused = False
         self._task: asyncio.Task[None] | None = None
+        self._with_narration = with_narration
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
@@ -54,8 +61,14 @@ class LoveApp(App):
                 yield self._spc
             self._audit = AuditLogView()
             yield self._audit
+            self._narration: NarrationView | None = None
+            if self._with_narration:
+                self._narration = NarrationView()
+                yield self._narration
         yield Footer()
         self._views = [self._sensor, self._spc, self._audit]
+        if self._narration is not None:
+            self._views.append(self._narration)
 
     async def on_mount(self) -> None:
         self._task = asyncio.create_task(self._consume())

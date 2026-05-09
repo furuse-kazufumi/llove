@@ -1,4 +1,4 @@
-"""NarrationView — show scenario commentary in a Markdown-flavoured pane.
+r"""NarrationView — show scenario commentary in a Markdown-flavoured pane.
 
 Each ``Event`` of kind ``NARRATION`` carries:
     payload = {"text": "...", "title": "(optional)"}

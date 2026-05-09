@@ -6,9 +6,9 @@ LLMesh node required. Use ``--seed`` for deterministic playback.
 """
 from __future__ import annotations
 
-from llove.demo.scenarios.base import DemoScenario, narrate
 from llove.demo.scenarios.audit import AuditChainScenario
 from llove.demo.scenarios.backends import LLMBackendsScenario
+from llove.demo.scenarios.base import DemoScenario, narrate
 from llove.demo.scenarios.firewall import FirewallScenario
 from llove.demo.scenarios.multimodal import MultimodalSPCScenario
 from llove.demo.scenarios.rag import RAGStoresScenario
