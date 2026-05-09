@@ -79,6 +79,12 @@ class SCADAScenario(DemoScenario):
                         "threshold": 5.0,
                     },
                 )
+                # Real ExplainedCUSUM also writes an AuditTrail entry per alarm.
+                yield Event(
+                    kind=EventKind.AUDIT,
+                    source_id="scada",
+                    payload={"event": "cusum.alarm", "sensor_id": sensor_id, "cusum": round(cusum, 1)},
+                )
 
         # LLM explanation
         yield narrate("**LLM explainer** triggered — building incident report", title="LLM")
@@ -92,6 +98,11 @@ class SCADAScenario(DemoScenario):
                 "model": "llama3.2",
                 "hypothesis": _HYPOTHESIS,
             },
+        )
+        yield Event(
+            kind=EventKind.AUDIT,
+            source_id="scada",
+            payload={"event": "llm.complete", "tokens": 237, "latency_ms": 412},
         )
 
         # Phase 3: recovery
