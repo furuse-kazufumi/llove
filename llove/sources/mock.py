@@ -84,10 +84,16 @@ class MockSource(DataSource):
             self._step += 1
             await asyncio.sleep(self._tick)
 
-    def _phase(self, t: float) -> str:
-        if t < 10.0:
+    # Phase boundaries are step-based (not wall-clock) so the scenario stays
+    # reproducible regardless of the chosen tick_seconds. With the default
+    # tick of 0.1 s, the boundaries map to ~10 s and ~25 s of wall time.
+    _PHASE_NORMAL_UNTIL = 100
+    _PHASE_ALARM_UNTIL = 250
+
+    def _phase(self, step: int) -> str:
+        if step < self._PHASE_NORMAL_UNTIL:
             return "normal"
-        if t < 25.0:
+        if step < self._PHASE_ALARM_UNTIL:
             return "alarm"
         return "recover"
 
@@ -96,7 +102,9 @@ class MockSource(DataSource):
         if phase == "normal":
             return baseline + noise
         if phase == "alarm":
-            drift = (self._step * self._tick - 10.0) * 0.5
+            into_phase = self._step - self._PHASE_NORMAL_UNTIL
+            drift = into_phase * 0.05  # 5 unit/step → ~7.5 by end of alarm phase
             return baseline + drift + noise
         # recover
-        return baseline + max(0.0, 7.5 - (self._step * self._tick - 25.0) * 0.6) + noise
+        into_recover = self._step - self._PHASE_ALARM_UNTIL
+        return baseline + max(0.0, 7.5 - into_recover * 0.06) + noise
