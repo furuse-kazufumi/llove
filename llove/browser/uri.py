@@ -106,8 +106,17 @@ class URIRef:
 
     @property
     def is_file(self) -> bool:
-        """``image`` / ``pdf`` / ``mesh`` 等の **ローカルファイル参照** か？"""
-        return self.scheme not in ("web", "geo", "qr", "unknown") and bool(self.path)
+        """**ローカルファイル参照** か？
+
+        ``web`` scheme は分岐: ``web://https://...`` → False (URL),
+        裸の ``page.html`` → True (ローカル). ``geo`` / ``qr`` / ``unknown``
+        は常に False.
+        """
+        if self.scheme in ("geo", "qr", "unknown"):
+            return False
+        if self.scheme == "web":
+            return not self.target.startswith(("http://", "https://", "file://"))
+        return bool(self.path)
 
 
 def parse_uri(s: str) -> URIRef:
