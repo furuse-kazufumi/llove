@@ -13,7 +13,7 @@ Steps:
 Conventions:
     - Keep scenarios fully offline (no network, no real LLMesh node).
     - Pass ``seed`` for determinism if you use randomness.
-    - Default scenario length: about 30–60 seconds (≤ 200 events at 0.3 s pause).
+    - Default scenario length: about 30-60 seconds (<= 200 events at 0.3 s pause).
     - Open with one ``narrate(intro, title="Scenario: ...")`` so users know
       where they are.
 
