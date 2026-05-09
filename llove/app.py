@@ -127,6 +127,14 @@ class LoveApp(App):
         if self._log_path:
             self._log_path.parent.mkdir(parents=True, exist_ok=True)
             self._log_file = self._log_path.open("a", encoding="utf-8")
+
+        # llove is, first and foremost, a TUI window onto **llmesh**. Every
+        # run opens with a verifiable "this came from peer:…" AUDIT line so
+        # the user sees the identity story before the first sensor tick.
+        # When no identity is reachable, we still fire an AUDIT — with copy
+        # that nudges the user toward installing the llmesh SDK.
+        self._emit_identity_event()
+
         # If the source is a DemoScenario, let it rename pane titles and
         # reshape the narration pane so that non-LLMesh-flavoured demos
         # (coin_toss, shogi, …) don't have to fit the LLMesh template.
