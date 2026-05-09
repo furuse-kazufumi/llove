@@ -29,7 +29,7 @@ class AuditLogView(Static, View):
         super().__init__("(no audit events yet)")
         self._rows: deque[str] = deque(maxlen=limit)
         self._counts: dict[EventKind, int] = {k: 0 for k in _INTERESTING}
-        self.border_title = "📋 Audit log — audit / LLM / RAG events"
+        self.border_title = "📋 Audit log — audit / LLM / RAG events  · view"
         self.border_subtitle = "newest first"
 
     def feed(self, event: Event) -> None:
