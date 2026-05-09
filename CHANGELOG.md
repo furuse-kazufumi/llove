@@ -3,7 +3,36 @@
 All notable changes to **llove** are recorded here.
 This project follows [Semantic Versioning](https://semver.org).
 
-## [Unreleased]
+## [Unreleased] — 0.3.0a1 in progress
+
+### Added — F17 WindowManager / F21 typing / F16 chess (推奨順 A→B→C 完了)
+
+- **A. F17 WindowManager 最小骨組み** (`llove/window/`):
+  - `WindowType` ABC + Registry (`register_window_type` / `get` / `list`).
+    ビルトイン 5 種 (`data.{sensor_stream,spc_chart,audit_log,narration}`,
+    `meta.identity_panel`).
+  - `IconSet` 3 段フォールバック: Nerd Font / 絵文字 / ASCII.
+    `LLOVE_ICONS` env + ターミナル自動検出. Sixel / Kitty graphics は将来.
+  - `FreeContainer` (自由 + / × 可) / `LockedContainer` (remove 拒否).
+  - `WindowManager` + `WindowLayout` / `WindowSpec` (F17(r) シナリオ駆動
+    レイアウト) + `to_toml` / `from_toml` で `layout.toml` 往復.
+  - 全 20 件 PASS.
+- **B. F21 タイピングデモ** (`llove/games/typing/`):
+  - `TypingEngine` (F16 GameEngine 継承、1-player). ミスタイプは
+    `LegalityResult ok=False` で試行カウントのみ加算 (状態は進めない).
+    目標単語数到達で `TermReason.SCORE` 終局.
+  - `MockWordSource` + 同梱 `BUILTIN_GENRES` 8 種 (programming-rust /
+    programming-llmesh-api / shogi-koma / llmesh-did / multilingual-ja-en
+    / math-symbols / unix-commands / common-english).
+  - 全 17 件 PASS.
+- **C. F16 chess 最小実装** (`llove/games/chess/`):
+  - `ChessEngine` — python-chess (MIT 14k★) の薄いラッパ. UCI 形式の
+    Move.notation、`is_legal` で en passant / castling / promotion /
+    pinned / discovered check / 50-move / threefold すべて委譲.
+  - `[chess]` extras 追加 (コア依存ではない).
+  - `is_terminated` で CHECKMATE / STALEMATE / REPETITION / DRAW
+    (insufficient material / fifty-move rule).
+  - 全 12 件 PASS — Fool's Mate 4 手詰み + 構成 stalemate FEN 検証.
 
 ### Added — shogi MVP2a + llmesh identity AUDIT + F15/F16 roadmap
 
