@@ -144,4 +144,4 @@ def available_locales() -> list[str]:
     return sorted(p.stem for p in here.glob("*.toml"))
 
 
-__all__ = ["t", "set_locale", "active_locale", "available_locales", "Translator"]
+__all__ = ["Translator", "active_locale", "available_locales", "set_locale", "t"]
