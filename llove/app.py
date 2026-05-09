@@ -81,6 +81,13 @@ class LoveApp(App):
             yield self._btn_reset
             yield Button("? Help", id="btn-help", variant="default")
             yield Button("✕ Quit", id="btn-quit", variant="error")
+        # Hint bar makes the read/write split unambiguous at a glance.
+        yield Static(
+            "[bold]↑ buttons[/bold] = clickable controls   ·   "
+            "[bold]↓ panes[/bold] = read-only data displays   ·   "
+            "key shortcuts: q quit · r reset · space pause · h help",
+            id="hint-bar",
+        )
         with Vertical():
             with Horizontal(classes="top-row"):
                 self._sensor = SensorStreamView()
