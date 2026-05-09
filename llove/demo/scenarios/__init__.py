@@ -17,9 +17,11 @@ from llove.demo.scenarios.drift import ModelDriftScenario
 from llove.demo.scenarios.firewall import FirewallScenario
 from llove.demo.scenarios.mcp_call import MCPCallScenario
 from llove.demo.scenarios.multimodal import MultimodalSPCScenario
+from llove.demo.scenarios.pointcloud import PointCloudScenario
 from llove.demo.scenarios.rag import RAGStoresScenario
 from llove.demo.scenarios.reliability import ReliabilityScenario
 from llove.demo.scenarios.scada import SCADAScenario
+from llove.demo.scenarios.vision import VisionScenario
 
 # Registry — order matters for the menu display.
 SCENARIOS: dict[str, type[DemoScenario]] = {
