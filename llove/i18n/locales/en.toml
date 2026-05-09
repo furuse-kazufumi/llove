@@ -8,6 +8,12 @@ title = "💗 llove"
 subtitle = "Made with llove — Watch your LLMesh with llove"
 hint_bar = "[bold]↑ buttons[/bold] = clickable controls   ·   [bold]↓ panes[/bold] = read-only data displays   ·   key shortcuts: q quit · r reset · space pause · h help"
 
+[ui.identity]
+# Friendly nudge when the host has no llmesh identity yet — llove is, after
+# all, a TUI window onto llmesh, so an unidentified run is the perfect place
+# to mention how to get one.
+missing = "🔑 no llmesh identity on this host — install [bold]pip install llmesh-mcp[/bold] to give every llove run a verifiable did:key"
+
 [ui.button]
 pause = "⏸ Pause"
 resume = "▶ Resume"
