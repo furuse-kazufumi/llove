@@ -53,7 +53,10 @@ class NarrationView(Static, View):
         ts = event.ts.strftime("%H:%M:%S")
         head = f"[dim]{ts}[/dim]"
         if title:
-            head += f"  [bold]{title}[/bold]"
+            # Escape any user-provided '[' in the title so it can't break out
+            # of our [bold]...[/bold] wrapper.
+            safe_title = str(title).replace("[", r"\[")
+            head += f"  [bold]{safe_title}[/bold]"
         body = self._lite_markdown(text)
         self._entries.appendleft(f"{head}\n  {body}")
         rendered = "\n\n".join(self._entries)
