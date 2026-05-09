@@ -136,6 +136,14 @@ llove demo --scenario rag --seed 99
 
 実行中は **narration pane** が画面下部に常駐し、各イベントに紐づく解説を Markdown 風に流す。
 
+### シナリオ拡張要件
+
+- 第三者が **5 分** で新シナリオを追加できること
+- リポジトリ `llove/demo/scenarios/_template.py` をコピーし、`__init__.py` に 1 行追加で起動可能になる構成
+- 詳細手順は `docs/contributing-scenarios.md`（コピペ用テンプレート + 命名規則 + Style Guide + 禁止事項）
+- 各シナリオは **完全オフライン**（ネットワーク禁止 / ファイルシステム書き込み禁止 / LLMesh import 禁止）
+- 既存テスト `tests/test_scenarios.py` は `SCENARIOS` 全件にパラメタライズで自動適用されるため、新シナリオ追加時もスモークテストが追従する
+
 ---
 
 ## 6. スコープ外（v1.0 までやらない）
