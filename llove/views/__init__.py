@@ -3,7 +3,14 @@ from __future__ import annotations
 
 from .audit_log import AuditLogView
 from .base import View
+from .narration import NarrationView
 from .sensor_stream import SensorStreamView
 from .spc_chart import SPCChartView
 
-__all__ = ["View", "AuditLogView", "SensorStreamView", "SPCChartView"]
+__all__ = [
+    "View",
+    "AuditLogView",
+    "NarrationView",
+    "SensorStreamView",
+    "SPCChartView",
+]

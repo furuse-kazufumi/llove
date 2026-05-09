@@ -1,0 +1,50 @@
+"""Interactive demo scenarios that showcase LLMesh features through llove.
+
+Each scenario is a self-contained generator of llove ``Event``s plus narration.
+All scenarios run **fully offline** with synthetic data — no network, no real
+LLMesh node required. Use ``--seed`` for deterministic playback.
+"""
+from __future__ import annotations
+
+from llove.demo.scenarios.base import DemoScenario, narrate
+from llove.demo.scenarios.audit import AuditChainScenario
+from llove.demo.scenarios.backends import LLMBackendsScenario
+from llove.demo.scenarios.firewall import FirewallScenario
+from llove.demo.scenarios.multimodal import MultimodalSPCScenario
+from llove.demo.scenarios.rag import RAGStoresScenario
+from llove.demo.scenarios.reliability import ReliabilityScenario
+from llove.demo.scenarios.scada import SCADAScenario
+
+# Registry — order matters for the menu display.
+SCENARIOS: dict[str, type[DemoScenario]] = {
+    "firewall": FirewallScenario,
+    "scada": SCADAScenario,
+    "multimodal": MultimodalSPCScenario,
+    "rag": RAGStoresScenario,
+    "backends": LLMBackendsScenario,
+    "audit": AuditChainScenario,
+    "reliability": ReliabilityScenario,
+}
+
+
+def get_scenario(name: str) -> DemoScenario:
+    """Look up and instantiate a scenario by short name."""
+    if name not in SCENARIOS:
+        valid = ", ".join(SCENARIOS)
+        raise ValueError(f"unknown scenario {name!r}; choose from: {valid}")
+    return SCENARIOS[name]()
+
+
+__all__ = [
+    "DemoScenario",
+    "SCENARIOS",
+    "get_scenario",
+    "narrate",
+    "AuditChainScenario",
+    "FirewallScenario",
+    "LLMBackendsScenario",
+    "MultimodalSPCScenario",
+    "RAGStoresScenario",
+    "ReliabilityScenario",
+    "SCADAScenario",
+]
