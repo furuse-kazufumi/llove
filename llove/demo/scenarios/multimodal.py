@@ -1,21 +1,11 @@
-"""Multimodal SPC scenario — UnifiedSPC + VLMFeatureExtractor.
-
-Shows how llmesh.industrial.UnifiedSPC pairs a numerical sensor with image
-captions (via VLMFeatureExtractor) and applies a combined SPC rule.
-"""
+"""Multimodal SPC scenario — UnifiedSPC + VLMFeatureExtractor."""
 from __future__ import annotations
 
 import random
 from collections.abc import AsyncIterator
 
-from llove.demo.scenarios.base import DemoScenario, narrate
+from llove.demo.scenarios.base import DemoScenario, narrate_key
 from llove.events import Event, EventKind
-
-_INTRO = (
-    "**UnifiedSPC** combines two streams (numerical sensor + image caption) "
-    "with a configurable AND / OR / Weighted rule. We use AND here: alarm only when "
-    "**both** streams cross their limits."
-)
 
 _CAPTIONS_NORMAL = [
     "smooth surface, no defect",
@@ -31,24 +21,18 @@ _CAPTIONS_ANOMALOUS = [
 
 class MultimodalSPCScenario(DemoScenario):
     name = "multimodal"
-    title = "Multimodal SPC — sensor + VLM caption fused"
-    description = (
-        "Two streams (vibration + camera caption) flow side-by-side. UnifiedSPC's "
-        "AND rule fires only when both indicate trouble."
-    )
+    i18n_key = "multimodal"
     default_pause = 0.25
 
     def __init__(self, *, seed: int = 42) -> None:
         self._rng = random.Random(seed)
 
     async def events(self) -> AsyncIterator[Event]:
-        yield narrate(_INTRO, title="Scenario: Multimodal SPC")
-
-        # Phase A: both streams nominal — no alarm
-        yield narrate(
-            "Phase A — sensor nominal, image nominal → **no alarm** (AND not satisfied)",
-            title="Phase A",
+        yield narrate_key(
+            "scenario.multimodal.intro", title_key="scenario.multimodal.intro_title"
         )
+
+        yield narrate_key("scenario.multimodal.phase_a", title_key="scenario.multimodal.phase_a_title")
         for _ in range(8):
             yield Event(
                 kind=EventKind.SENSOR,
@@ -65,11 +49,7 @@ class MultimodalSPCScenario(DemoScenario):
                 },
             )
 
-        # Phase B: image anomalous, sensor nominal — single side alarm, AND blocks
-        yield narrate(
-            "Phase B — image suspicious, sensor still fine → AND rule **suppresses** alarm",
-            title="Phase B",
-        )
+        yield narrate_key("scenario.multimodal.phase_b", title_key="scenario.multimodal.phase_b_title")
         for _ in range(4):
             yield Event(
                 kind=EventKind.SENSOR,
@@ -86,12 +66,7 @@ class MultimodalSPCScenario(DemoScenario):
                 },
             )
 
-        # Phase C: both anomalous — AND fires
-        yield narrate(
-            "Phase C — vibration also rises **and** image still suspicious → "
-            "**alarm**: bothstreams agree",
-            title="Phase C",
-        )
+        yield narrate_key("scenario.multimodal.phase_c", title_key="scenario.multimodal.phase_c_title")
         for i in range(6):
             yield Event(
                 kind=EventKind.SENSOR,
@@ -120,8 +95,6 @@ class MultimodalSPCScenario(DemoScenario):
                 "sensor_id": "unified",
             },
         )
-        yield narrate(
-            "UnifiedSPC reduces false alarms by **requiring agreement across modalities**. "
-            "Choose AND for high-precision (process control), OR for high-recall (safety).",
-            title="Take-away",
+        yield narrate_key(
+            "scenario.multimodal.takeaway", title_key="scenario.multimodal.takeaway_title"
         )
