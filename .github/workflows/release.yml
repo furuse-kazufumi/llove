@@ -65,7 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/llove
+      url: https://pypi.org/p/llmesh-llove
     permissions:
       id-token: write  # OIDC trusted publisher
     steps:
