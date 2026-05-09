@@ -40,11 +40,11 @@ class MyThingScenario(DemoScenario):
 
     # Full description shown by ``llove demo --list``.
     description = (
-        "Replace this with a 1–2 sentence pitch for your scenario. "
+        "Replace this with a 1-2 sentence pitch for your scenario. "
         "Mention which LLMesh feature it covers."
     )
 
-    # Seconds between events. 0.3–0.6 reads naturally; 0.0 is for tests.
+    # Seconds between events. 0.3-0.6 reads naturally; 0.0 is for tests.
     default_pause = 0.4
 
     async def events(self) -> AsyncIterator[Event]:
