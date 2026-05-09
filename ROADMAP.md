@@ -240,6 +240,49 @@
 
 ---
 
+## v0.7.0 — Multi-Game LLM Arena *(F16, 2026-05-09 追加)*
+
+**ゴール:** shogi (F12) で確立した `Engine + Player + Loop + Provider` 抽象を
+`llove/games/<game>/` に汎用化し、chess / go / mahjong / poker /
+カードゲーム小品を順次実装。LLM 同士の **多種ゲーム対局アリーナ** に。
+
+### 入る機能（順序）
+
+- [ ] `llove/games/` 共通骨格 (Engine / Player / Loop / Provider 抽象を
+      shogi から切り出し汎用化)
+- [ ] **chess** (`[chess]` extras: python-chess 14k★ MIT) — PGN export、
+      Stockfish 評価値オプション
+- [ ] **go** (`[go]` extras: sente / katago bind) — 9x9 → 13x13 → 19x19、
+      SGF export
+- [ ] **mahjong** (`[mahjong]` extras: nekobean/mahjong) — Riichi ルール、
+      不完全情報対応 (`Engine.observation_for(player)`)、tenhou.net JSON
+- [ ] **poker** (`[poker]` extras: pokerkit / treys) — Texas Hold'em
+- [ ] **bridge** (`[bridge]` extras: endplay) — PBN export
+- [ ] **カードゲーム小品** (`[card]` extras): こいこい / 大富豪 /
+      七並べ / 神経衰弱 / speed / blackjack
+- [ ] **CLI 統一**: `llove play <game> --player1 ... --player2 ...
+      [--players N]`
+- [ ] **共通機能**: Ed25519 署名 / 棋譜 export / `--games N` バッチ
+      勝率 / 観戦モード / multi-LLM identity per player
+- [ ] **llmesh peer 越し対局**: `llmesh:peer:<NodeID>` プロバイダで
+      `<game>.think` MCP ツール経由 — llmesh-mcp に v3.2 追加
+
+### 参考プロジェクト
+
+- **OpenSpiel** (DeepMind, 50+ ゲーム、Apache-2.0)
+- **pgx** (JAX-based RL gym)
+- **python-chess** / **python-shogi**
+
+### 受け入れ基準
+
+- 各ゲームが `llove play <game> --player1 mock --player2 mock` で
+  完走する（offline、API キー不要）
+- 各 extras 不在時は `pip install llmesh-llove[<game>]` 案内のみで、
+  他ゲームと shogi は影響を受けない
+- 全ゲームで Ed25519 署名付きの棋譜が `out/<game>/` に自動保存
+
+---
+
 ## v1.0.0 — Stable Release
 
 **ゴール:** SemVer 適用、API 公開契約、十分なドキュメント、安定運用。
