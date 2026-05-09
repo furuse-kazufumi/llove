@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.11", "3.12"]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -e ".[dev,all]"
+
+      - name: Lint with ruff
+        run: ruff check llove/
+
+      - name: Run tests with coverage
+        run: python -m pytest --cov=llove --cov-fail-under=70 -q
+
+      - name: Bandit (project config)
+        run: bandit -r llove/ -c pyproject.toml -ll
+
+      - name: Smoke check — export HTML headlessly
+        shell: bash
+        run: |
+          python -c "from llove.export.html import export_html; \
+                     from pathlib import Path; \
+                     export_html(source_uri='mock://demo', \
+                                 output_path=Path('snapshot.html'), \
+                                 duration_s=0.3); \
+                     assert Path('snapshot.html').stat().st_size > 200"
+
+      - name: Upload HTML snapshot
+        if: always() && matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: llove-snapshot
+          path: snapshot.html
+          retention-days: 14
