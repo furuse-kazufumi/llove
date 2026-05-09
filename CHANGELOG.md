@@ -3,6 +3,20 @@
 All notable changes to **llove** are recorded here.
 This project follows [Semantic Versioning](https://semver.org).
 
+## [0.2.1] - 2026-05-09
+
+### Fixed
+- **`llove demo --list`** previously rendered `<property object at 0x...>`
+  instead of each scenario's title. `SCENARIOS` stores classes and v0.2.0
+  turned `title` / `description` into `@property`, so `cls.title` returned
+  the property descriptor. The list view now instantiates each scenario
+  before reading its localized title and description.
+- Regression tests added: title resolves to a real string, no
+  `<property object` leaks in either `en` or `ja`.
+
+### Changed
+- `demo --list` now also prints the scenario description on a second line.
+
 ## [0.2.0] - 2026-05-09
 
 ### Added

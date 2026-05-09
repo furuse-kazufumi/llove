@@ -7,6 +7,7 @@ Subcommands:
     llove export --source URI   — write a single-file HTML snapshot
     llove version               — print version
 """
+
 from __future__ import annotations
 
 import sys
@@ -55,7 +56,9 @@ def demo(seed: int, tick: float, scenario_name: str | None, list_only: bool) -> 
     if list_only:
         click.echo("Available scenarios:")
         for key, cls in SCENARIOS.items():
-            click.echo(f"  {key:12}  {cls.title}")
+            instance = cls()
+            click.echo(f"  {key:12}  {instance.title}")
+            click.echo(f"  {'':12}  {instance.description}")
         click.echo("\nRun: llove demo --scenario <name>")
         return
 

@@ -4,12 +4,13 @@ A DataSource yields ``Event``s asynchronously. Implementations live in this
 package (``mock``, ``jsonl``, …) plus optional sub-packages enabled via
 extras (``llmesh``).
 """
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import AsyncIterator
 
-from llove.events import Event
+from llove.events import Event, EventKind
 
 
 class DataSource(ABC):
@@ -25,7 +26,7 @@ class DataSource(ABC):
     async def stream(self) -> AsyncIterator[Event]:
         """Yield events. Loop forever for live sources, finish for finite ones."""
         if False:  # pragma: no cover — purely a generator-typing hint
-            yield Event(kind=Event.model_fields["kind"].annotation.SENSOR)  # type: ignore[arg-type]
+            yield Event(kind=EventKind.SENSOR)
 
     async def close(self) -> None:
         """Optional cleanup hook called by the App on teardown."""

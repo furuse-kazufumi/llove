@@ -19,7 +19,7 @@ include = [
 
 [project]
 name = "llove"
-version = "0.2.0"
+version = "0.2.1"
 description = "llove — a cute, terminal-first Artifact for inspecting LLMesh data with llove"
 readme = "README.md"
 license = "MIT"
@@ -73,7 +73,9 @@ llove = "llove.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/furuse-kazufumi/llove"
+Repository = "https://github.com/furuse-kazufumi/llove"
 Issues = "https://github.com/furuse-kazufumi/llove/issues"
+Changelog = "https://github.com/furuse-kazufumi/llove/blob/main/CHANGELOG.md"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -105,3 +107,22 @@ ignore = ["E501"]
 #  B311 — random: only used for synthetic demo data, never for security
 skips = ["B101", "B110", "B112", "B311"]
 exclude_dirs = ["tests"]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["llove"]
+strict_optional = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+no_implicit_optional = true
+check_untyped_defs = true
+disallow_untyped_defs = false  # progressive: tighten later
+ignore_missing_imports = false
+follow_imports = "silent"
+
+[[tool.mypy.overrides]]
+# Optional / heavyweight third-party deps may lack stubs.
+module = ["textual.*"]
+ignore_missing_imports = true

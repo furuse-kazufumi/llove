@@ -1,7 +1,9 @@
 """LLM backends scenario — Ollama / OpenAI / Anthropic side-by-side."""
+
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
+from typing import Any
 
 from llove.demo.scenarios.base import DemoScenario, narrate, narrate_key
 from llove.events import Event, EventKind
@@ -9,7 +11,7 @@ from llove.i18n import t
 
 _PROMPT = "Explain CUSUM control charts in 2 sentences."
 
-_RESULTS = [
+_RESULTS: list[dict[str, Any]] = [
     {
         "backend": "OllamaBackend",
         "model": "llama3.2",

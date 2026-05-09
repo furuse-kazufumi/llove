@@ -7,9 +7,10 @@ Public API surface:
 The package follows the LLMesh philosophy: fail-closed, optional dependencies as
 extras, and keyboard-friendly by default.
 """
+
 from __future__ import annotations
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 from .events import Event, EventKind
 from .sources.base import DataSource

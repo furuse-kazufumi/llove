@@ -1,12 +1,14 @@
 """Audit chain scenario — HMAC-chain tamper detection."""
+
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
+from typing import Any
 
 from llove.demo.scenarios.base import DemoScenario, narrate_key
 from llove.events import Event, EventKind
 
-_ENTRIES = [
+_ENTRIES: list[dict[str, Any]] = [
     {"event": "firewall.allow", "user": "ops", "layer": "L2"},
     {"event": "rag.search", "query": "modbus replay defense", "hits": 5},
     {"event": "llm.complete", "model": "llama3.2", "tokens": 187},
