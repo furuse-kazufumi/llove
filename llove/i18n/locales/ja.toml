@@ -1,0 +1,137 @@
+# llove — 日本語ロケール
+
+[ui]
+title = "💗 llove"
+subtitle = "Made with llove — LLMesh をやさしく見守る"
+hint_bar = "[bold]↑ ボタン[/bold] = クリック可能なコントロール   ·   [bold]↓ パネル[/bold] = 表示専用のデータ表示   ·   キー: q 終了 · r リセット · space 一時停止 · h ヘルプ"
+
+[ui.button]
+pause = "⏸ 一時停止"
+resume = "▶ 再開"
+reset = "⟲ リセット"
+help = "? ヘルプ"
+quit = "✕ 終了"
+
+[ui.pane.sensor_stream]
+title = "📡 センサーイベント・ストリーム  · 表示"
+subtitle_init = "(データ待機中)"
+subtitle_active = "{count} 件 | 直近 {latest}"
+header = "時刻      センサー              値"
+sparkline_label = "推移グラフ (直近 40 件):"
+empty = "(データはまだありません)"
+
+[ui.pane.spc_chart]
+title = "📊 SPC 管理図 — CUSUM 累積和  · 表示"
+subtitle_init = "ドリフト監視中"
+subtitle_alarmed = "⚠ 警報 {count} 件"
+status_alarm = "[bold red]●[/bold red] 状態: 警報"
+status_nominal = "[bold green]●[/bold green] 状態: 正常  (値={value})"
+status_waiting = "[dim]●[/dim] 状態: データ待機中"
+recent_alarms = "  直近の警報:"
+no_alarms = "  (警報なし)"
+as_of = "[dim]{ts} 時点[/dim]"
+
+[ui.pane.audit_log]
+title = "📋 監査ログ — audit / LLM / RAG イベント  · 表示"
+subtitle_init = "新しい順"
+empty = "(監査イベントはまだありません)"
+
+[ui.pane.narration]
+title = "💬 解説 — 何が起きているかを言葉で  · 表示"
+subtitle_init = "(シナリオ解説)"
+subtitle_active = "場面 {beat} · {latest}"
+empty = "[dim](解説はまだありません — シナリオの開始を待っています)[/dim]"
+
+[scenario.firewall]
+title = "Firewall — プロンプトの 4 層検査"
+description = "12 件のプロンプトを各層 (L0/L1/L1.5/L2) が ALLOW / BLOCK / SUMMARIZE に振り分ける様子を再生。"
+intro_title = "シナリオ: PromptFirewall 4 層"
+intro = "**LLMesh PromptFirewall** は 4 層を優先順位付きで実行します。各プロンプトをどの層が捕まえるかに注目 — 早い層が必ず勝ちます。"
+takeaway_title = "ポイント"
+takeaway = "**層の順序が重要。** L0 が注入パターン → L1 がシークレット → L1.5 が PII → L2 が構造、の順で先に評価され、早い層が後の層を覆い隠します（仕様）。"
+prompt_line = "prompt: `{shown}`\n  → **{layer}** → **{action}** ({reason})"
+
+[scenario.scada]
+title = "SCADA — ExplainedCUSUM と LLM 仮説生成"
+description = "軸受け温度センサーが管理限界を逸脱。ExplainedCUSUM が警報を検出し、LLM が原因仮説を出します。"
+intro_title = "シナリオ: SCADA"
+intro = "**SCADA + ExplainedCUSUM**: 軸受け温度センサーが管理限界を超えてドリフトします。CUSUM が累積偏差を検出し、LLM 説明器が原因の仮説を添えます。"
+phase1_title = "フェーズ 1"
+phase1 = "フェーズ 1 — **正常運転**: 温度は 70 °C 前後で安定"
+phase2_title = "フェーズ 2"
+phase2 = "フェーズ 2 — **ドリフト**: `lubricant_flow_03` で潤滑油の粘度が低下し、軸受けの温度が上昇"
+phase3_title = "フェーズ 3"
+phase3 = "フェーズ 3 — 保守作業後の **復旧**"
+llm_title = "LLM"
+llm_triggered = "**LLM 説明器** が起動 — インシデントレポートを生成中"
+hypothesis = "累積ドリフトは約 12 分前から始まっており、lubricant_flow_03 の粘度低下と相関しています。軸受けの摩耗または潤滑油の劣化が考えられます。潤滑油圧と振動スペクトルの確認を推奨します。"
+takeaway_title = "ポイント"
+takeaway = "ExplainedCUSUM = **CUSUMChart + LLMExplainer** の合成。数値ドリフトで警報が出ると、LLM が自然言語で原因仮説を添えてくれます。"
+
+[scenario.multimodal]
+title = "マルチモーダル SPC — センサー + 画像キャプションの融合"
+description = "振動センサーと画像キャプションを並行して流し、両方が異常を示した時だけ UnifiedSPC の AND ルールで警報を発火。"
+intro_title = "シナリオ: マルチモーダル SPC"
+intro = "**UnifiedSPC** は 2 系統 (数値センサー + 画像キャプション) を AND / OR / Weighted で結合できます。ここでは AND を使い、**両方** が限界を超えた時だけ警報します。"
+phase_a_title = "フェーズ A"
+phase_a = "フェーズ A — センサー正常・画像正常 → **警報なし** (AND 不成立)"
+phase_b_title = "フェーズ B"
+phase_b = "フェーズ B — 画像が疑わしいがセンサーは正常 → AND ルールが警報を **抑止**"
+phase_c_title = "フェーズ C"
+phase_c = "フェーズ C — 振動も上昇 **かつ** 画像も疑わしい → **警報**: 両系統が一致"
+takeaway_title = "ポイント"
+takeaway = "UnifiedSPC は **モダリティ間の合意を要求** することで誤警報を減らせます。AND で精度重視 (プロセス制御)、OR で再現率重視 (安全) に。"
+
+[scenario.rag]
+title = "RAG — 3 つのベクトルストアを比較"
+description = "同じクエリを NumpyVectorStore / SqliteVectorStore / LSHVectorStore の 3 種で実行し、レイテンシと recall を比較。"
+intro_title = "シナリオ: RAG ストア比較"
+intro = "**llmesh.rag** には 3 つのストアがあります。共通の `Retriever` ABC、スケールが異なります。同一クエリを 3 種類で実行します。"
+query_title = "クエリ"
+query = "クエリ: `{q}`"
+running = "実行中: **{name}** ({scale}) — {note}"
+takeaway_title = "ポイント"
+takeaway = "**人気ではなく規模で選ぶ。** プロトタイプは Numpy、典型的な本番 (≤ 10⁶) は SQLite、100 万件超なら LSH ANN。"
+
+[scenario.backends]
+title = "LLM バックエンド — Ollama / OpenAI / Anthropic"
+description = "同じプロンプトをローカル 1 種 + クラウド 2 種に投げ、tokens / latency / cost を比較。"
+intro_title = "シナリオ: LLM バックエンド"
+intro = "**llmesh.llm** はコンストラクタを 1 行変えるだけでバックエンドを切り替えられます。同じプロンプトを 3 種類のバックエンドに投げます (他のコードはそのまま)。"
+prompt_title = "プロンプト"
+prompt = "プロンプト: `{q}`"
+calling = "呼び出し中: **{backend}** — モデル `{model}`  ({note})"
+takeaway_title = "ポイント"
+takeaway = "ローカル合計 = {local_ms} ms (無料) · クラウド合計 = {cloud_ms} ms (低コスト)。**開発はローカル、難しいプロンプトはクラウド** が定石。"
+
+[scenario.audit]
+title = "監査 — HMAC チェーンによる改ざん検知"
+description = "監査エントリを追加 → 1 件改ざん → verify_chain() が破断を検知する流れを再生。"
+intro_title = "シナリオ: 監査チェーン"
+intro = "**AuditTrail** はすべてのエントリの HMAC を次のエントリに連鎖させます。1 件でも削除/変更されればチェーンが破断し、`verify_chain()` が例外を投げます。"
+step1_title = "ステップ 1"
+step1 = "**ステップ 1.** 5 件のエントリを追加 — 各エントリには前のエントリの HMAC が `prev_hmac` として連鎖されます"
+step2_title = "ステップ 2 — 改ざん"
+step2 = "**ステップ 2.** 攻撃者がエントリ **#3** を書き換える。保存されている HMAC が、#4 が連鎖していた `prev_hmac` と整合しなくなる。"
+step3_title = "ステップ 3 — 検証"
+step3 = "**ステップ 3.** 運用者が `verify_chain()` を実行 — #4 の `prev_hmac` が #3 を再計算した HMAC と一致しない → **seq=3 でチェーン破断**"
+takeaway_title = "ポイント"
+takeaway = "改ざん**耐性**ではなく改ざん**検知**。攻撃者は履歴を黙って書き換えられず、破断点が法的証拠になります。"
+
+[scenario.reliability]
+title = "信頼性プロトコル — ACK / RETRANSMIT / Watchdog"
+description = "6 チャンクのストリームを損失下で送信。RETRANSMIT が #3 と #5 を回復し、STREAM_ACK で完了。"
+intro_title = "シナリオ: 信頼性プロトコル"
+intro = "**信頼性プロトコル**: `ChunkSender` + `MessageAssembler` が ACK + RETRANSMIT でパケット損失から回復 (RETRANSMIT は **1 回のみ** 送信、再送ループ阻止)。"
+step1_title = "ステップ 1 — 送信"
+step1 = "**ステップ 1.** 送信側がチャンク 1-6 を送出。ネットワークが **#3** と **#5** を破棄。"
+step2_title = "ステップ 2 — 検出"
+step2 = "**ステップ 2.** 受信側の `MessageAssembler.check_timeouts()` が seq=3 と seq=5 の欠落を検出 → **1 回の** RETRANSMIT 要求を発行。"
+step3_title = "ステップ 3 — 復旧"
+step3 = "**ステップ 3.** 送信側の `handle_retransmit()` が **欠落分のみ** 再送。重複再試行なし。"
+step4_title = "ステップ 4 — ACK"
+step4 = "**ステップ 4.** 受信側がメッセージを完成 → `STREAM_ACK` を発行。送信側の `handle_ack()` がバッファを破棄。"
+watchdog_title = "おまけ — Watchdog"
+watchdog = "もし受信側が無音になった場合、**WatchdogTimer** (NTP 確認済みクロック) が切断を通知し、`expire_old()` がバッファを GC します。"
+takeaway_title = "ポイント"
+takeaway = "RETRANSMIT は欠落ごとに **1 回のみ** 送り、再送嵐や増幅を防ぎます。TTL でバッファが永遠に膨らむことも防止。"

@@ -1,0 +1,140 @@
+# llove — English locale (default / fallback)
+#
+# Every other locale is checked against this file: keys present here MUST
+# also appear in ja.toml etc. Missing keys silently fall back to English.
+
+[ui]
+title = "💗 llove"
+subtitle = "Made with llove — Watch your LLMesh with llove"
+hint_bar = "[bold]↑ buttons[/bold] = clickable controls   ·   [bold]↓ panes[/bold] = read-only data displays   ·   key shortcuts: q quit · r reset · space pause · h help"
+
+[ui.button]
+pause = "⏸ Pause"
+resume = "▶ Resume"
+reset = "⟲ Reset"
+help = "? Help"
+quit = "✕ Quit"
+
+[ui.pane.sensor_stream]
+title = "📡 SensorEvent stream  · view"
+subtitle_init = "(waiting for data)"
+subtitle_active = "{count} pts | latest {latest}"
+header = "time      sensor                value"
+sparkline_label = "sparkline (last 40):"
+empty = "(no data yet)"
+
+[ui.pane.spc_chart]
+title = "📊 SPC chart — CUSUM control  · view"
+subtitle_init = "watching for drift"
+subtitle_alarmed = "⚠ {count} alarm(s)"
+status_alarm = "[bold red]●[/bold red] status: ALARM"
+status_nominal = "[bold green]●[/bold green] status: nominal  (value={value})"
+status_waiting = "[dim]●[/dim] status: waiting for data"
+recent_alarms = "  Recent alarms:"
+no_alarms = "  (no alarms)"
+as_of = "[dim]as of {ts}[/dim]"
+
+[ui.pane.audit_log]
+title = "📋 Audit log — audit / LLM / RAG events  · view"
+subtitle_init = "newest first"
+empty = "(no audit events yet)"
+
+[ui.pane.narration]
+title = "💬 Narration — what's happening, in plain words  · view"
+subtitle_init = "(scenario commentary)"
+subtitle_active = "beat {beat} · {latest}"
+empty = "[dim](no narration yet — waiting for the scenario to begin)[/dim]"
+
+[scenario.firewall]
+title = "Firewall — 4-layer prompt screening"
+description = "Replay 12 prompts and watch L0/L1/L1.5/L2 layers route them to ALLOW / BLOCK / SUMMARIZE."
+intro_title = "Scenario: PromptFirewall 4 layers"
+intro = "**LLMesh PromptFirewall** has 4 layers running in priority order. Watch each prompt below and note which layer catches it — earlier layers always win."
+takeaway_title = "Take-away"
+takeaway = "**Layer order matters.** L0 catches injection patterns first, then secrets, then PII, then structure. Earlier layers shadow later ones — that's by design."
+prompt_line = "prompt: `{shown}`\n  → **{layer}** → **{action}** ({reason})"
+
+[scenario.scada]
+title = "SCADA — ExplainedCUSUM with LLM hypothesis"
+description = "A bearing temperature sensor drifts past its control limit. ExplainedCUSUM detects the alarm and the LLM emits a hypothesis."
+intro_title = "Scenario: SCADA"
+intro = "**SCADA + ExplainedCUSUM**: a bearing temperature sensor will drift past its control limit. CUSUM detects the cumulative shift; the LLM explainer then attaches a likely cause."
+phase1_title = "Phase 1"
+phase1 = "Phase 1 — **normal**: temperature hovers around 70 °C"
+phase2_title = "Phase 2"
+phase2 = "Phase 2 — **drift**: viscosity drops in `lubricant_flow_03`, bearing temperature rises"
+phase3_title = "Phase 3"
+phase3 = "Phase 3 — **recovery** after maintenance action"
+llm_title = "LLM"
+llm_triggered = "**LLM explainer** triggered — building incident report"
+hypothesis = "The cumulative drift began ~12 minutes ago, coinciding with a viscosity drop in lubricant_flow_03. Bearing wear or lubricant degradation is plausible. Recommend checking lubricant pressure and vibration spectrum."
+takeaway_title = "Take-away"
+takeaway = "ExplainedCUSUM = **CUSUMChart + LLMExplainer** glued together. Alarms fire on numerical drift; the LLM attaches a natural-language cause."
+
+[scenario.multimodal]
+title = "Multimodal SPC — sensor + VLM caption fused"
+description = "Two streams (vibration + camera caption) flow side-by-side. UnifiedSPC's AND rule fires only when both indicate trouble."
+intro_title = "Scenario: Multimodal SPC"
+intro = "**UnifiedSPC** combines two streams (numerical sensor + image caption) with a configurable AND / OR / Weighted rule. We use AND here: alarm only when **both** streams cross their limits."
+phase_a_title = "Phase A"
+phase_a = "Phase A — sensor nominal, image nominal → **no alarm** (AND not satisfied)"
+phase_b_title = "Phase B"
+phase_b = "Phase B — image suspicious, sensor still fine → AND rule **suppresses** alarm"
+phase_c_title = "Phase C"
+phase_c = "Phase C — vibration also rises **and** image still suspicious → **alarm**: both streams agree"
+takeaway_title = "Take-away"
+takeaway = "UnifiedSPC reduces false alarms by **requiring agreement across modalities**. Choose AND for high-precision (process control), OR for high-recall (safety)."
+
+[scenario.rag]
+title = "RAG — three vector stores compared"
+description = "Replay one query across NumpyVectorStore / SqliteVectorStore / LSHVectorStore and compare latency vs recall."
+intro_title = "Scenario: RAG stores"
+intro = "**llmesh.rag** ships 3 stores. Same `Retriever` ABC, different scaling. We replay the same query against each one."
+query_title = "Query"
+query = "query: `{q}`"
+running = "running **{name}** ({scale}) — {note}"
+takeaway_title = "Take-away"
+takeaway = "**Pick by scale, not popularity.** Numpy for prototypes, SQLite for typical production (≤ 10⁶), LSH ANN when you blow past a million documents."
+
+[scenario.backends]
+title = "LLM backends — Ollama / OpenAI / Anthropic"
+description = "Same prompt across local + 2 cloud backends. Compare tokens / latency / cost with the unified ABC."
+intro_title = "Scenario: LLM backends"
+intro = "**llmesh.llm** lets you swap backends with one constructor change. Same prompt → 3 different backends, no other code changes."
+prompt_title = "Prompt"
+prompt = "prompt: `{q}`"
+calling = "calling **{backend}** — model `{model}`  ({note})"
+takeaway_title = "Take-away"
+takeaway = "local total = {local_ms} ms (free) · cloud total = {cloud_ms} ms (low cost). **Use local for dev, cloud for hard prompts.**"
+
+[scenario.audit]
+title = "Audit — HMAC chain tamper detection"
+description = "Append a few audit entries, then tamper with one and watch verify_chain() raise on the broken link."
+intro_title = "Scenario: Audit chain"
+intro = "**AuditTrail** chains every entry's HMAC into the next. Removing or modifying any entry breaks the chain — `verify_chain()` raises."
+step1_title = "Step 1"
+step1 = "**Step 1.** Append 5 entries — each gets `prev_hmac` chained from the last"
+step2_title = "Step 2 — tamper"
+step2 = "**Step 2.** An attacker rewrites entry **#3** in-place. The stored HMAC is now stale relative to the chained `prev_hmac` of #4."
+step3_title = "Step 3 — verify"
+step3 = "**Step 3.** Operator runs `verify_chain()` — entry #4's `prev_hmac` no longer matches recomputed HMAC of #3 → **chain broken at seq=3**"
+takeaway_title = "Take-away"
+takeaway = "Tamper-evident, not tamper-proof. The attacker cannot silently rewrite history; the broken link is forensic evidence."
+
+[scenario.reliability]
+title = "Reliability — ACK / RETRANSMIT / Watchdog"
+description = "Lossy stream of 6 chunks. Watch RETRANSMIT recover dropped chunks 3 and 5 before STREAM_ACK arrives."
+intro_title = "Scenario: Reliability"
+intro = "**Reliability protocol**: `ChunkSender` + `MessageAssembler` recover from packet loss with ACK + RETRANSMIT (sent at most **once** to avoid amplification)."
+step1_title = "Step 1 — send"
+step1 = "**Step 1.** Sender pushes chunks 1-6. The network drops **#3** and **#5**."
+step2_title = "Step 2 — detect"
+step2 = "**Step 2.** Receiver's `MessageAssembler.check_timeouts()` notices gaps at seq=3 and seq=5 → emits **one** RETRANSMIT request."
+step3_title = "Step 3 — recover"
+step3 = "**Step 3.** Sender's `handle_retransmit()` re-sends **only** the missing chunks. No duplicate retries."
+step4_title = "Step 4 — ack"
+step4 = "**Step 4.** Receiver completes the message → emits `STREAM_ACK`. Sender's `handle_ack()` drops its buffer."
+watchdog_title = "Bonus — watchdog"
+watchdog = "If the receiver had gone silent, **WatchdogTimer** (NTP-checked clock) would have signalled a disconnect; `expire_old()` would have GC'd buffered chunks."
+takeaway_title = "Take-away"
+takeaway = "RETRANSMIT is sent **once** per gap to avoid retry storms / amplification. TTL guarantees buffers don't grow forever even on disconnect."
