@@ -36,8 +36,12 @@ class NarrationView(Static, View):
     """
 
     def __init__(self, *, limit: int = 4) -> None:
-        super().__init__("[dim](no narration yet — waiting for the scenario to begin)[/dim]")
+        self._initial = "[dim](no narration yet — waiting for the scenario to begin)[/dim]"
+        super().__init__(self._initial)
         self._entries: deque[str] = deque(maxlen=limit)
+        # Mirror the latest rendered string so tests / external callers can
+        # inspect what the user would see without diving into Textual internals.
+        self.last_render: str = self._initial
 
     def feed(self, event: Event) -> None:
         if event.kind != EventKind.NARRATION:
