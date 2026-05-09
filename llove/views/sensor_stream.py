@@ -34,7 +34,7 @@ class SensorStreamView(Static, View):
         self._rows: deque[str] = deque(maxlen=limit)
         self._values: deque[float] = deque(maxlen=40)
         self._count = 0
-        self.border_title = "📡 SensorEvent stream"
+        self.border_title = "📡 SensorEvent stream  · view"
         self.border_subtitle = "(waiting for data)"
 
     def feed(self, event: Event) -> None:
