@@ -98,11 +98,29 @@ llove export --source mock://demo --html dashboard.html
 
 ```bash
 llove demo                       # フル機能デモ（合成データ）
+llove demo --list                # シナリオ一覧
+llove demo --scenario firewall   # 個別シナリオを起動
 llove view --source <URI>        # ライブ表示
 llove tail <file>                # ファイル末尾を流す
 llove export <source> --html <path>   # 1 ファイル HTML
 llove --help                     # コマンド一覧
 ```
+
+### LLMesh 機能カバレッジシナリオ
+
+`llove demo --scenario <name>` で、LLMesh の各機能を **オフライン合成データで** 体験できます。
+
+| name | 何を見せる | カバーする LLMesh 機能 |
+|---|---|---|
+| `firewall` | 12 prompt が L0/L1/L1.5/L2 で BLOCK / SUMMARIZE / ALLOW される様子 | `PromptFirewall` 4 層 |
+| `scada` | センサー drift → CUSUM alarm → LLM の Markdown 説明 | `ExplainedCUSUM` + `LLMExplainer` |
+| `multimodal` | 数値センサー × 画像 caption の AND 結合 SPC | `UnifiedSPC` + `VLMFeatureExtractor` |
+| `rag` | 同じクエリを 3 ストア（Numpy / SQLite / LSH ANN）で比較 | RAG 3 段ストア |
+| `backends` | 同じプロンプトを Ollama / OpenAI / Anthropic に投げた風の比較 | LLM backend ABC |
+| `audit` | 5 エントリ追加 → 改ざん → `verify_chain()` が検知 | `AuditTrail` HMAC chain |
+| `reliability` | パケット損失下で ACK / RETRANSMIT / TTL 失効を実演 | `MessageAssembler` + `ChunkSender` |
+
+**自分のシナリオを追加するのは超簡単です** — [`docs/contributing-scenarios.md`](docs/contributing-scenarios.md) と [`llove/demo/scenarios/_template.py`](llove/demo/scenarios/_template.py) を参照（5 分でできます）。
 
 ### URI スキーム例
 
