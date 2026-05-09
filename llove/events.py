@@ -6,7 +6,7 @@ to JSON Lines straightforward.
 """
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 
@@ -34,7 +34,7 @@ class Event(BaseModel):
     """
 
     kind: EventKind
-    ts: datetime = Field(default_factory=lambda: datetime.now(tz=timezone.utc))
+    ts: datetime = Field(default_factory=lambda: datetime.now(tz=UTC))
     source_id: str = ""
     payload: dict[str, Any] = Field(default_factory=dict)
 

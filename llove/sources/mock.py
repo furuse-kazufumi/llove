@@ -13,7 +13,7 @@ from __future__ import annotations
 import asyncio
 import random
 from collections.abc import AsyncIterator
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from llove.events import Event, EventKind
 from llove.sources.base import DataSource
@@ -46,7 +46,7 @@ class MockSource(DataSource):
 
             yield Event(
                 kind=EventKind.SENSOR,
-                ts=datetime.now(tz=timezone.utc),
+                ts=datetime.now(tz=UTC),
                 source_id=self.name,
                 payload={"sensor_id": sensor_id, "value": round(value, 2), "quality": "good"},
             )

@@ -53,7 +53,7 @@ async def _collect(source: DataSource, duration_s: float) -> list[Event]:
 
     try:
         await asyncio.wait_for(runner(), timeout=duration_s)
-    except asyncio.TimeoutError:
+    except TimeoutError:
         pass
     finally:
         await source.close()
