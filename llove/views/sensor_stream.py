@@ -52,12 +52,16 @@ class SensorStreamView(Static, View):
         ts = event.ts.strftime("%H:%M:%S")
         self._rows.append(f"{ts}  {sid:18}  {val:7.2f}")
         self._values.append(val)
+        self._count += 1
+        self.border_subtitle = f"{self._count} pts | latest {val:.2f}"
         self._refresh()
 
     def _refresh(self) -> None:
         spark = self._render_spark()
+        header = "[dim]time      sensor                value[/dim]"
         body = "\n".join(self._rows) if self._rows else "(no data yet)"
-        self.update(f"{body}\n\n{spark}")
+        spark_label = "[dim]sparkline (last 40):[/dim] " + spark if spark else ""
+        self.update(f"{header}\n{body}\n\n{spark_label}")
 
     def _render_spark(self) -> str:
         if not self._values:
