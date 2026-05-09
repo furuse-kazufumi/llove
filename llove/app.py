@@ -41,6 +41,12 @@ class LoveApp(App):
         margin: 0 1;
         min-width: 12;
     }
+    #hint-bar {
+        height: 1;
+        padding: 0 2;
+        background: $panel;
+        color: $text-muted;
+    }
     .top-row {
         height: 1fr;
     }
