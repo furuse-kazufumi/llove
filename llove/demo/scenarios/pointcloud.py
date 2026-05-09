@@ -65,7 +65,7 @@ def _synth_points(missing: tuple[int, int] | None) -> list[tuple[float, float, f
     return pts
 
 
-_FRAMES = [
+_FRAMES: list[dict[str, Any]] = [
     {"id": 1, "missing": None},
     {"id": 2, "missing": None},
     {"id": 3, "missing": (3, 0)},  # top-right slot
