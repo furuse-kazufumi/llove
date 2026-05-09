@@ -62,9 +62,11 @@ __all__ = [
     "MCPCallScenario",
     "ModelDriftScenario",
     "MultimodalSPCScenario",
+    "PointCloudScenario",
     "RAGStoresScenario",
     "ReliabilityScenario",
     "SCADAScenario",
+    "VisionScenario",
     "get_scenario",
     "narrate",
 ]
