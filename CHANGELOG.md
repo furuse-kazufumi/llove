@@ -5,6 +5,30 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — F20 Command Palette dispatch core (推奨順 D 完了, 2026-05-10)
+
+- **D. F20 Command Palette 最小骨組み** (`llove/term/`):
+  - `Command` / `CommandResult` / `CommandContext` / `CommandRegistry`
+    + `parse_line` (Vim ex 風 `:` 接頭辞 + shlex 分割) +
+    `dispatch` (alias / macro 入れ子 5 段防止) + `DEFAULT_REGISTRY` +
+    `register_command` (F20(f) 動的追加).
+  - ビルトイン **11 種** (F20(b)): `:help` `:identity` `:layout`
+    `:demo` `:play` `:open` `:peer` `:set` `:get` `:alias` `:macro`.
+    副作用は `ctx.hooks` 経由で `apply_layout` / `start_demo` /
+    `start_game` / `open_uri` / `peer_call` / `identity_did` を後段配線
+    可能 (F20(i) 未配線時は表示のみで fail-closed).
+  - 未知コマンドは difflib で似た名前を `suggested` に提案 (F20(i)).
+  - UI (Textual `Input` widget, F20(c)③) は別段階で追加予定. このコアは
+    UI 非依存・純粋関数で完結.
+  - 全 39 件 PASS — parse_line / Registry / dispatch / 11 ビルトイン
+    / hook callable 配線 / alias 循環防止. ruff / bandit クリーン.
+
+### Fixed — test_browser PIL import (2026-05-10)
+
+- `pytest.importorskip("PIL")` の戻り値に `PIL.Image` 属性が無い問題
+  (Python 3.12+ で `PIL.Image` がサブモジュール扱い) を `importorskip
+  ("PIL.Image")` + `from PIL import Image` 形に変更.
+
 ### Added — F17 WindowManager / F21 typing / F16 chess (推奨順 A→B→C 完了)
 
 - **A. F17 WindowManager 最小骨組み** (`llove/window/`):
