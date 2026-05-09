@@ -7,13 +7,13 @@ to JSON Lines straightforward.
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
 
-class EventKind(str, Enum):
+class EventKind(StrEnum):
     """The kind of event flowing through the pipeline."""
 
     SENSOR = "sensor"
