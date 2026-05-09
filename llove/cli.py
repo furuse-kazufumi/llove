@@ -23,7 +23,7 @@ def main() -> None:  # pragma: no cover — Click dispatch
     pass
 
 
-@main.command(help="Run the synthetic 30-second demo (works offline).")
+@main.command(help="Run an interactive demo (works offline).")
 @click.option(
     "--seed",
     type=int,
@@ -32,12 +32,37 @@ def main() -> None:  # pragma: no cover — Click dispatch
     help="Random seed; pass 0 for non-deterministic.",
 )
 @click.option("--tick", type=float, default=0.1, show_default=True, help="Seconds between events.")
-def demo(seed: int, tick: float) -> None:
+@click.option(
+    "--scenario",
+    "scenario_name",
+    default=None,
+    help="Scenario name (run with --list to see options). Omit to pick interactively.",
+)
+@click.option("--list", "list_only", is_flag=True, help="List available scenarios and exit.")
+def demo(seed: int, tick: float, scenario_name: str | None, list_only: bool) -> None:
     from llove.app import LoveApp
+    from llove.demo.scenarios import SCENARIOS, get_scenario
     from llove.sources.mock import MockSource
 
-    source = MockSource(seed=seed if seed != 0 else None, tick_seconds=tick)
-    LoveApp(source).run()
+    if list_only:
+        click.echo("Available scenarios:")
+        for key, cls in SCENARIOS.items():
+            click.echo(f"  {key:12}  {cls.title}")
+        click.echo("\nRun: llove demo --scenario <name>")
+        return
+
+    if scenario_name is None:
+        # No scenario chosen — run the original mixed-stream demo.
+        source = MockSource(seed=seed if seed != 0 else None, tick_seconds=tick)
+        LoveApp(source).run()
+        return
+
+    try:
+        scenario = get_scenario(scenario_name)
+    except ValueError as exc:
+        click.echo(str(exc), err=True)
+        sys.exit(2)
+    LoveApp(scenario, with_narration=True).run()
 
 
 @main.command(help="Tail a JSON Lines file as a live event stream.")
