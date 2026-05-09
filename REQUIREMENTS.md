@@ -109,6 +109,35 @@ Claude HTML Artifacts のように、**自己完結・共有可能・インタ�
 
 ---
 
+## 5.5 LLMesh 機能カバレッジシナリオ（F8 詳細）
+
+llove は LLMesh のほぼ全機能を **オフライン合成データで** 体験できるシナリオを揃える。各シナリオは決定論的（seed 固定）、完全にネットワーク不要。
+
+| ID | シナリオ名 | カバーする LLMesh 機能 | 体験できること |
+|---|---|---|---|
+| S1 | `firewall` | `PromptFirewall` 4 層 (L0/L1/L1.5/L2) | 12 サンプル prompt が各層で BLOCK / SUMMARIZE / ALLOW される様子 |
+| S2 | `scada` | `ExplainedCUSUM` + `LLMExplainer` | センサーが正常→異常→復帰し、alarm 時に LLM が原因仮説を Markdown で吐く |
+| S3 | `multimodal` | `UnifiedSPC` + `VLMFeatureExtractor` | 数値センサーと画像 caption の 2 系統が時刻同期して結合 SPC 判定 |
+| S4 | `rag` | RAG 3 ストア (Numpy / SQLite / LSH ANN) | 同一クエリを 3 ストアで検索、レイテンシ + recall@10 を比較表示 |
+| S5 | `backends` | LLM backend ABC (Ollama / OpenAI / Anthropic) | 同一プロンプトを 3 backend に投げた風の比較（tokens / latency / cost） |
+| S6 | `audit` | `AuditTrail` HMAC chain | エントリ追加 → 改ざん → `verify_chain()` が検知する流れ |
+| S7 | `reliability` | `MessageAssembler` + `ChunkSender` + `WatchdogTimer` | パケット損失あり通信での ACK / RETRANSMIT / TTL 期限切れの動き |
+
+実装は `llove/demo/scenarios/` 配下に各シナリオ 1 ファイル。共通インタフェースは `DemoScenario` ABC で `name`, `title`, `description`, `events()` を要求する。
+
+### シナリオ起動方法
+
+```bash
+llove demo                       # メニューで対話的に選ぶ
+llove demo --list                # 一覧表示
+llove demo --scenario firewall   # 直接起動
+llove demo --scenario rag --seed 99
+```
+
+実行中は **narration pane** が画面下部に常駐し、各イベントに紐づく解説を Markdown 風に流す。
+
+---
+
 ## 6. スコープ外（v1.0 までやらない）
 
 - 書き込み操作（PLC の制御、LLM への能動的プロンプト）— 観察と表示に専念
