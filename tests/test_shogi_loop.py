@@ -11,7 +11,18 @@ import pytest
 shogi_lib = pytest.importorskip("shogi")
 
 from llove.events import EventKind
-from llove.shogi import make_player, parse_provider_spec, run_game
+from llove.shogi import parse_provider_spec, run_game
+from llove.shogi.players.mock import MockPlayer
+
+
+def make_player(spec: str, *, side: str) -> MockPlayer:
+    """Test-local factory: like ``llove.shogi.make_player`` but force
+    ``thinking_ms_override=0`` so the demo replay completes in milliseconds
+    instead of multiple minutes of real-time sleep."""
+    _, _, model = spec.partition(":")
+    if not model:
+        model = "script"
+    return MockPlayer(model=model, side=side, thinking_ms_override=0)
 from llove.shogi.engine import (
     TERM_CHECKMATE,
     TERM_MAX_PLY,
