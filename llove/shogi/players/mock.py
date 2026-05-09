@@ -41,7 +41,13 @@ def _load_demo_script() -> list[tuple[str, int, str]]:
 class MockPlayer(Player):
     """Deterministic player. ``model`` selects the variant."""
 
-    def __init__(self, *, model: str = "script", side: str = "sente") -> None:
+    def __init__(
+        self,
+        *,
+        model: str = "script",
+        side: str = "sente",
+        thinking_ms_override: int | None = None,
+    ) -> None:
         # Subset of legal model strings — guards against typos like ``mock:scrpt``.
         if model not in ("script", "illegal", "resign"):
             raise ValueError(
@@ -52,6 +58,10 @@ class MockPlayer(Player):
         self.model = model
         self.name = f"mock:{model} ({side})"
         self._side = side
+        # When set, every move's ``thinking_ms`` is overridden to this value.
+        # Tests pass ``thinking_ms_override=0`` so the demo replay finishes in
+        # milliseconds instead of multiple minutes of real-time sleep.
+        self._thinking_ms_override = thinking_ms_override
         # Index into the demo script for the ``script`` variant.
         self._cursor = 0
         self._script: list[tuple[str, int, str]] | None = None
