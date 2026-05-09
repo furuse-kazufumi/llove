@@ -129,9 +129,36 @@ class LoveApp(App):
                 continue
 
     def action_reset(self) -> None:
+        # Clear internal state on every view that holds one, then nudge each
+        # widget to repaint with its now-empty content so the user actually
+        # sees the reset on screen.
         for v in self._views:
             if hasattr(v, "_rows"):
                 v._rows.clear()
+            if hasattr(v, "_alarms"):
+                v._alarms.clear()
+            if hasattr(v, "_entries"):
+                v._entries.clear()
+            if hasattr(v, "_values"):
+                v._values.clear()
+            if hasattr(v, "_count"):
+                v._count = 0
+            if hasattr(v, "_alarm_count"):
+                v._alarm_count = 0
+            if hasattr(v, "_beats"):
+                v._beats = 0
+            if hasattr(v, "_counts") and isinstance(v._counts, dict):
+                for k in list(v._counts):
+                    v._counts[k] = 0
+            # Force a redraw of empty state.
+            if hasattr(v, "update"):
+                empty = getattr(v, "_initial", None)
+                if empty is None:
+                    empty = "(reset)"
+                try:
+                    v.update(empty)
+                except Exception:  # nosec B110 — fail-closed: a broken redraw must not kill the app.
+                    continue
 
     def action_toggle_pause(self) -> None:
         self._paused = not self._paused
