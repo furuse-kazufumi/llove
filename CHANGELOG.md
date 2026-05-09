@@ -5,41 +5,96 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
-### Added
+### Added — `shogi` scenario (MVP1 complete)
+- 17th demo scenario (`llove demo --scenario shogi`). Two LLMs replay a
+  scripted 20-half-move game (Yagura opening + 2-file / 8-file pawn
+  trades) on a shared 9x9 board. Designed as the prototype for MVP2's
+  real-LLM duel.
+- **Kanji pieces with side colouring** — sente in default colour, gote
+  in `[bright_red]`. Same glyph for both sides except the king:
+  traditional Shogi distinction `先手 = 玉` / `後手 = 王`.
+- **Captured-piece hands** — header above the board shows gote's
+  captured hand, footer below shows sente's. Real captures fire during
+  the mid-game extension so the rendering is exercised, not just
+  decorative.
+- **Traditional kifu in the audit pane** — moves render as
+  `▲７六歩 (2.4秒)` / `△３四歩 (1.8秒)`. Per-move thinking time is
+  carried in the Event payload (`thinking_ms`) and surfaces in the
+  audit line and the JSONL log.
+- **Player identity line** — intro narration and the first audit entry
+  state who is playing whom (currently `LLM-A (mock · MVP1)` vs
+  `LLM-B (mock · MVP1)`; MVP2 will fill these from the actual model
+  handles).
+- **Half-move board updates** — narration pane re-renders after every
+  ply, like a real shogi broadcast.
+- Unit tests in `tests/test_shogi.py` cover `_apply` capture
+  bookkeeping, `_format_hand` ordering, `_usi_to_kifu` variants
+  (promotion / sub-second timing / 王・玉 split), and an integration
+  test that asserts the default 20-move script actually produces
+  captured pieces on both sides.
+
+### Added — engine plumbing
 - **`mindmap` scenario** — LLM expands a seed query (`What is LLMesh?`)
-  into a knowledge tree via BFS. Each node is emitted as a TRACE_SPAN;
-  when tree breadth crosses 12 an SPC alarm fires. Final tree renders
-  as a Unicode-tree outline in the narration pane.
+  into a knowledge tree via BFS. SPC alarm on breadth runaway.
 - **`coin_toss` scenario** — entry-level student demo: 50 tosses of an
-  early-biased coin, watch the heads ratio settle near 0.5 (Law of
-  Large Numbers). Bilingual narration with mile-marker comments.
-- **Per-scenario pane title overrides** — `DemoScenario` now exposes
+  early-biased coin → Law of Large Numbers settling near 0.5.
+- **Per-scenario pane title overrides** — `DemoScenario` exposes
   `sensor_pane_title_key` / `spc_pane_title_key` / `audit_pane_title_key`
-  / `narration_pane_title_key`. `LoveApp.on_mount` resolves any set keys
-  through the i18n catalog and rewrites the matching pane's
-  `border_title`, so non-LLMesh-flavoured demos can read naturally
-  (e.g. coin_toss now shows "🪙 Toss outcomes" instead of
-  "📡 SensorEvent stream").
+  / `narration_pane_title_key`. `LoveApp.on_mount` resolves them through
+  the i18n catalog and rewrites each pane's `border_title`, so
+  non-LLMesh-flavoured demos read naturally (coin_toss shows
+  "🪙 Toss outcomes"; shogi shows "♟ 盤面" / "📋 棋譜" / "📊 評価" /
+  "💬 解説").
+- **Per-scenario layout overrides** — `DemoScenario` now also exposes
+  `narration_pane_height` / `narration_max_entries` / `audit_pane_height`
+  / `audit_max_entries`. shogi uses these to grow the board narration
+  to 55% of the window with `max_entries=1` (pinned to the latest
+  position) and the kifu pane to 32% with 30 lines of scrollback.
+- **AuditLogView display override** — `payload['display']` (when
+  present) replaces the default `Event.short()` line. shogi uses this
+  to show the kifu string without changing the audit format for any
+  other scenario.
+- **NarrationView Rich-markup parsing** — feed runs the rendered string
+  through `Text.from_markup` so colour tags (`[bright_red]` etc.) make
+  it through to the SVG export instead of getting collapsed into the
+  default-colour class. `narrate(allow_rich=True)` lets a scenario opt
+  out of the default `[` escape.
+- **Reset = "play from ply 1"** — pressing `r` on a `DemoScenario` now
+  cancels the consume task, clears the views, re-instantiates the
+  scenario, truncates any active event log, and starts a fresh consume
+  task. Arbitrary `DataSource` subclasses still get the old "views
+  only" reset so a JSONL tail-follow doesn't restart the file from
+  line 1.
+- **`--log <path>` JSONL event log** — every dispatched Event is
+  appended as one JSON line to the path. `llove tail` can replay it.
+  For `--scenario shogi` the log path is auto-assigned to
+  `out/shogi/shogi-<UTC timestamp>.jsonl` so you don't have to remember
+  the flag (explicit `--log` still wins).
 - **`scripts/snapshot_scenario.py`** — Pilot-driven SVG snapshot tool
   for reviewing TUI presentation quality without launching a real
   terminal. Patches in a CJK-aware monospace font fallback chain
   (`MS Gothic` / `BIZ UDGothic` / `Noto Sans Mono CJK JP` / …) and
   injects `lengthAdjust="spacingAndGlyphs"` on every `<text>` so
-  Japanese glyphs cannot overlap when a viewer falls back to a
-  proportional font.
+  Japanese glyphs can't overlap when the viewer picks a proportional
+  fallback. `scripts/_inspect_shogi.py` is the matching diagnostic.
 
 ### Changed
-- **`cost` scenario** — also yields a `daily_cost_usd` SENSOR event
-  per LLM call so the SensorStream pane displays a clear running total
+- **`cost` scenario** — also yields a `daily_cost_usd` SENSOR event per
+  LLM call so the SensorStream pane displays a clear running total
   alongside the LLM_CALL audit entries (was: SensorStream stayed empty).
+- **i18n header** — `ui.pane.sensor_stream.header` swapped
+  `sensor` / `センサー` → `metric` / `指標` so non-LLMesh demos read
+  naturally.
 
 ### Process
-- Per [feedback_scenario_iterative]: from now on, each new scenario must
-  pass real-terminal (or Pilot SVG) review before its release commit,
-  not just the smoke test.
-- New [REQUIREMENTS](REQUIREMENTS.md) **F9** (per-scenario quality bar),
-  **F11** (student-friendly demos), **F12** (`shogi` two-LLM + human
-  duel scenario, planned in 4 MVPs); see ROADMAP.md "v0.2.x" section.
+- Per [feedback_scenario_iterative]: each new scenario must pass
+  real-terminal (or Pilot SVG) review before its release commit, not
+  just the smoke test.
+- New [REQUIREMENTS](REQUIREMENTS.md) **F9** (per-scenario quality
+  bar), **F11** (student-friendly demos), **F12** (`shogi` 4-MVP plan,
+  now staged as **MVP2a / MVP2b / MVP3 / MVP4** — see
+  [ROADMAP.md](ROADMAP.md)), **F13** (webcam + image-LLM demo),
+  **F14** (mic + voice-LLM demo).
 
 ## [0.2.2] - 2026-05-09
 

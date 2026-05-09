@@ -87,16 +87,39 @@
       LLMesh 機能学習の前段としても使える「動かして遊べる」レベル。
       - [x] coin_toss (v0.2.x ローカル) — pane title override 機構も同時導入
 
-- [ ] **対局シナリオ `shogi`** (REQUIREMENTS F12) — llove で最初の双方向シナリオ。
-      段階実装:
-      - [ ] **MVP1**: scripted 棋譜（実 LLM なし）。`python-shogi` で 9x9 ASCII 盤面・
-            持ち駒・棋譜をペインに流す。Sensor=mock 評価値、SPC=mock 形勢逆転。
-            既存量産シナリオと同じ「眺める」モードで動作確認。
-      - [ ] **MVP2**: 実 LLM 接続（Anthropic / OpenAI 各 1 体、`[llmesh]` extras 経由）。
-            合法手チェック+リトライ。10 手程度の実対局。
-      - [ ] **MVP3**: 人間対戦モード `llove play shogi --human-vs-llm`。キーボード入力、
-            合法手 highlight、投了。
-      - [ ] **MVP4**: Qt viewer (`tools/qt_viewer/shogi_viewer.py`) で本物の駒表示。
+- [x] **対局シナリオ `shogi` MVP1** (REQUIREMENTS F12) — scripted 20 半手 +
+      漢字駒（先手玉 / 後手王）+ `[bright_red]` 後手色 + 持ち駒上下表示 +
+      `▲７六歩 (2.4秒)` 形式の棋譜 + 半手ごと盤面更新 + 自動 JSONL ログ
+      (`out/shogi/shogi-<ts>.jsonl`) + Reset で対局やり直し（ログも作り直し）+
+      先後 LLM 名表示 + ユニットテスト (`tests/test_shogi.py`)。
+
+- [ ] **対局シナリオ `shogi` MVP2a** — *最小の実対局ループ*。
+      - [ ] `[shogi]` extras: `python-shogi` (GPL-3.0、本体 MIT は extras 経由で隔離)
+      - [ ] 合法手チェッカ統合 — 駒の動き / 二歩 / 王手放置 / 行き所のない駒 / 持ち駒打ち
+      - [ ] LLM プロバイダ抽象化 (`llove/shogi/players/`):
+            - `mock` (scripted、MVP1 互換)
+            - `anthropic` (Claude — `anthropic` SDK)
+            - `ollama` (**ローカル LLM**、Llama 3 / Qwen / DeepSeek-R1 等、`httpx` で Ollama HTTP API)
+      - [ ] CLI: `llove play shogi --sente <provider:model> --gote <provider:model>`
+            例: `llove play shogi --sente anthropic:claude-haiku-4-5 --gote ollama:llama3:70b`
+      - [ ] ゲームループ — 違法手 3 回で投了、詰み / 投了 / 千日手で終局
+      - [ ] system prompt を locale 別 TOML に外出し
+      - [ ] 既存 `--log` JSONL に対局全体を継続記録
+
+- [ ] **対局シナリオ `shogi` MVP2b** — *プロバイダ拡張 + バッチ評価*。
+      - [ ] `openai` / `llamacpp` / `lmstudio` プロバイダ
+      - [ ] バッチ実行 `--games N` で AvsB の勝率比較
+      - [ ] KIF 形式 export `out/shogi/<ts>.kif`（標準棋譜フォーマット）
+
+- [ ] **対局シナリオ `shogi` MVP3** — *人間対戦モード*。
+      - [ ] `human` プロバイダ（キーボード入力、合法手 highlight）
+      - [ ] 投了 / 待った / 局面コピー操作
+      - [ ] ボタン拡張（投了・次手）
+
+- [ ] **対局シナリオ `shogi` MVP4** — *Qt 盤面ビューア*。
+      - [ ] `tools/qt_viewer/shogi_viewer.py` で本物の駒画像表示
+      - [ ] 後手駒は 180° 回転表示
+      - [ ] 棋譜送り戻し UI、SFEN コピー
 
 - [ ] **ウェブカメラ + 画像 LLM デモ** (REQUIREMENTS F13) — `face_landmarks`。
       `[webcam]` extras (opencv-python + mediapipe)。TUI で ASCII 顔 + landmark、

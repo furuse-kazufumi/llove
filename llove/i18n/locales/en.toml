@@ -253,7 +253,7 @@ takeaway = "**{heads} heads, {tails} tails** — final ratio **{ratio}**. The La
 title = "Shogi — two LLMs replay a 14-move opening (MVP1, scripted)"
 description = "MVP1: scripted opening on a shared 9x9 board. Each ply lands an eval score in the SPC pane; large eval swings raise an alarm. MVP2 will swap the script for real LLM calls."
 intro_title = "Scenario: Shogi (MVP1)"
-intro = "**Two-LLM Shogi (MVP1).** No real LLM yet — we replay a 14-half-move opening so you can see how the four panes carry the game state. The board lives in the *Board* pane; eval drifts in the *Eval* pane; every move is logged as USI in *Moves*; LLM-style commentary lands in *Commentary*."
+intro = "**Two-LLM Shogi (MVP1).** Players: ☗ sente = **{sente}** vs ☖ gote = **{gote}**. No real LLM yet — we replay a 14-half-move opening so you can see how the four panes carry the game state. The board lives in the *Board* pane; eval drifts in the *Eval* pane; every move is logged as USI in *Moves*; LLM-style commentary lands in *Commentary*."
 sensor_pane_title = "♟ Board (every ply)  · 📖 read-only"
 spc_pane_title = "📊 Eval — sente lead (positive)  · 📖 read-only"
 audit_pane_title = "📋 棋譜 (kifu) — ▲ sente △ gote  · 📖 read-only"

@@ -37,6 +37,16 @@ from llove.i18n import t
 # rendering; a kanji rendering can come later in MVP4.
 #   P = pawn, L = lance, N = knight, S = silver, G = gold,
 #   B = bishop, R = rook, K = king
+# Player identities. MVP1 is scripted so the model names are mock; MVP2
+# will replace these at runtime with the actual Anthropic / OpenAI handles
+# the user wires in. Surfaced in the intro narration and the audit header
+# so the user can see who is playing whom.
+_PLAYERS: dict[str, str] = {
+    "sente": "LLM-A (mock · MVP1)",
+    "gote": "LLM-B (mock · MVP1)",
+}
+
+
 _INITIAL_SFEN_BOARD = [
     list("lnsgkgsnl"),
     [".", "r", ".", ".", ".", ".", ".", "b", "."],
@@ -70,6 +80,17 @@ _MOVES: list[dict[str, Any]] = [
     {"usi": "7c7d", "side": "gote",  "comment": "7c→7d: gote opens a path for their bishop.",     "eval": +25, "thinking_ms": 6100},
     {"usi": "3i4h", "side": "sente", "comment": "3i→4h: silver lifts toward the Yagura.",         "eval": +85, "thinking_ms": 9400},
     {"usi": "2b3c", "side": "gote",  "comment": "2b→3c: gote rerouting bishop. Sente has the lead but the position stays playable.", "eval": +45, "thinking_ms": 8200},
+    # Mid-game starts here — the Yagura buildup tilts into open trades so
+    # the captured-pieces panel actually fills with content. The moves
+    # come straight from a "2-suji push" (相掛かり風 2 筋交換) sequence:
+    # sente trades pawns on the 2-file, gote retaliates on the 8-file,
+    # both sides end up with pawns in hand.
+    {"usi": "2e2d", "side": "sente", "comment": "▲2四歩: lance the 2-file pawn forward; opens the trade.", "eval": +110, "thinking_ms": 7100},
+    {"usi": "2c2d", "side": "gote",  "comment": "△同歩: gote takes back with the rank-c pawn. Sente loses a pawn, gote captures one.", "eval":  +45, "thinking_ms": 4300},
+    {"usi": "2h2d", "side": "sente", "comment": "▲同飛: rook lifts to 2d and recaptures. Sente now holds a pawn in hand.",            "eval":  +95, "thinking_ms": 6800},
+    {"usi": "8e8f", "side": "gote",  "comment": "△8六歩: gote opens the 8-file trade.",                                                "eval":  +30, "thinking_ms": 5400},
+    {"usi": "8g8f", "side": "sente", "comment": "▲同歩: sente recaptures with the 8g pawn — also picks up a pawn for the hand.",      "eval":  +75, "thinking_ms": 5900},
+    {"usi": "8b8f", "side": "gote",  "comment": "△同飛: gote rook drops to 8f and takes; both sides now hold pawns.",                  "eval":  +25, "thinking_ms": 7200},
 ]
 
 # Eval threshold for the SPC alarm — when |eval| swings by this much in a
@@ -112,7 +133,11 @@ def _usi_to_kifu(
     pane reads like a real broadcast (``▲７六歩 (2.4秒)``).
     """
     base = piece_before.lstrip("+").upper()
-    kanji = _PIECE_KANJI.get(base, "?")
+    if base == "K" and not piece_before.startswith("+"):
+        # Side-aware king glyph: ▲ → 玉, △ → 王.
+        kanji = _king_kanji(is_gote=(side == "gote"))
+    else:
+        kanji = _PIECE_KANJI.get(base, "?")
     file_full = _FILES_FULLWIDTH[int(usi[2]) - 1]
     rank_kanji = _RANKS_KANJI["abcdefghi".index(usi[3])]
     side_mark = "▲" if side == "sente" else "△"
@@ -143,6 +168,15 @@ _PIECE_KANJI: dict[str, str] = {
 }
 
 
+def _king_kanji(*, is_gote: bool) -> str:
+    """Traditional Shogi convention: sente (above-rank) plays 玉将 ("玉"),
+    gote (below-rank) plays 王将 ("王"). Same piece, different glyph —
+    showing both makes the side instantly readable in the kifu pane and on
+    the board, even if the colour markup gets stripped (e.g. plain text
+    log file)."""
+    return "王" if is_gote else "玉"
+
+
 def _piece_to_kanji(cell: str) -> str:
     """Map a board cell to a Rich-markup kanji glyph.
 
@@ -168,8 +202,12 @@ def _piece_to_kanji(cell: str) -> str:
     promoted = cell.startswith("+")
     base = cell[1:] if promoted else cell
     is_gote = base.islower()
-    key = ("+" + base.upper()) if promoted else base.upper()
-    glyph = _PIECE_KANJI.get(key, "？")
+    if not promoted and base.upper() == "K":
+        # 先手玉 / 後手王 — traditional Shogi distinction.
+        glyph = _king_kanji(is_gote=is_gote)
+    else:
+        key = ("+" + base.upper()) if promoted else base.upper()
+        glyph = _PIECE_KANJI.get(key, "？")
     colour = "bright_red" if is_gote else "default"
     return f"[{colour}]{glyph}[/{colour}]"
 
@@ -187,7 +225,7 @@ def _format_hand(hand: dict[str, int], side: str) -> str:
             if not n:
                 continue
             kanji = _PIECE_KANJI.get(k, "?")
-            parts.append(f"{kanji}×{n}" if n > 1 else kanji)
+            parts.append(f"{kanji} x{n}" if n > 1 else kanji)
         body = " ".join(parts) if parts else "なし"
     label = "[bright_red]☖ 後手[/bright_red]" if side == "gote" else "☗ 先手"
     return f"  {label} の持ち駒: {body}"
@@ -242,7 +280,26 @@ class ShogiScenario(DemoScenario):
     audit_max_entries = 30
 
     async def events(self) -> AsyncIterator[Event]:
-        yield narrate_key("scenario.shogi.intro", title_key="scenario.shogi.intro_title")
+        yield narrate_key(
+            "scenario.shogi.intro",
+            title_key="scenario.shogi.intro_title",
+            sente=_PLAYERS["sente"],
+            gote=_PLAYERS["gote"],
+        )
+
+        # Emit a 'shogi.game_start' audit entry so the audit pane (and the
+        # JSONL log) record who is playing whom. The display string lands at
+        # the top of the kifu pane and reads naturally next to the moves.
+        yield Event(
+            kind=EventKind.AUDIT,
+            source_id="judge",
+            payload={
+                "event": "shogi.game_start",
+                "sente": _PLAYERS["sente"],
+                "gote": _PLAYERS["gote"],
+                "display": f"☗ 先手: {_PLAYERS['sente']}  ☖ 後手: {_PLAYERS['gote']}",
+            },
+        )
 
         board = [row[:] for row in _INITIAL_SFEN_BOARD]
         sente_hand: dict[str, int] = {}

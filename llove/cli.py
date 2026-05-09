@@ -64,6 +64,8 @@ def demo(
     list_only: bool,
     log_path: Path | None,
 ) -> None:
+    from datetime import UTC, datetime
+
     from llove.app import LoveApp
     from llove.demo.scenarios import SCENARIOS, get_scenario
     from llove.sources.mock import MockSource
@@ -82,6 +84,16 @@ def demo(
         source = MockSource(seed=seed if seed != 0 else None, tick_seconds=tick)
         LoveApp(source, log_path=log_path).run()
         return
+
+    # For scenarios that produce a record worth keeping (e.g. a shogi game
+    # log = kifu), write a JSONL by default into out/<scenario>/<timestamp>
+    # so users don't have to remember --log every run. Explicit --log still
+    # wins.
+    auto_log_scenarios = {"shogi"}
+    if log_path is None and scenario_name in auto_log_scenarios:
+        ts = datetime.now(tz=UTC).strftime("%Y%m%d-%H%M%S")
+        log_path = Path("out") / scenario_name / f"{scenario_name}-{ts}.jsonl"
+        click.echo(f"Logging this run to {log_path}", err=True)
 
     try:
         scenario = get_scenario(scenario_name)

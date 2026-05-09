@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 from pathlib import Path
 from typing import TextIO
 
@@ -244,6 +245,15 @@ class LoveApp(App):
         if hasattr(self, "_btn_pause"):
             self._btn_pause.label = t("ui.button.pause")
         if isinstance(self._source, DemoScenario):
+            # Truncate the event log (if any) so the new run starts a fresh
+            # record. Without this, Reset would keep appending the second
+            # game underneath the first in the same .jsonl file — confusing
+            # for shogi where the file is meant to be the kifu of *one* game.
+            if self._log_file is not None and self._log_path is not None:
+                # fail-closed: a broken log close must not kill reset.
+                with contextlib.suppress(Exception):
+                    self._log_file.close()
+                self._log_file = self._log_path.open("w", encoding="utf-8")
             self._source = self._source.__class__()
             self._task = asyncio.create_task(self._consume())
 
