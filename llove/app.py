@@ -192,6 +192,28 @@ class LoveApp(App):
         except asyncio.CancelledError:
             return
 
+    def _emit_identity_event(self) -> None:
+        """First event of every run: the local llmesh node identity.
+
+        We always fire something — either the resolved did:key, or a friendly
+        "install llmesh-mcp to get one" line. That way the audit pane and the
+        JSONL log both *start* with an identity story, no matter the scenario.
+        """
+        identity = load_local_identity()
+        if identity is not None:
+            payload: dict[str, object] = dict(identity.to_audit_payload())
+        else:
+            payload = {
+                "event": "llove.identity.missing",
+                "did": None,
+                "display": t("ui.identity.missing"),
+            }
+        self._dispatch(Event(
+            kind=EventKind.AUDIT,
+            source_id="llove.identity",
+            payload=payload,
+        ))
+
     def _dispatch(self, event: Event) -> None:
         if self._log_file is not None:
             try:
