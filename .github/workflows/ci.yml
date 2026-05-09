@@ -57,7 +57,7 @@ jobs:
 
       - name: Upload HTML snapshot
         if: always() && matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: llove-snapshot
           path: snapshot.html
