@@ -181,6 +181,51 @@
 
 ---
 
+## v0.6.0 — Browser-grade Data Display *(F15, 2026-05-09 追加)*
+
+**ゴール:** llove を「ターミナル版 Artifact」から「ターミナル版ブラウザ」に
+広げる。HTML ブラウザに匹敵する多モーダル表示力をもたせ、LLMesh のあらゆる
+ストリーム（センサー / 画像 / PDF / 表 / 地図 / 3D / 音声 / 動画）を
+単一 TUI で見られるようにする。各モーダルはコア依存を増やさず extras 経由。
+
+### 入る機能 (F15 (a)〜(n) を順に刻む)
+
+- [ ] **画像**: Sixel / Kitty / iTerm2 graphics 自動検出 + ASCII フォールバック
+      (`[browser-image]` extras: `pillow`, `term-image` or `chafa` ラッパ)
+- [ ] **PDF**: ページレンダリング → Sixel または Qt viewer
+      (`[browser-pdf]`: `pypdf`/`pymupdf`)
+- [ ] **HTML / Markdown**: Rich ベースの整形表示拡張（NarrationView の派生）
+- [ ] **DataTable**: Textual の対話的 DataTable で CSV/JSONL/SQLite を
+      ソート・フィルタ可能に
+- [ ] **グラフ拡張**: 折れ線・棒・散布・ヒートマップ
+      (`[browser-charts]`: `textual-plotext` 既存 + 新拡張)
+- [ ] **地理データ**: 緯度経度を terminal-aware ASCII map にプロット
+      (`[browser-geo]`: natural earth tile 化、または Qt viewer)
+- [ ] **3D**: 既存 `pointcloud` の延長 — 点群・メッシュを Sixel + Qt viewer
+- [ ] **音声波形 / spectrogram**: F14 と統合
+- [ ] **動画**: フレーム ASCII / Sixel ストリーム（Kitty graphics 推奨）
+- [ ] **JSON / YAML**: 折りたたみ可能なツリービュー
+- [ ] **新パネル種** `BrowserView`: `image://path`, `pdf://path`,
+      `geo://lat,lon`, `web://https://...`, `csv://path` などの URI ルーティング
+- [ ] **fail-closed**: viewer 未インストールでも ASCII フォールバック +
+      「`pip install llmesh-llove[browser-all]` で X が見えます」案内
+- [ ] **llmesh 統合**: `llove view --source llmesh+...` で LLMesh の
+      多モーダルストリームを **識別子・署名つき**で見られる
+      （Telnet を NetSurf / Firefox に育てるイメージ）
+
+### 受け入れ基準
+
+- 画像をインライン表示できる端末（Wezterm / Kitty / Konsole / iTerm2）
+  では実画像が見える。それ以外は ASCII でぼやけた縮小版が見える
+- PDF を開くと最初のページがインライン表示される
+- `llove view --source geo://35.68,139.76` で東京中心の ASCII 世界地図が
+  ピンとともに見える
+- 地理 / 画像 / PDF / 動画のいずれも、対応 extras 不在時は **クラッシュせず**
+  「ASCII フォールバック + インストール案内」を表示する
+- 既存 18 シナリオの動作は不変（regression なし）
+
+---
+
 ## v0.5.0 — Plugin Architecture
 
 **ゴール:** 他者が `llove-foo` を `pip install` するだけで View や Source が増える。
