@@ -5,6 +5,11 @@ title = "💗 llove"
 subtitle = "Made with llove — LLMesh をやさしく見守る"
 hint_bar = "[bold]↑ ボタン[/bold] = クリック可能なコントロール   ·   [bold]↓ パネル[/bold] = 表示専用のデータ表示   ·   キー: q 終了 · r リセット · space 一時停止 · h ヘルプ"
 
+[ui.identity]
+# llmesh の鍵が見つからなかったときの案内 — llove はそもそも LLMesh のためのウィンドウなので、
+# 「鍵が無い」状態は llmesh をインストールするきっかけとして見せる。
+missing = "🔑 このホストには llmesh の識別子がありません — [bold]pip install llmesh-mcp[/bold] で各実行に検証可能な did:key が付きます"
+
 [ui.button]
 pause = "⏸ 一時停止"
 resume = "▶ 再開"
