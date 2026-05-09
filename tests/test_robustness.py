@@ -20,7 +20,6 @@ from llove.views.narration import NarrationView
 from llove.views.sensor_stream import SensorStreamView
 from llove.views.spc_chart import SPCChartView
 
-
 # --------------------------------------------------------------------------
 # Views — extreme / malformed payloads
 # --------------------------------------------------------------------------
@@ -84,7 +83,10 @@ def test_narration_view_neutralises_user_supplied_rich_tags() -> None:
     payload = {"text": "[red]hostile[/red] **ok**", "title": "[bold]A[/bold]"}
     v.feed(Event(kind=EventKind.NARRATION, payload=payload))
     rendered = v.last_render
-    assert "[red]" not in rendered
+    # User-supplied [red] must be escaped to \[red] (no unescaped Rich tags).
+    assert r"\[red]" in rendered
+    assert r"\[bold]A\[/bold]" in rendered
+    # Our own bold conversion still works on **ok**.
     assert "[bold]ok[/bold]" in rendered
 
 
