@@ -15,12 +15,20 @@ from pathlib import Path
 import click
 
 from llove import __version__
+from llove.i18n import available_locales, set_locale
 
 
 @click.group(help="💗 llove — terminal Artifact for LLMesh data")
 @click.version_option(version=__version__, prog_name="llove")
-def main() -> None:  # pragma: no cover — Click dispatch
-    pass
+@click.option(
+    "--lang",
+    type=click.Choice(available_locales(), case_sensitive=False),
+    default=None,
+    help="UI language (defaults to LLOVE_LANG env or system locale; falls back to 'en').",
+)
+def main(lang: str | None) -> None:  # pragma: no cover — Click dispatch
+    if lang:
+        set_locale(lang)
 
 
 @main.command(help="Run an interactive demo (works offline).")
