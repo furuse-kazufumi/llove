@@ -10,7 +10,7 @@ extras, and keyboard-friendly by default.
 
 from __future__ import annotations
 
-__version__ = "0.2.2"
+__version__ = "0.3.0a1"
 
 from .events import Event, EventKind
 from .sources.base import DataSource
