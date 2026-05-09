@@ -8,6 +8,7 @@ viewer (tools/qt_viewer/pointcloud_viewer.py) can spin the cloud in 3D.
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
+from typing import Any
 
 from llove.demo.scenarios.base import DemoScenario, narrate, narrate_key
 from llove.events import Event, EventKind
