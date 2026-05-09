@@ -61,6 +61,12 @@ shogi = [
     # `pip install llmesh-llove[shogi]`.
     "python-shogi>=1.1",
 ]
+chess = [
+    # F16 multi-game arena: chess legality / mate / stalemate / en passant
+    # / castling / repetition. python-chess is MIT-licensed and the de-facto
+    # standard (14k★).
+    "chess>=1.11",
+]
 dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
