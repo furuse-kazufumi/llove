@@ -75,7 +75,12 @@ pip install "llove[plots,llmesh]"# textual-plotext のグラフ + LLMesh
 ```bash
 llove demo                       # 合成データでフル機能のデモ
 llove demo --tutorial            # 各ビューを順に解説しながら触る
+llove --lang ja demo --scenario scada   # UI を日本語で（v0.2.0+）
 ```
+
+### 多言語化 (i18n)
+
+UI は `--lang en` / `--lang ja` で切り替えられます（環境変数 `LLOVE_LANG=ja`、システムロケール自動検出にも対応）。新しい言語を足すには `llove/i18n/locales/<lang>.toml` を 1 つ追加するだけ。詳細は [`docs/i18n.md`](docs/i18n.md)。
 
 ### 3. 自分のデータを見る
 
