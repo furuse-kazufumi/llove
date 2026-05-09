@@ -33,7 +33,7 @@ class LoveApp(App):
     }
     """
 
-    BINDINGS = [
+    BINDINGS = [  # noqa: RUF012 — Textual reads BINDINGS as a class-level list, not per-instance.
         ("q", "quit", "Quit"),
         ("r", "reset", "Reset views"),
         ("space", "toggle_pause", "Pause/Resume"),
