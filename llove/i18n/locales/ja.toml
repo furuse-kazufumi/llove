@@ -13,7 +13,7 @@ help = "? ヘルプ"
 quit = "✕ 終了"
 
 [ui.pane.sensor_stream]
-title = "📡 センサーイベント・ストリーム  · 表示"
+title = "📡 センサーイベント・ストリーム  · 📖 読み取り専用"
 subtitle_init = "(データ待機中)"
 subtitle_active = "{count} 件 | 直近 {latest}"
 header = "時刻      センサー              値"
@@ -21,7 +21,7 @@ sparkline_label = "推移グラフ (直近 40 件):"
 empty = "(データはまだありません)"
 
 [ui.pane.spc_chart]
-title = "📊 SPC 管理図 — CUSUM 累積和  · 表示"
+title = "📊 SPC 管理図 — CUSUM 累積和  · 📖 読み取り専用"
 subtitle_init = "ドリフト監視中"
 subtitle_alarmed = "⚠ 警報 {count} 件"
 status_alarm = "[bold red]●[/bold red] 状態: 警報"
@@ -32,12 +32,12 @@ no_alarms = "  (警報なし)"
 as_of = "[dim]{ts} 時点[/dim]"
 
 [ui.pane.audit_log]
-title = "📋 監査ログ — audit / LLM / RAG イベント  · 表示"
+title = "📋 監査ログ — audit / LLM / RAG イベント  · 📖 読み取り専用"
 subtitle_init = "新しい順"
 empty = "(監査イベントはまだありません)"
 
 [ui.pane.narration]
-title = "💬 解説 — 何が起きているかを言葉で  · 表示"
+title = "💬 解説 — 何が起きているかを言葉で  · 📖 読み取り専用"
 subtitle_init = "(シナリオ解説)"
 subtitle_active = "場面 {beat} · {latest}"
 empty = "[dim](解説はまだありません — シナリオの開始を待っています)[/dim]"
