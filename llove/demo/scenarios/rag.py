@@ -1,20 +1,11 @@
-"""RAG stores scenario — compare Numpy / SQLite / LSH ANN backends.
-
-Synthetic only: we don't actually run a vector search. The numbers below come
-from the LLMesh PERFORMANCE.md doc and are presented to teach which store to
-pick at which scale.
-"""
+"""RAG stores scenario — compare Numpy / SQLite / LSH ANN backends."""
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
 
-from llove.demo.scenarios.base import DemoScenario, narrate
+from llove.demo.scenarios.base import DemoScenario, narrate, narrate_key
 from llove.events import Event, EventKind
-
-_INTRO = (
-    "**llmesh.rag** ships 3 stores. Same `Retriever` ABC, different scaling. "
-    "We replay the same query against each one."
-)
+from llove.i18n import t
 
 _STORES = [
     {
@@ -45,35 +36,31 @@ _QUERY = "Modbus replay attack mitigation in DNP3"
 
 class RAGStoresScenario(DemoScenario):
     name = "rag"
-    title = "RAG — three vector stores compared"
-    description = (
-        "Replay one query across NumpyVectorStore / SqliteVectorStore / LSHVectorStore "
-        "and compare latency vs recall."
-    )
+    i18n_key = "rag"
     default_pause = 0.5
 
     async def events(self) -> AsyncIterator[Event]:
-        yield narrate(_INTRO, title="Scenario: RAG stores")
-        yield narrate(f"query: `{_QUERY}`", title="Query")
+        yield narrate_key("scenario.rag.intro", title_key="scenario.rag.intro_title")
+        yield narrate(t("scenario.rag.query", q=_QUERY), title=t("scenario.rag.query_title"))
 
         for store in _STORES:
             yield narrate(
-                f"running **{store['name']}** ({store['scale']}) — {store['note']}",
-                title=store["name"],
+                t("scenario.rag.running", name=store["name"], scale=store["scale"], note=store["note"]),
+                title=str(store["name"]),
             )
             for i in range(3):
                 yield Event(
                     kind=EventKind.RAG_HIT,
-                    source_id=store["name"],
+                    source_id=str(store["name"]),
                     payload={
                         "score": round(0.92 - i * 0.04, 2),
                         "text": f"({store['name']}#{i + 1}) replay defenses for industrial protocols ...",
-                        "doc_id": f"doc-{store['name'][0].lower()}-{i + 1}",
+                        "doc_id": f"doc-{str(store['name'])[0].lower()}-{i + 1}",
                     },
                 )
             yield Event(
                 kind=EventKind.AUDIT,
-                source_id=store["name"],
+                source_id=str(store["name"]),
                 payload={
                     "event": "rag.search",
                     "store": store["name"],
@@ -83,8 +70,4 @@ class RAGStoresScenario(DemoScenario):
                 },
             )
 
-        yield narrate(
-            "**Pick by scale, not popularity.** Numpy for prototypes, SQLite for typical "
-            "production (≤ 10⁶), LSH ANN when you blow past a million documents.",
-            title="Take-away",
-        )
+        yield narrate_key("scenario.rag.takeaway", title_key="scenario.rag.takeaway_title")
