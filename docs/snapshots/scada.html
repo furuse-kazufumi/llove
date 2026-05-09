@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>llove snapshot (scenario://scada)</title>
+<style>
+  body { font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+          background: #0e1116; color: #e6edf3; margin: 0; padding: 24px; }
+  h1 { font-size: 18px; margin: 0 0 8px 0; }
+  .meta { color: #8b949e; font-size: 12px; margin-bottom: 16px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  td { padding: 4px 8px; border-bottom: 1px solid #21262d; vertical-align: top; }
+  tr.k-sensor td:nth-child(2) { color: #79c0ff; }
+  tr.k-spc_alarm td { color: #ff7b72; }
+  tr.k-audit td:nth-child(2) { color: #a5d6ff; }
+  tr.k-llm_call td:nth-child(2) { color: #d2a8ff; }
+  footer { color: #6e7681; font-size: 11px; margin-top: 24px; }
+</style>
+</head>
+<body>
+  <h1>💗 llove snapshot — llove snapshot (scenario://scada)</h1>
+  <div class="meta">94 events · sensor:80 · spc_alarm:3 · audit:4 · llm_call:1 · narration:6 · generated 2026-05-09 13:09:22</div>
+  <table>
+    <thead><tr><td>time</td><td>kind</td><td>detail</td></tr></thead>
+    <tbody>
+      <tr class="k-narration"><td>04:09:22</td><td>narration</td><td>text=**SCADA + ExplainedCUSUM**: a bearing temperature sensor will drift past its control limit. CUSUM detects the cumulative shift; the LLM explainer then attaches a likely cause., title=Scenario: SCADA</td></tr>
+<tr class="k-narration"><td>04:09:22</td><td>narration</td><td>text=Phase 1 — **normal**: reading hovers around 70 °C, title=Phase 1</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 69.94 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 69.93 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 69.96 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 70.28 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 69.95 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 69.4 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 70.13 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 69.89 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 69.91 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 70.05 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 70.09 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 70.47 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 70.26 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 70.04 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 69.7 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 69.59 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 70.1 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 70.52 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 70.02 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 69.96 (good)</td></tr>
+<tr class="k-narration"><td>04:09:22</td><td>narration</td><td>text=Phase 2 — **drift**: viscosity drops in `lubricant_flow_03`, bearing temp rises, title=Phase 2</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 70.21 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 69.67 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 70.38 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 70.95 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 71.35 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 71.15 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 71.65 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 71.85 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 72.31 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 71.8 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 72.73 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 72.14 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 71.95 (good)</td></tr>
+<tr class="k-spc_alarm"><td>04:09:22</td><td>spc_alarm</td><td>ALARM bearing_temp_07  cusum=12.9</td></tr>
+<tr class="k-audit"><td>04:09:22</td><td>audit</td><td>event=cusum.alarm, sensor_id=bearing_temp_07, cusum=12.9</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 73.01 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 73.13 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 74.1 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 74.27 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 73.76 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 74.84 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 74.35 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 74.97 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 75.13 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 75.55 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 76.08 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 76.26 (good)</td></tr>
+<tr class="k-spc_alarm"><td>04:09:22</td><td>spc_alarm</td><td>ALARM bearing_temp_07  cusum=62.3</td></tr>
+<tr class="k-audit"><td>04:09:22</td><td>audit</td><td>event=cusum.alarm, sensor_id=bearing_temp_07, cusum=62.3</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 76.39 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 76.76 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 76.94 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 76.75 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 76.96 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 77.31 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 77.95 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 77.9 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 79.18 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 78.17 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 78.31 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 79.31 (good)</td></tr>
+<tr class="k-spc_alarm"><td>04:09:22</td><td>spc_alarm</td><td>ALARM bearing_temp_07  cusum=148.3</td></tr>
+<tr class="k-audit"><td>04:09:22</td><td>audit</td><td>event=cusum.alarm, sensor_id=bearing_temp_07, cusum=148.3</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 79.82 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 79.7 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 80.08 (good)</td></tr>
+<tr class="k-narration"><td>04:09:22</td><td>narration</td><td>text=**LLM explainer** triggered — building incident report, title=LLM</td></tr>
+<tr class="k-llm_call"><td>04:09:22</td><td>llm_call</td><td>kind=incident_explanation, tokens=237, latency_ms=412, model=llama3.2, hypothesis=The cumulative drift began ~12 minutes ago, coinciding with a viscosity drop in lubricant_flow_03. Bearing wear or lubricant degradation is plausible. Recommend checking lubricant pressure and vibration spectrum.</td></tr>
+<tr class="k-audit"><td>04:09:22</td><td>audit</td><td>event=llm.complete, tokens=237, latency_ms=412</td></tr>
+<tr class="k-narration"><td>04:09:22</td><td>narration</td><td>text=Phase 3 — **recovery** after maintenance action, title=Phase 3</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 78.57 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 77.56 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 76.63 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 76.59 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 76.78 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 75.42 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 75.61 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 75.3 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 74.67 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 74.69 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 74.23 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 74.53 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 73.45 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 72.56 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 72.18 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 71.67 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 71.98 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 70.97 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 70.77 (good)</td></tr>
+<tr class="k-sensor"><td>04:09:22</td><td>sensor</td><td>bearing_temp_07 = 70.7 (good)</td></tr>
+<tr class="k-narration"><td>04:09:22</td><td>narration</td><td>text=ExplainedCUSUM = **CUSUMChart + LLMExplainer** glued together. Alarms fire on numerical drift; the LLM attaches a natural-language cause., title=Take-away</td></tr>
+    </tbody>
+  </table>
+  <footer>Made with <a style="color:#ff7b72" href="https://github.com/furuse-kazufumi/llove">llove</a>.</footer>
+</body>
+</html>
