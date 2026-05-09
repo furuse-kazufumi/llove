@@ -3,6 +3,66 @@
 All notable changes to **llove** are recorded here.
 This project follows [Semantic Versioning](https://semver.org).
 
+## [0.2.0] - 2026-05-09
+
+### Added
+- **Internationalisation (i18n)**: TOML-driven locale catalog under
+  `llove/i18n/locales/`. Ships `en` (default) + `ja`. Active locale chosen
+  from `--lang` flag, `LLOVE_LANG` env, system locale, fallback `en`.
+- `Translator` class + module-level `t()` and `set_locale()` helpers.
+- `--lang` flag on the CLI (`llove --lang ja demo --scenario scada`).
+- `docs/i18n.md` contributor guide.
+- Per-locale SVG snapshots: `docs/snapshots/{en,ja}/*.svg`.
+- **HelpScreen modal**: clicking `? Help` (or pressing `h`) opens a modal
+  with key bindings, button explanations, pane summary, and the
+  Footer-is-clickable tip. Prominent yellow line at the top:
+  *"Press ESC (or h / q / Close button) to return."*
+- **Read-only badge** on every pane: ` · 📖 read-only` /
+  ` · 📖 読み取り専用` so the bordered panes are not mistaken for
+  clickable controls.
+- **Hint bar** between buttons and panes:
+  *"↑ buttons = clickable controls · ↓ panes = read-only data displays"*.
+- **Click-feedback for control row** (Pause / Reset / Help / Quit) wired
+  to `on_button_pressed` so mouse and keyboard share the same actions.
+- **Pause button label flips** between `⏸ Pause` and `▶ Resume`.
+- **Counter subtitles** on every pane (event count / alarm count /
+  audit·llm·rag splits / scenario beat counter).
+- `SensorStreamView` now prepends a `time / sensor / value` column header
+  and labels the sparkline.
+
+### Fixed
+- **Help button** previously rang the bell only — now opens HelpScreen.
+- **Quit button** was a silent no-op (sync handler was discarding the
+  async coroutine returned by `App.action_quit`). Now uses a sync
+  `action_quit_now()` that calls `self.exit()` directly.
+- **Reset button** previously cleared internal state but never told the
+  widgets to redraw. Now also zeros per-view counters and calls
+  `view.update()` to repaint.
+- **NarrationView** title escaping: user-supplied `[` in title is now
+  escaped to `\[` so Rich tags from data cannot break out.
+- **SensorStreamView** drops NaN/Inf values (sparkline normalisation
+  used to crash on them).
+- **`temp` → `temperature` / `温度`** normalisation across narration
+  copy (the abbreviation was ambiguous as sample code).
+
+### Changed
+- Pane titles now end with `· 📖 read-only` (was `· view`).
+- `DemoScenario` resolves `title` / `description` lazily through i18n
+  (`scenario.<key>.title`) instead of class attributes, so locale
+  switching at runtime takes effect without re-instantiation.
+- Every shipping scenario now uses `narrate_key()` / `t()` instead of
+  hardcoded strings; all narration text lives in TOML.
+
+### Quality
+- Coverage 91.7%+ (CI threshold raised 70 → 80 in v0.1).
+- Stricter ruff ruleset (E/F/W/I/B/UP + SIM/RUF/PTH/PLE) — clean.
+- Bandit clean across all severities.
+- Hypothesis property-based tests (event roundtrip, JSONL fail-closed,
+  narration tag-injection safety, MockSource determinism).
+- Robustness tests for malformed input.
+- Textual `run_test()` pilot tests for LoveApp (boot, key bindings,
+  pause/resume, reset, quit, fail-closed dispatch).
+
 ## [0.1.0] - 2026-05-09
 
 Initial public release.
