@@ -123,6 +123,21 @@ class LoveApp(App):
 
     def action_toggle_pause(self) -> None:
         self._paused = not self._paused
+        # Keep the visible button label in sync so users see the new state.
+        if hasattr(self, "_btn_pause"):
+            self._btn_pause.label = "▶ Resume" if self._paused else "⏸ Pause"
 
     def action_show_help(self) -> None:
         self.bell()
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Wire the top-row buttons to the same actions as the keybindings."""
+        action_by_id = {
+            "btn-pause": self.action_toggle_pause,
+            "btn-reset": self.action_reset,
+            "btn-help": self.action_show_help,
+            "btn-quit": self.action_quit,
+        }
+        handler = action_by_id.get(event.button.id or "")
+        if handler is not None:
+            handler()
