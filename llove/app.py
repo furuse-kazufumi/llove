@@ -136,7 +136,9 @@ class LoveApp(App):
         self._paused = not self._paused
         # Keep the visible button label in sync so users see the new state.
         if hasattr(self, "_btn_pause"):
-            self._btn_pause.label = "▶ Resume" if self._paused else "⏸ Pause"
+            self._btn_pause.label = (
+                t("ui.button.resume") if self._paused else t("ui.button.pause")
+            )
 
     def action_show_help(self) -> None:
         self.bell()
