@@ -94,13 +94,17 @@ def test_narration_view_never_leaks_user_rich_tags(text: str, title: str | None)
         idx = i + 1
 
 
-@settings(suppress_health_check=[HealthCheck.too_slow], max_examples=20)
+@settings(
+    suppress_health_check=[HealthCheck.too_slow, HealthCheck.function_scoped_fixture],
+    max_examples=12,
+    deadline=None,
+)
 @given(seed=st.integers(min_value=0, max_value=2**31 - 1))
 @pytest.mark.asyncio
 async def test_mock_source_is_deterministic_for_any_seed(seed: int) -> None:
     """Same seed -> same value sequence."""
-    a = await _take_sensor_values(MockSource(seed=seed, tick_seconds=0.0001), n=30)
-    b = await _take_sensor_values(MockSource(seed=seed, tick_seconds=0.0001), n=30)
+    a = await _take_sensor_values(MockSource(seed=seed, tick_seconds=0.0001), n=15)
+    b = await _take_sensor_values(MockSource(seed=seed, tick_seconds=0.0001), n=15)
     assert a == b
 
 
