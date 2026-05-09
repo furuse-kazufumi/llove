@@ -12,8 +12,9 @@ from textual.containers import Horizontal, Vertical
 from textual.screen import ModalScreen
 from textual.widgets import Button, Footer, Header, Static
 
-from llove.events import Event
+from llove.events import Event, EventKind
 from llove.i18n import t
+from llove.identity import load_local_identity
 from llove.sources.base import DataSource
 from llove.views.audit_log import AuditLogView
 from llove.views.base import View
