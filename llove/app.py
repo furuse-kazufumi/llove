@@ -159,3 +159,39 @@ class LoveApp(App):
         handler = action_by_id.get(event.button.id or "")
         if handler is not None:
             handler()
+
+
+class HelpScreen(ModalScreen):
+    """Modal overlay shown when the user clicks Help or presses 'h'."""
+
+    DEFAULT_CSS = """
+    HelpScreen {
+        align: center middle;
+    }
+    HelpScreen > #help-box {
+        width: 70;
+        max-height: 80%;
+        background: $boost;
+        border: heavy $primary;
+        padding: 1 2;
+    }
+    HelpScreen #help-close {
+        margin-top: 1;
+    }
+    """
+
+    BINDINGS = [  # noqa: RUF012 — Textual reads BINDINGS as a class-level list, not per-instance.
+        ("escape", "dismiss", "Close"),
+        ("h", "dismiss", "Close"),
+        ("q", "dismiss", "Close"),
+    ]
+
+    def compose(self) -> ComposeResult:
+        with Vertical(id="help-box"):
+            yield Static(t("ui.help.title"))
+            yield Static(t("ui.help.body"))
+            yield Button(t("ui.help.close"), id="help-close", variant="primary")
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "help-close":
+            self.dismiss()
