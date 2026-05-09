@@ -103,6 +103,101 @@ def demo(
     LoveApp(scenario, with_narration=True, log_path=log_path).run()
 
 
+@main.group(help="Run a real LLM-vs-LLM game (shogi today; chess / go / mahjong on the v0.7 roadmap).")
+def play() -> None:  # pragma: no cover — Click dispatch
+    pass
+
+
+@play.command(name="shogi", help="Play a real shogi game between two players.")
+@click.option(
+    "--sente",
+    default="mock:script",
+    show_default=True,
+    help="Sente (first player) provider:model. Examples: mock:script, "
+    "mock:illegal, mock:resign. anthropic / ollama land in MVP2b.",
+)
+@click.option(
+    "--gote",
+    default="mock:script",
+    show_default=True,
+    help="Gote (second player) provider:model.",
+)
+@click.option("--max-ply", type=int, default=400, show_default=True)
+@click.option(
+    "--log",
+    "log_path",
+    type=click.Path(dir_okay=False, path_type=Path),
+    default=None,
+    help="Append every event as one JSON line to this file (kifu + signed moves).",
+)
+@click.option(
+    "--no-tui",
+    is_flag=True,
+    help="Skip the TUI; stream JSONL events to stdout. Useful for CI / batch eval.",
+)
+@click.option(
+    "--stream",
+    is_flag=True,
+    help="In TUI mode, also stream events to stdout. Pair with --log for tee.",
+)
+def play_shogi(
+    sente: str,
+    gote: str,
+    max_ply: int,
+    log_path: Path | None,
+    no_tui: bool,
+    stream: bool,
+) -> None:
+    """Drive ``llove.shogi.run_game`` and route events to TUI / stdout / log."""
+    import asyncio
+    from datetime import UTC, datetime
+
+    try:
+        from llove.shogi import make_player, run_game
+    except ImportError as exc:
+        # python-shogi missing — surface the install hint, not the traceback.
+        click.echo(
+            f"shogi engine unavailable: {exc}\n"
+            "Install: pip install 'llmesh-llove[shogi]'",
+            err=True,
+        )
+        sys.exit(2)
+
+    try:
+        sente_p = make_player(sente, side="sente")
+        gote_p = make_player(gote, side="gote")
+    except (ValueError, NotImplementedError) as exc:
+        click.echo(str(exc), err=True)
+        sys.exit(2)
+
+    # Auto-log to out/shogi/play-<ts>.jsonl when no explicit --log given,
+    # mirroring the demo scenario's auto-log behaviour.
+    if log_path is None:
+        ts = datetime.now(tz=UTC).strftime("%Y%m%d-%H%M%S")
+        log_path = Path("out") / "shogi" / f"play-{ts}.jsonl"
+        click.echo(f"Logging this game to {log_path}", err=True)
+
+    if no_tui:
+        async def _stream() -> None:
+            log_path.parent.mkdir(parents=True, exist_ok=True)
+            with log_path.open("w", encoding="utf-8") as fh:
+                async for ev in run_game(sente_p, gote_p, max_ply=max_ply):
+                    line = ev.model_dump_json()
+                    fh.write(line + "\n")
+                    fh.flush()
+                    click.echo(line)
+
+        asyncio.run(_stream())
+        return
+
+    # TUI mode (default).
+    from llove.app import LoveApp
+    from llove.shogi.source import ShogiSource
+
+    source = ShogiSource(sente_p, gote_p, max_ply=max_ply, also_stdout=stream)
+    LoveApp(source, with_narration=True, log_path=log_path).run()
+
+
 @main.command(help="Tail a JSON Lines file as a live event stream.")
 @click.argument("path", type=click.Path(exists=True, dir_okay=False, path_type=Path))
 @click.option("--follow/--no-follow", default=True, show_default=True, help="Tail-F mode.")
