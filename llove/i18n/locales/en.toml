@@ -46,7 +46,7 @@ close = "Close (esc)"
 title = "📡 SensorEvent stream  · 📖 read-only"
 subtitle_init = "(waiting for data)"
 subtitle_active = "{count} pts | latest {latest}"
-header = "time      sensor                value"
+header = "time      metric                value"
 sparkline_label = "sparkline (last 40):"
 empty = "(no data yet)"
 
@@ -248,6 +248,18 @@ alarm_title = "Suspicious streak"
 alarm = "After **{n}** tosses we have **{heads} heads / {tails} tails** (ratio = **{ratio}**). That's far from 0.50 — interesting! Could be early luck, could be a loaded coin. Keep watching."
 takeaway_title = "Take-away"
 takeaway = "**{heads} heads, {tails} tails** — final ratio **{ratio}**. The Law of Large Numbers wins: enough tosses, and a fair coin always hovers near 0.50. SPC alarms early help us spot whether the deviation is just bad luck or something to investigate."
+
+[scenario.shogi]
+title = "Shogi — two LLMs replay a 14-move opening (MVP1, scripted)"
+description = "MVP1: scripted opening on a shared 9x9 board. Each ply lands an eval score in the SPC pane; large eval swings raise an alarm. MVP2 will swap the script for real LLM calls."
+intro_title = "Scenario: Shogi (MVP1)"
+intro = "**Two-LLM Shogi (MVP1).** No real LLM yet — we replay a 14-half-move opening so you can see how the four panes carry the game state. The board lives in the *Board* pane; eval drifts in the *Eval* pane; every move is logged as USI in *Moves*; LLM-style commentary lands in *Commentary*."
+sensor_pane_title = "♟ Board (every ply)  · 📖 read-only"
+spc_pane_title = "📊 Eval — sente lead (positive)  · 📖 read-only"
+audit_pane_title = "📋 棋譜 (kifu) — ▲ sente △ gote  · 📖 read-only"
+narration_pane_title = "💬 Commentary — LLM thinking  · 📖 read-only"
+takeaway_title = "Take-away"
+takeaway = "**{plies} half-moves played, final eval = {final_eval:+d}**.  This is **MVP1 — opening replay only**; the game is intentionally truncated here, not resigned. MVP2 swaps the script for live LLM play (with a legality checker) so the pieces actually fight to a finish."
 
 [scenario.reliability]
 title = "Reliability — ACK / RETRANSMIT / Watchdog"

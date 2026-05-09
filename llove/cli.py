@@ -48,7 +48,22 @@ def main(lang: str | None) -> None:  # pragma: no cover — Click dispatch
     help="Scenario name (run with --list to see options). Omit to pick interactively.",
 )
 @click.option("--list", "list_only", is_flag=True, help="List available scenarios and exit.")
-def demo(seed: int, tick: float, scenario_name: str | None, list_only: bool) -> None:
+@click.option(
+    "--log",
+    "log_path",
+    type=click.Path(dir_okay=False, path_type=Path),
+    default=None,
+    help="Append every event as one JSON line to this file. The result is "
+    "replayable with `llove tail`, and for `--scenario shogi` it gives you a "
+    "full game record (kifu + eval + commentary) without watching the run live.",
+)
+def demo(
+    seed: int,
+    tick: float,
+    scenario_name: str | None,
+    list_only: bool,
+    log_path: Path | None,
+) -> None:
     from llove.app import LoveApp
     from llove.demo.scenarios import SCENARIOS, get_scenario
     from llove.sources.mock import MockSource
@@ -65,7 +80,7 @@ def demo(seed: int, tick: float, scenario_name: str | None, list_only: bool) -> 
     if scenario_name is None:
         # No scenario chosen — run the original mixed-stream demo.
         source = MockSource(seed=seed if seed != 0 else None, tick_seconds=tick)
-        LoveApp(source).run()
+        LoveApp(source, log_path=log_path).run()
         return
 
     try:
@@ -73,7 +88,7 @@ def demo(seed: int, tick: float, scenario_name: str | None, list_only: bool) -> 
     except ValueError as exc:
         click.echo(str(exc), err=True)
         sys.exit(2)
-    LoveApp(scenario, with_narration=True).run()
+    LoveApp(scenario, with_narration=True, log_path=log_path).run()
 
 
 @main.command(help="Tail a JSON Lines file as a live event stream.")

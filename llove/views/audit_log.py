@@ -37,7 +37,16 @@ class AuditLogView(Static, View):
     def feed(self, event: Event) -> None:
         if event.kind not in _INTERESTING:
             return
-        self._rows.appendleft(event.short())
+        # Scenarios may pre-format an audit line via payload['display'] (e.g.
+        # shogi turns USI into '▲７六歩'). Fall back to Event.short() otherwise
+        # so existing audit consumers keep their current rendering.
+        display = event.payload.get("display") if isinstance(event.payload, dict) else None
+        if display:
+            ts = event.ts.strftime("%H:%M:%S")
+            line = f"{ts}  {display}"
+        else:
+            line = event.short()
+        self._rows.appendleft(line)
         self._counts[event.kind] = self._counts.get(event.kind, 0) + 1
         # Compact subtitle counter so users can see what kinds happened. We
         # keep it locale-neutral (kind values + numbers) — the locale-specific

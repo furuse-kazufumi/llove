@@ -13,6 +13,7 @@ from __future__ import annotations
 import re
 from collections import deque
 
+from rich.text import Text
 from textual.widgets import Static
 
 from llove.events import Event, EventKind
@@ -62,7 +63,10 @@ class NarrationView(Static, View):
             # of our [bold]...[/bold] wrapper.
             safe_title = str(title).replace("[", r"\[")
             head += f"  [bold]{safe_title}[/bold]"
-        body = self._lite_markdown(text)
+        # Trust scenarios that explicitly opt in to Rich markup (e.g. the
+        # shogi board uses [reverse] tags to invert gote pieces). Default
+        # path still escapes user-supplied '[' for safety.
+        body = text if event.payload.get("allow_rich") else self._lite_markdown(text)
         self._entries.appendleft(f"{head}\n  {body}")
         self._beats += 1
         # border_subtitle is parsed as Textual markup, so escape any '[' the
@@ -74,7 +78,16 @@ class NarrationView(Static, View):
         )
         rendered = "\n\n".join(self._entries)
         self.last_render = rendered
-        self.update(rendered)
+        # Explicitly parse Rich markup. Static.update(str) does parse markup,
+        # but in our multi-line concatenated body the parser sometimes leaves
+        # colour tags (e.g. [bright_red]) un-applied so they end up in the SVG
+        # export under the default-colour class. Force parsing via Text on the
+        # real app, but fall back to the raw string in tests where the widget
+        # isn't mounted to an App (Text path needs widget.app.console).
+        try:
+            self.update(Text.from_markup(rendered))
+        except Exception:  # nosec B110 — fail-closed to plain text outside an App.
+            self.update(rendered)
 
     @staticmethod
     def _lite_markdown(text: str) -> str:

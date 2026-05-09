@@ -43,7 +43,7 @@ close = "閉じる (esc)"
 title = "📡 センサーイベント・ストリーム  · 📖 読み取り専用"
 subtitle_init = "(データ待機中)"
 subtitle_active = "{count} 件 | 直近 {latest}"
-header = "時刻      センサー              値"
+header = "時刻      指標                  値"
 sparkline_label = "推移グラフ (直近 40 件):"
 empty = "(データはまだありません)"
 
@@ -245,6 +245,18 @@ alarm_title = "怪しいストリーク"
 alarm = "{n} 回時点で **表 {heads} 回 / 裏 {tails} 回** (比率 = **{ratio}**)。0.50 から大きく外れています — 序盤の運か、それとも歪んだコインか？ もう少し観察してみましょう。"
 takeaway_title = "ポイント"
 takeaway = "**表 {heads} / 裏 {tails}** — 最終比率 **{ratio}**。**大数の法則** の勝利: 試行回数が増えれば、公平なコインは必ず 0.50 付近に落ち着く。早めの SPC アラームは「本当に怪しいのか、ただの運か」を判定する助けになります。"
+
+[scenario.shogi]
+title = "将棋 — 2 つの LLM が 14 手の序盤を再生 (MVP1、scripted)"
+description = "MVP1: 共通 9x9 盤面に scripted な序盤を再生。各手で評価値を SPC ペインに、大きな評価値変動で alarm。MVP2 では scripted を実 LLM 呼び出しに置き換える予定。"
+intro_title = "シナリオ: 将棋 (MVP1)"
+intro = "**2 LLM 将棋 (MVP1)。** 実 LLM はまだ繋いでいません — 14 手の序盤を再生し、4 ペインに局面が流れる様子を確認します。盤面 → *盤面* ペイン、評価値 → *評価* ペイン、各手は USI で *棋譜* ペインに、LLM 風解説は *解説* ペインに。"
+sensor_pane_title = "♟ 盤面 (各手の局面)  · 📖 読み取り専用"
+spc_pane_title = "📊 評価 — 先手リード (正の値)  · 📖 読み取り専用"
+audit_pane_title = "📋 棋譜 — ▲先手 △後手  · 📖 読み取り専用"
+narration_pane_title = "💬 解説 — LLM の思考  · 📖 読み取り専用"
+takeaway_title = "ポイント"
+takeaway = "**{plies} 半手で終了、最終評価値 = {final_eval:+d}**。これは **MVP1 — 序盤の再生のみ** で、投了したわけではなくここで打ち切っています。MVP2 で scripted を実 LLM に置き換え (合法手チェック付き) → 本物の終局まで指せるようになる予定です。"
 
 [scenario.reliability]
 title = "信頼性プロトコル — ACK / RETRANSMIT / Watchdog"

@@ -98,6 +98,15 @@
             合法手 highlight、投了。
       - [ ] **MVP4**: Qt viewer (`tools/qt_viewer/shogi_viewer.py`) で本物の駒表示。
 
+- [ ] **ウェブカメラ + 画像 LLM デモ** (REQUIREMENTS F13) — `face_landmarks`。
+      `[webcam]` extras (opencv-python + mediapipe)。TUI で ASCII 顔 + landmark、
+      Qt viewer で実画像 + overlay。`gesture` / `pose` / `vlm_caption` も同じ
+      入力経路で増設可能。
+
+- [ ] **マイク + 音声 LLM デモ** (REQUIREMENTS F14) — 実用 OSS 音声 LLM が
+      コミュニティに揃ったタイミングで `voice_transcribe` / `voice_emotion`。
+      WhisperX など chunk 対応モデル + sounddevice が安定してきたら着手。
+
 ### 受け入れ基準
 
 - 全シナリオで 4 ペイン全部に non-trivial な情報が流れる

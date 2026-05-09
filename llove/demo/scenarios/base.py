@@ -17,11 +17,20 @@ from llove.i18n import t
 from llove.sources.base import DataSource
 
 
-def narrate(text: str, *, title: str | None = None) -> Event:
-    """Build a NARRATION event in one call."""
+def narrate(text: str, *, title: str | None = None, allow_rich: bool = False) -> Event:
+    """Build a NARRATION event in one call.
+
+    ``allow_rich`` lets a scenario opt out of NarrationView's '[' escaping
+    so it can use Rich markup like ``[reverse]…[/reverse]`` in the body
+    (used by shogi to invert gote pieces). Only set this when the scenario
+    *itself* writes the markup string — never propagate user-supplied text
+    with this flag on.
+    """
     payload: dict = {"text": text}
     if title:
         payload["title"] = title
+    if allow_rich:
+        payload["allow_rich"] = True
     return Event(kind=EventKind.NARRATION, source_id="scenario", payload=payload)
 
 
@@ -59,6 +68,16 @@ class DemoScenario(DataSource):
     spc_pane_title_key: str | None = None
     audit_pane_title_key: str | None = None
     narration_pane_title_key: str | None = None
+
+    # Optional layout hints for scenarios that want a non-default pane size.
+    # Use these sparingly — they reshape the whole window. Example: shogi
+    # needs a tall narration pane to fit a 9x9 board *and* a tall audit
+    # pane so the whole game scoresheet stays visible.
+    narration_pane_height: str | None = None     # CSS length, e.g. "28" or "70%"
+    narration_max_entries: int | None = None     # deque maxlen; e.g. 1 = always
+                                                  # show only the latest beat
+    audit_pane_height: str | None = None         # CSS length, e.g. "20" or "30%"
+    audit_max_entries: int | None = None         # deque maxlen; e.g. 30
 
     @property
     def title(self) -> str:

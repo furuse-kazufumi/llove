@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import asyncio
+from pathlib import Path
+from typing import TextIO
 
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical
@@ -65,13 +67,25 @@ class LoveApp(App):
     TITLE = "💗 llove"
     SUB_TITLE = "Made with llove"
 
-    def __init__(self, source: DataSource, *, with_narration: bool = False) -> None:
+    def __init__(
+        self,
+        source: DataSource,
+        *,
+        with_narration: bool = False,
+        log_path: Path | None = None,
+    ) -> None:
         super().__init__()
         self._source = source
         self._views: list[View] = []
         self._paused = False
         self._task: asyncio.Task[None] | None = None
         self._with_narration = with_narration
+        # Optional event-log path. When set, every dispatched Event is
+        # appended as a JSON line so the run can be replayed with
+        # `llove tail` (and serves as a permanent record — e.g. a full
+        # shogi kifu).
+        self._log_path = log_path
+        self._log_file: TextIO | None = None
         # Pull localised app subtitle so it changes with --lang.
         self.sub_title = t("ui.subtitle")
 
@@ -106,9 +120,16 @@ class LoveApp(App):
             self._views.append(self._narration)
 
     async def on_mount(self) -> None:
-        # If the source is a DemoScenario, let it rename pane titles so that
-        # non-LLMesh-flavoured demos (coin_toss, dice_roll, …) don't have to
-        # call their data "SensorEvent stream".
+        # Open the event log up-front (append) so every dispatched event is
+        # captured. We close it on unmount.
+        if self._log_path:
+            self._log_path.parent.mkdir(parents=True, exist_ok=True)
+            self._log_file = self._log_path.open("a", encoding="utf-8")
+        # If the source is a DemoScenario, let it rename pane titles and
+        # reshape the narration pane so that non-LLMesh-flavoured demos
+        # (coin_toss, shogi, …) don't have to fit the LLMesh template.
+        from collections import deque
+
         from llove.demo.scenarios.base import DemoScenario
 
         if isinstance(self._source, DemoScenario):
@@ -121,11 +142,35 @@ class LoveApp(App):
                 self._audit.border_title = t(s.audit_pane_title_key)
             if s.narration_pane_title_key and self._narration is not None:
                 self._narration.border_title = t(s.narration_pane_title_key)
+            if self._narration is not None:
+                # Resize the narration pane (e.g. shogi needs ~28 rows for
+                # a 9x9 board) and shrink its scrollback so the *latest*
+                # board is never pushed off-screen by older snapshots.
+                if s.narration_pane_height:
+                    self._narration.styles.height = s.narration_pane_height
+                if s.narration_max_entries:
+                    self._narration._entries = deque(
+                        self._narration._entries,
+                        maxlen=s.narration_max_entries,
+                    )
+            # Audit pane reshape: shogi keeps the full kifu visible.
+            if s.audit_pane_height:
+                self._audit.styles.height = s.audit_pane_height
+            if s.audit_max_entries:
+                self._audit._rows = deque(
+                    self._audit._rows,
+                    maxlen=s.audit_max_entries,
+                )
         self._task = asyncio.create_task(self._consume())
 
     async def on_unmount(self) -> None:
         if self._task and not self._task.done():
             self._task.cancel()
+        if self._log_file is not None:
+            try:
+                self._log_file.close()
+            finally:
+                self._log_file = None
         await self._source.close()
 
     async def _consume(self) -> None:
@@ -138,6 +183,12 @@ class LoveApp(App):
             return
 
     def _dispatch(self, event: Event) -> None:
+        if self._log_file is not None:
+            try:
+                self._log_file.write(event.model_dump_json() + "\n")
+                self._log_file.flush()
+            except Exception:  # nosec B110 — fail-closed: a broken log must not kill the app.
+                pass
         for v in self._views:
             try:
                 v.feed(event)
@@ -145,9 +196,16 @@ class LoveApp(App):
                 continue
 
     def action_reset(self) -> None:
-        # Clear internal state on every view that holds one, then nudge each
-        # widget to repaint with its now-empty content so the user actually
-        # sees the reset on screen.
+        # Reset = "play the scenario from the beginning". Cancel the current
+        # consume task, clear every view, then for DemoScenarios re-instantiate
+        # the source and start a fresh consume task so the game / demo plays
+        # again from ply 1.
+        from llove.demo.scenarios.base import DemoScenario
+
+        if self._task and not self._task.done():
+            self._task.cancel()
+            self._task = None
+
         for v in self._views:
             if hasattr(v, "_rows"):
                 v._rows.clear()
@@ -175,6 +233,19 @@ class LoveApp(App):
                     v.update(empty)
                 except Exception:  # nosec B110 — fail-closed: a broken redraw must not kill the app.
                     continue
+
+        # Restart the source from scratch *only* for DemoScenarios — they
+        # are stateless apart from their event generator, which is what we
+        # want to re-roll. For arbitrary DataSource subclasses (JSONL tail,
+        # custom test sources) we leave the existing instance alone and
+        # do not start a new consume task: re-reading those is the caller's
+        # responsibility, not Reset's.
+        self._paused = False
+        if hasattr(self, "_btn_pause"):
+            self._btn_pause.label = t("ui.button.pause")
+        if isinstance(self._source, DemoScenario):
+            self._source = self._source.__class__()
+            self._task = asyncio.create_task(self._consume())
 
     def action_toggle_pause(self) -> None:
         self._paused = not self._paused
