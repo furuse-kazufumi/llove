@@ -3,6 +3,29 @@
 All notable changes to **llove** are recorded here.
 This project follows [Semantic Versioning](https://semver.org).
 
+## [Unreleased]
+
+### Added
+- **`vision` scenario** — VLM-based belt-conveyor inspection across 7 ASCII
+  frames. Two frames trigger an SPC defect alarm with a bounding-box payload
+  and a "surface_contamination" audit entry.
+- **`pointcloud` scenario** — 4-frame LiDAR top-view of a 4x3 parts tray. The
+  top-right slot empties for two frames; SPC fires on density drop and the
+  audit summary nails which (col, row) is missing.
+- **Standalone Qt viewers** under `tools/qt_viewer/`:
+  - `vision_viewer.py` upscales each frame to a pixmap (or decodes
+    `image_b64` if present) and overlays bounding boxes from SPC_ALARM events.
+  - `pointcloud_viewer.py` projects the raw `points_xyz` payload to a 2D
+    scatter and highlights the missing slot. Both have a frame slider.
+  - Tools require `pip install PySide6` — **not** a llove dependency.
+- Total demo scenarios now **14** (was 12 in 0.2.1).
+
+### Changed
+- `vision` and `pointcloud` Event payloads carry rich data
+  (`image_b64`, `image_ascii`, `points_xyz`, `topview_ascii`, `bbox`,
+  `missing_slot`) so external pipelines can consume the same stream and
+  render their own way without re-running the scenario.
+
 ## [0.2.1] - 2026-05-09
 
 ### Fixed
