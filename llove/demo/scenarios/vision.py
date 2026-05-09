@@ -14,7 +14,7 @@ from typing import Any
 from llove.demo.scenarios.base import DemoScenario, narrate, narrate_key
 from llove.events import Event, EventKind
 
-# ASCII art frames — 22 cols × 8 rows. The defect frame replaces the cylinder
+# ASCII art frames — 22 cols x 8 rows. The defect frame replaces the cylinder
 # at column 13 with a misshapen blob. No Pillow / no graphics deps.
 _FRAME_OK = """
 ......................
