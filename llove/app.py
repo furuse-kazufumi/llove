@@ -141,7 +141,11 @@ class LoveApp(App):
             )
 
     def action_show_help(self) -> None:
-        self.bell()
+        self.push_screen(HelpScreen())
+
+    def action_quit_now(self) -> None:
+        """Synchronous quit so it can be wired from Button.Pressed."""
+        self.exit()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Wire the top-row buttons to the same actions as the keybindings."""
@@ -149,7 +153,7 @@ class LoveApp(App):
             "btn-pause": self.action_toggle_pause,
             "btn-reset": self.action_reset,
             "btn-help": self.action_show_help,
-            "btn-quit": self.action_quit,
+            "btn-quit": self.action_quit_now,
         }
         handler = action_by_id.get(event.button.id or "")
         if handler is not None:
