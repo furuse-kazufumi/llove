@@ -281,6 +281,47 @@
 
 ---
 
+## v0.8.0 — Window Management *(F17, 2026-05-09 追加)*
+
+**ゴール:** SDI⇔MDI 切替・位置記憶・マルチディスプレイ・可変 Window 数・
+「自由可変」「常駐ロック」二重コンテナ. シナリオ駆動レイアウト.
+
+### 入る機能
+
+- [x] **A. WindowManager 最小骨組み** (`llove/window/`) — **v0.3.0a1 完了**
+      (Registry + IconSet 3 段 + Free/Locked Container + WindowLayout +
+      WindowSpec + layout.toml 往復、全 20 件 PASS)
+- [ ] LoveApp との互換層 (window_layout=None なら従来 4 ペイン動作維持)
+- [ ] Textual 側 SDI/MDI/Tabbed/Tile レイアウト切替の実装
+- [ ] Qt 本格版 (PySide6 + Qt-Advanced-Docking-System)
+- [ ] マルチディスプレイ識別 (QScreen UID + DP/HDMI 抜き差し対応)
+- [ ] レイアウトプリセット (初期 / 集中 / 観戦) + ワークスペース概念
+- [ ] CLI: `llove demo --scenario shogi --layout focus`
+- [ ] Sixel / Kitty graphics IconSet (実画像 SVG/PNG)
+- [ ] F17(p)(r) シナリオ駆動レイアウトの shogi/typing/chess 適用
+
+---
+
+## v0.9.0 — Embedded Scripting + Editor / IDE *(F19/F20, 2026-05-09 追加)*
+
+**ゴール:** llove 上で Python/Lua/Starlark/Janet/JS REPL + テキスト編集 +
+LSP/lint/シンタックスハイライト + Notebook 風セル UI + Command Palette.
+
+### 入る機能
+
+- [ ] **F19 (a) Python REPL** (`code.InteractiveConsole`、デフォ同梱)
+- [ ] **F20 Command Palette** (`llove/term/`、`:open` `:play` `:layout` 等)
+- [ ] **F19 Editor モード** (Textual TextArea + DirectoryTree + tabs)
+- [ ] **F19 (b) Lua** (`lupa`)
+- [ ] **F19 (c) Starlark** (`pystarlark`)
+- [ ] **F19 (l) Jupyter Notebook 風セル UI** (`euporie` 参考、ipynb 互換)
+- [ ] **F19 lint / 診断** (ruff JSON, pyflakes)
+- [ ] **F19 LSP クライアント** (pylsp, rust-analyzer)
+- [ ] **F19 (d) Janet / chibi-scheme** (Lisp DSL)
+- [ ] **F19 (e) JavaScript** (PyMiniRacer / pyduktape)
+
+---
+
 ## v1.0.0 — Stable Release
 
 **ゴール:** SemVer 適用、API 公開契約、十分なドキュメント、安定運用。
