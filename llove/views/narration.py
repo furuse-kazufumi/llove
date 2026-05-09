@@ -43,7 +43,7 @@ class NarrationView(Static, View):
         # Mirror the latest rendered string so tests / external callers can
         # inspect what the user would see without diving into Textual internals.
         self.last_render: str = self._initial
-        self.border_title = "💬 Narration — what's happening, in plain words"
+        self.border_title = "💬 Narration — what's happening, in plain words  · view"
         self.border_subtitle = "(scenario commentary)"
 
     def feed(self, event: Event) -> None:
