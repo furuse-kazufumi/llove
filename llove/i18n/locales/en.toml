@@ -16,7 +16,7 @@ help = "? Help"
 quit = "✕ Quit"
 
 [ui.help]
-title = "[bold]💗 llove — Help[/bold]\n"
+title = "[bold]💗 llove — Help[/bold]\n[bold yellow]Press ESC (or h / q / the Close button) to return.[/bold yellow]\n"
 body = """
 [bold]Mouse / clickable controls (top row)[/bold]
   ⏸ Pause / ▶ Resume   pause or resume the data stream
