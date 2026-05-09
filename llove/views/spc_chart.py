@@ -28,6 +28,9 @@ class SPCChartView(Static, View):
         self._limit = limit
         self._alarms: list[str] = []
         self._last_value: float | None = None
+        self._alarm_count = 0
+        self.border_title = "📊 SPC chart — CUSUM control"
+        self.border_subtitle = "watching for drift"
 
     def feed(self, event: Event) -> None:
         if event.kind == EventKind.SENSOR:
@@ -43,6 +46,8 @@ class SPCChartView(Static, View):
             ts = event.ts.strftime("%H:%M:%S")
             self._alarms.insert(0, f"  {ts}  ALARM {sid}  cusum={cusum}")
             self._alarms = self._alarms[: self._limit]
+            self._alarm_count += 1
+            self.border_subtitle = f"⚠ {self._alarm_count} alarm(s)"
             self._refresh(alarmed=True)
 
     def _refresh(self, *, alarmed: bool) -> None:
