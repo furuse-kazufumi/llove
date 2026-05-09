@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import asyncio
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from collections.abc import AsyncIterator
 
 from llove.events import Event, EventKind
@@ -17,7 +17,7 @@ def narrate(text: str, *, title: str | None = None) -> Event:
     return Event(kind=EventKind.NARRATION, source_id="scenario", payload=payload)
 
 
-class DemoScenario(ABC, DataSource):
+class DemoScenario(DataSource):
     """A scripted sequence of llove Events with attached narration.
 
     Each scenario covers one or more LLMesh capabilities and is fully
