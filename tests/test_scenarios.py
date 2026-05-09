@@ -73,20 +73,22 @@ async def test_scada_scenario_emits_alarm() -> None:
 
 
 def test_narration_view_renders_lite_markdown() -> None:
-    from llove.events import Event, EventKind as EK
+    from llove.events import Event
+    from llove.events import EventKind as EK
     from llove.views.narration import NarrationView
 
     v = NarrationView()
     v.feed(Event(kind=EK.NARRATION, payload={"text": "hello **world** and `code`", "title": "T"}))
-    rendered = v.renderable
-    assert "[bold]world[/bold]" in str(rendered)
-    assert "[reverse]code[/reverse]" in str(rendered)
+    rendered = v.last_render
+    assert "[bold]world[/bold]" in rendered
+    assert "[reverse]code[/reverse]" in rendered
 
 
 def test_narration_view_ignores_other_kinds() -> None:
-    from llove.events import Event, EventKind as EK
+    from llove.events import Event
+    from llove.events import EventKind as EK
     from llove.views.narration import NarrationView
 
     v = NarrationView()
     v.feed(Event(kind=EK.SENSOR, payload={"sensor_id": "x", "value": 1.0}))
-    assert "no narration yet" in str(v.renderable)
+    assert "no narration yet" in v.last_render
