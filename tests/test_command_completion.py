@@ -220,3 +220,43 @@ class TestHistoryRingPersistence:
         h = HistoryRing()
         h.load(p)
         assert h.items == [":help", ":identity"]
+
+
+# ---------------------------------------------------------------------------
+# highlight_match
+# ---------------------------------------------------------------------------
+
+
+class TestHighlightMatch:
+    def test_empty_needle_returns_plain(self) -> None:
+        assert highlight_match("", "help") == "help"
+
+    def test_colon_prefix_stripped(self) -> None:
+        assert highlight_match(":he", "help") == "[bold]he[/bold]lp"
+
+    def test_prefix_match_highlights_head(self) -> None:
+        assert highlight_match("he", "help") == "[bold]he[/bold]lp"
+
+    def test_full_match_all_bold(self) -> None:
+        result = highlight_match("help", "help")
+        assert result == "[bold]help[/bold]"
+
+    def test_fuzzy_match_highlights_scattered(self) -> None:
+        # "hlp" fuzzy-matches "help" with h/l/p positions
+        result = highlight_match("hlp", "help")
+        assert "[bold]" in result
+        assert "h" in result
+
+    def test_no_match_returns_plain(self) -> None:
+        # "xyz" が "help" にマッチしない場合はプレーンで返る
+        result = highlight_match("xyz", "help")
+        assert result == "help"
+
+    def test_single_char_match(self) -> None:
+        result = highlight_match("h", "help")
+        assert result == "[bold]h[/bold]elp"
+
+    def test_markup_is_valid_bold_pairs(self) -> None:
+        # [bold] と [/bold] の個数が一致する
+        result = highlight_match("el", "help")
+        assert result.count("[bold]") == result.count("[/bold]")
