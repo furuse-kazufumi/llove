@@ -179,7 +179,8 @@ def reg_ctx() -> tuple[CommandRegistry, CommandContext]:
 class TestBuiltins:
     def test_builtin_count(self) -> None:
         # 期待: help / identity / layout / demo / play / open / peer
-        # / set / get / alias / macro = 11 件
+        # / set / get / alias / macro / fold = 12 件
+        # (2026-05-10 F15 (u8) で `fold` を追加)
         names = {c.name for c in builtin_commands()}
         assert names == {
             "help",
@@ -193,6 +194,7 @@ class TestBuiltins:
             "get",
             "alias",
             "macro",
+            "fold",
         }
 
     def test_help_lists_categories(self, reg_ctx: tuple[CommandRegistry, CommandContext]) -> None:
