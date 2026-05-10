@@ -74,6 +74,10 @@ subtitle_init = "(シナリオ解説)"
 subtitle_active = "場面 {beat} · {latest}"
 empty = "[dim](解説はまだありません — シナリオの開始を待っています)[/dim]"
 
+[ui.pane.markdown]
+title = "📝 Markdown — フル GFM 表示  · 📖 読み取り専用"
+empty = "_(Markdown はまだありません)_"
+
 [scenario.firewall]
 title = "Firewall — プロンプトの 4 層検査"
 description = "12 件のプロンプトを各層 (L0/L1/L1.5/L2) が ALLOW / BLOCK / SUMMARIZE に振り分ける様子を再生。"
