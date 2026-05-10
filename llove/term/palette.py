@@ -128,6 +128,7 @@ class CommandPaletteWidget(Vertical):
         if not line:
             return
         self.history.push(line)
+        self.history.save()
         result = dispatch(line, self.ctx, self.registry)
         for row in _format_result(result):
             self._output_lines.append(row)
