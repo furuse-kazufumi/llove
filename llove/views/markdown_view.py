@@ -188,3 +188,56 @@ class MarkdownView(Static, View):
             self.update(Markdown("\n\n---\n\n".join(live_chunks)))
         except Exception:  # nosec B110 — fail-closed to plain text outside an App.
             self.update(rendered)
+
+
+def make_markdown_fold_hook(view: MarkdownView):
+    """Return a callable suitable for `ctx.hooks['fold']` (F15 u8 wiring).
+
+    The `:fold` builtin command treats the hook as a verb dispatcher:
+    `(verb, args)` → `tuple[str, ...] | None`. Returning ``None`` signals
+    "this view does not understand the verb"; the dispatcher then surfaces
+    that to the user as an error rather than silently dropping the request.
+
+    Supported verbs:
+        close-all      — close every fold in the latest entry
+        open-all       — open every fold
+        by-tag <kind>  — close only folds whose `kind` matches (heading /
+                         code / table)
+        toggle <line>  — toggle the fold whose region starts at <line>
+                         (integer; non-integer arg returns None)
+    """
+
+    def hook(verb: str, args: list[str]) -> tuple[str, ...] | None:
+        if verb == "close-all":
+            before = len(view.fold_state.closed_starts)
+            view.close_all_folds()
+            after = len(view.fold_state.closed_starts)
+            return (f"closed {after - before} fold(s) (total {after})",)
+        if verb == "open-all":
+            view.open_all_folds()
+            return ("opened all folds",)
+        if verb == "by-tag":
+            if not args:
+                return None
+            kind = args[0]
+            valid = {"heading", "code", "table"}
+            if kind not in valid:
+                return None
+            regions = view.fold_regions()
+            view.fold_state.close_by_kind(regions, kind)
+            view._render()
+            count = sum(1 for r in regions if r.kind == kind)
+            return (f"closed {count} {kind} fold(s)",)
+        if verb == "toggle":
+            if not args:
+                return None
+            try:
+                line = int(args[0])
+            except ValueError:
+                return None
+            view.toggle_fold(line)
+            state = "closed" if view.fold_state.is_closed(line) else "open"
+            return (f"fold at line {line} now {state}",)
+        return None
+
+    return hook
