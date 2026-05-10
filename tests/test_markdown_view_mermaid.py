@@ -157,10 +157,10 @@ def test_mermaid_callback_not_invoked_for_ascii(tmp_path: Path) -> None:
         return mr.MermaidRender(kind="ascii", ascii_text=mr.ascii_fallback(src))
 
     v = MarkdownView(
-        mermaid_render=True,
-        mermaid_renderer=renderer,
-        mermaid_image_callback=calls.append,
-        mermaid_cache_dir=tmp_path,
+        diagram_render=True,
+        diagram_renderers={"mermaid": renderer},
+        diagram_image_callback=calls.append,
+        diagram_cache_dir=tmp_path,
     )
     v.feed(_narration("```mermaid\nflowchart LR\n```\n"))
     assert calls == []
