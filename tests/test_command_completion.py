@@ -36,7 +36,9 @@ NAMES = [
 
 class TestFilterSuggestions:
     def test_empty_returns_all_sorted(self) -> None:
-        assert filter_suggestions("", NAMES) == sorted(NAMES)
+        # default limit=10 で NAMES 11 件は先頭 10 件のみ. 全件は limit を渡す.
+        assert filter_suggestions("", NAMES) == sorted(NAMES)[:10]
+        assert filter_suggestions("", NAMES, limit=99) == sorted(NAMES)
 
     def test_strips_colon_prefix(self) -> None:
         assert filter_suggestions(":he", NAMES) == ["help"]
