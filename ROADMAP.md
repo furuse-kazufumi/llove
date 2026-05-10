@@ -248,9 +248,19 @@
         `toggle_fold / close_all_folds / open_all_folds / fold_regions`
         を統合。最新エントリのみに fold 適用 (旧履歴は常に展開)、
         line-number ベース永続性で同一文書再 feed でも保持。
-        テスト 19 件全 PASS。次段階: コードブロック/Mermaid/表 fold,
-        キーバインド (Vim/VSCode), `~/.config/llove/folds/<doc-id>.toml`
-        永続化, F20 コマンドパレット `:fold ...` 連携。
+        テスト 19 件全 PASS。
+      - **(u 段階 2) コードブロック / 表 fold 完了 (2026-05-10)**:
+        `find_code_block_regions` (` ``` / ~~~ ` ペア + 言語ラベル +
+        unclosed fence は fail-closed) と `find_table_regions`
+        (GFM header + alignment + body, code fence 内は無視) を folding.py
+        に追加。`apply_folds` の summary は kind 別書式
+        (heading: `▶ ## h (N lines)`, code: `▶ \`\`\`py (N lines)`,
+        table: `▶ | table (3 cols) (N rows)`)。MarkdownView の
+        `fold_regions()` は 3 種を統合して `start_line` 順返却 — 単一の
+        toggle で構文種を問わず動作。テスト追加 18 件、フルスイート
+        305 PASS + 3 skipped。次段階: Mermaid 図 fold, キーバインド
+        (Vim/VSCode), `~/.config/llove/folds/<doc-id>.toml` 永続化,
+        F20 `:fold ...` コマンド連携。
       - 対象: 見出しセクション / コードブロック / Mermaid / SVG / 画像 /
         表 / 引用 / コールアウト / JSON ツリー / ログペイン / Notebook セル /
         Command Palette 出力履歴
