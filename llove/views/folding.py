@@ -105,6 +105,76 @@ class FoldState:
                 self.closed_starts.add(r.start_line)
 
 
+# ---------------------------------------------------------------------------
+# F15 (u8) Presets
+# ---------------------------------------------------------------------------
+
+# Each preset is a predicate over (kind, level) that says
+# "should this region be CLOSED under this preset?". Open is the default.
+_FOLD_PRESETS: dict[str, "FoldPredicate"] = {}
+
+FoldPredicate = "Callable[[str, int], bool]"  # forward-ish; see typing below
+
+
+def _preset_outline(kind: str, level: int) -> bool:
+    # Skeleton view: keep h1/h2 open, collapse everything else.
+    if kind == "heading":
+        return level >= 3
+    return True
+
+
+def _preset_code(kind: str, level: int) -> bool:
+    # Focus on code: keep code blocks open, collapse the rest.
+    return kind != "code"
+
+
+def _preset_data_only(kind: str, level: int) -> bool:
+    # Focus on tables.
+    return kind != "table"
+
+
+def _preset_prose(kind: str, level: int) -> bool:
+    # Reading mode: collapse code and tables, leave headings open.
+    return kind in ("code", "table")
+
+
+_FOLD_PRESETS = {
+    "outline": _preset_outline,
+    "code": _preset_code,
+    "data-only": _preset_data_only,
+    "prose": _preset_prose,
+}
+
+
+def fold_preset_names() -> tuple[str, ...]:
+    """Return the canonical preset names in stable order."""
+    return tuple(sorted(_FOLD_PRESETS))
+
+
+def apply_preset(
+    state: FoldState,
+    regions: Iterable[FoldRegion],
+    preset: str,
+) -> FoldState:
+    """Apply a named preset to `state`, returning a new FoldState.
+
+    Unknown preset names leave the input untouched (returned by value as a
+    fresh FoldState so callers can swap freely without aliasing concerns).
+    The function is idempotent: applying the same preset twice yields the
+    same result.
+    """
+    predicate = _FOLD_PRESETS.get(preset)
+    region_list = list(regions)
+    if predicate is None:
+        # Defensive copy so the caller can't mutate `state` through us.
+        return FoldState(closed_starts=set(state.closed_starts))
+    closed: set[int] = set()
+    for r in region_list:
+        if predicate(r.kind, r.level):
+            closed.add(r.start_line)
+    return FoldState(closed_starts=closed)
+
+
 def find_heading_regions(source: str) -> list[FoldRegion]:
     """Extract Markdown ATX heading sections from `source`.
 
