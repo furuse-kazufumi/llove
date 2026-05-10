@@ -65,6 +65,7 @@ class LoveApp(App):
         ("r", "reset", "Reset views"),
         ("space", "toggle_pause", "Pause/Resume"),
         ("h", "show_help", "Help"),
+        (":", "command_palette", "Command Palette"),
     ]
 
     TITLE = "💗 llove"
