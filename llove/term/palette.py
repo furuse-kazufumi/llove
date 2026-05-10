@@ -129,7 +129,8 @@ class CommandPaletteWidget(Vertical):
             self._output_lines.append(row)
         if len(self._output_lines) > _OUTPUT_LIMIT:
             self._output_lines = self._output_lines[-_OUTPUT_LIMIT:]
-        self.query_one("#cp-output", Static).update("\n".join(self._output_lines))
+        self.last_output_text = "\n".join(self._output_lines)
+        self.query_one("#cp-output", Static).update(self.last_output_text)
         event.input.value = ""
         self._refresh_suggestions("")
 
