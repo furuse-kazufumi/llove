@@ -169,3 +169,53 @@ class TestHistoryRing:
 )
 def test_filter_parametrized(text: str, expected: list[str]) -> None:
     assert filter_suggestions(text, NAMES) == expected
+
+
+class TestHistoryRingPersistence:
+    def test_save_and_load_roundtrip(self, tmp_path: pytest.TempPathFactory) -> None:
+        p = tmp_path / "history"
+        h = HistoryRing()
+        h.push(":help")
+        h.push(":identity")
+        h.save(p)
+
+        h2 = HistoryRing()
+        h2.load(p)
+        assert h2.items == [":help", ":identity"]
+        assert h2.at_end()
+
+    def test_load_missing_file_is_noop(self, tmp_path: pytest.TempPathFactory) -> None:
+        h = HistoryRing()
+        h.load(tmp_path / "nonexistent")
+        assert h.items == []
+
+    def test_save_creates_parent_dir(self, tmp_path: pytest.TempPathFactory) -> None:
+        p = tmp_path / "nested" / "dir" / "history"
+        h = HistoryRing()
+        h.push(":demo")
+        h.save(p)
+        assert p.exists()
+        assert p.read_text(encoding="utf-8").strip() == ":demo"
+
+    def test_load_respects_maxlen(self, tmp_path: pytest.TempPathFactory) -> None:
+        p = tmp_path / "history"
+        p.write_text("\n".join(str(i) for i in range(10)) + "\n", encoding="utf-8")
+        h = HistoryRing(maxlen=5)
+        h.load(p)
+        assert h.items == ["5", "6", "7", "8", "9"]
+
+    def test_save_trims_to_maxlen(self, tmp_path: pytest.TempPathFactory) -> None:
+        p = tmp_path / "history"
+        h = HistoryRing(maxlen=3)
+        for s in ["a", "b", "c", "d"]:
+            h.push(s)
+        h.save(p)
+        lines = [l for l in p.read_text(encoding="utf-8").splitlines() if l]
+        assert lines == ["b", "c", "d"]
+
+    def test_blank_lines_skipped_on_load(self, tmp_path: pytest.TempPathFactory) -> None:
+        p = tmp_path / "history"
+        p.write_text(":help\n\n:identity\n  \n", encoding="utf-8")
+        h = HistoryRing()
+        h.load(p)
+        assert h.items == [":help", ":identity"]
