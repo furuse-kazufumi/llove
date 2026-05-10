@@ -216,6 +216,15 @@
 - [ ] **F15 (t) Markdown + SVG + Mermaid 視認性ターミナル** (2026-05-10 追加):
       - GitHub-flavored Markdown 全機能 (見出し / 表 / コードブロック /
         コールアウト / 数式 / フットノート / タスクリスト / 絵文字短縮形)
+      - **(t1) MarkdownView 骨組み 完了 (2026-05-10)**: Rich `Markdown`
+        ベースの新 View `llove/views/markdown_view.py` を導入。
+        NarrationView と同じ feed(event) インタフェース + latest-first 履歴 +
+        last_render / last_source スナップショット。GFM 基本構文
+        (見出し / 段落 / 箇条書き / 引用 / fenced code / inline / 太字)
+        が rich.markdown 経由でレンダリング。i18n は
+        `ui.pane.markdown.title` / `ui.pane.markdown.empty` を ja/en に追加。
+        テスト 12 件 PASS。コールアウト / 数式 / フットノート / タスクリスト /
+        絵文字短縮形は次段階で markdown-it-py プラグイン経由で拡張予定。
       - SVG ターミナル表示 (`rsvg-convert` / `cairosvg` → Pillow → 既存 image
         チェイン), `[browser-svg]` extras
       - Mermaid 図インライン表示 (`mmdc` 経由で SVG → image チェイン),
