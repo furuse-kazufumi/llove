@@ -289,12 +289,81 @@ class MarkdownView(Static, View):
         prefix = entry[: -len(self.last_source)]
         return prefix + folded
 
+    # ------------------------------------------------------------------
+    # F15 (t3) Mermaid 自動展開
+    # ------------------------------------------------------------------
+    def _mermaid_block_dir(self, source: str) -> Path:
+        """同じ mermaid source なら同じ subdir にキャッシュさせる."""
+        digest = hashlib.sha256(source.encode("utf-8")).hexdigest()[:16]
+        return self._mermaid_cache_dir / digest
+
+    def _call_mermaid_renderer(self, source: str) -> str:
+        """renderer 呼び出し → 本文に差し込む文字列を返す. Fail-closed."""
+        try:
+            result = self._mermaid_renderer(source, self._mermaid_block_dir(source))
+        except Exception:  # nosec B110 — renderer 失敗時は元 source を残す
+            return source
+        if result.kind == "image":
+            if self._mermaid_image_callback is not None:
+                try:
+                    self._mermaid_image_callback(result)
+                except Exception:  # nosec B110 — callback 失敗は view を壊さない
+                    pass
+            tool = result.argv[0] if result.argv else "image tool"
+            return f"_(◇ mermaid diagram → rendered separately via {tool})_"
+        # ascii kind (or unexpected): fall back to ascii_text if present
+        return result.ascii_text or source
+
+    def _expand_mermaid_in(self, text: str) -> str:
+        """text 内の `kind="mermaid"` フェンスを renderer 出力で置換する.
+
+        ``mermaid_render=False`` のときは何もしない (既存挙動を保つ)。
+        通常の code フェンスは触らない。fold で閉じられたフェンスは
+        サマリ行に置き換わっている (再開フェンスが無い) ため、ここでは
+        自動的に「開いている mermaid フェンスのみ」が展開される。
+        """
+        if not self._mermaid_render or not text:
+            return text
+        regions = find_code_block_regions(text)
+        mermaid_regions = sorted(
+            (r for r in regions if r.kind == "mermaid"),
+            key=lambda r: r.start_line,
+        )
+        if not mermaid_regions:
+            return text
+
+        lines = text.splitlines()
+        out: list[str] = []
+        i = 0
+        n = len(lines)
+        region_iter = iter(mermaid_regions)
+        next_region = next(region_iter, None)
+        while i < n:
+            if next_region is not None and i == next_region.start_line:
+                # フェンス内側 (open + 1 〜 close - 1) を renderer に渡す
+                body = "\n".join(
+                    lines[next_region.start_line + 1 : next_region.end_line]
+                )
+                out.append(self._call_mermaid_renderer(body))
+                i = next_region.end_line + 1
+                next_region = next(region_iter, None)
+            else:
+                out.append(lines[i])
+                i += 1
+        return "\n".join(out)
+
     def _render(self) -> None:
         """Rasterise the history (latest first) into both string + live widget."""
         rendered_chunks: list[str] = []
         live_chunks: list[str] = []
         for idx, entry in enumerate(self._entries):
             shown = self._folded_latest_entry(entry) if idx == 0 else entry
+            # mermaid 展開は fold の後段で動く (閉じられたフェンスは
+            # サマリ行になっており、開いているものだけが対象になる)。
+            # 現在のところ「最新エントリのみ」展開する — 旧履歴を後から
+            # mermaid 化すると過去のスクロール位置が崩れるため。
+            if idx == 0:
+                shown = self._expand_mermaid_in(shown)
             rendered_chunks.append(_markdown_to_text(shown, width=self._width))
             live_chunks.append(shown)
         rendered = "\n".join(rendered_chunks)
