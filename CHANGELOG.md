@@ -5,6 +5,32 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — F15 (t3) mmdc → SVG → ターミナル画像チェイン (2026-05-10)
+
+- **新モジュール `llove.views.mermaid_render`**: Mermaid source を
+  `mmdc -i .mmd -o .svg` で SVG 化 → 既存 image renderer chain
+  (`chafa` / `viu` / `timg` / `kitty +kitten icat` / `wezterm imgcat`) に
+  流すための薄い shim。
+  - 公開 API: `MermaidRender` (kind/argv/svg_path/ascii_text dataclass) /
+    `mmdc_available()` / `find_image_tool()` / `render_mermaid_to_svg()` /
+    `render_mermaid()` / `ascii_fallback()`。
+  - **依存性注入**: `mmdc_path` / `image_tool` / `runner` を全部差し替え可能。
+    mmdc 未インストールの CI / dev 環境でも全機能テスト可能 (subprocess を
+    踏まずに argv 検証ができる)。
+  - **Fail-closed**: mmdc の異常終了・出力ファイル欠損・OSError は全て
+    ASCII フォールバック (マーカー付きで mermaid source をそのまま表示) に
+    降りる。UI が renderer 失敗で落ちることはない。
+  - **セキュリティ**: subprocess は list-based argv のみ (shell=True 禁止)。
+    入力 source は temp `.mmd` に書き出し、引数経由の長文流入を回避。
+- **既存 image catalog (`llove.browser.external`) 再利用**: 画像ツール検出
+  は `available_tools("image")` 経由なので、新ツール追加時は catalog 1 行で
+  自動的に mermaid renderer も恩恵を受ける。
+- **テスト 16 件追加** (`test_mermaid_render.py`):
+  検出 (mmdc / image tool) 4 件 / `render_mermaid_to_svg` argv 検証 + 失敗
+  パス 5 件 / ASCII fallback 2 件 / 統合 `render_mermaid` 5 件
+  (image 成功 / mmdc 欠 / image 欠 / mmdc 失敗 / 自動検出)。
+  フルスイート **385 PASS** + 3 skipped、ruff クリーン、回帰ゼロ。
+
 ### Added — F15 (u6) Fold ステータス表示 (2026-05-10)
 
 - **`MarkdownView.fold_metrics()` / `fold_status()` 公開 API**:
