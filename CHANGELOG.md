@@ -5,6 +5,25 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — F20 Command Palette UI 骨組み (推奨順 D' 完了, 2026-05-10)
+
+- **D'. F20 Command Palette UI 骨組み** (`llove/term/`):
+  - `llove/term/completion.py` — UI 非依存の純粋関数:
+    `filter_suggestions` (前方一致優先 + difflib fuzzy fallback),
+    `complete_prefix` (Tab 補完で最大共通プレフィックスを返す),
+    `HistoryRing` (上下キー履歴, 重複排除 + 上限つき, push/up/down/reset).
+  - `llove/term/palette.py` — Textual widget:
+    `CommandPaletteWidget` (Input + 候補表示 Static + 出力 Static を 1 つに束ね,
+    Enter=submit→dispatch / Tab=補完 / Up,Down=履歴) と
+    `CommandPaletteScreen` (Vim ex 風 ModalScreen, Escape で dismiss).
+  - 公開 API: `llove.term` から `CommandPaletteWidget` /
+    `CommandPaletteScreen` / `HistoryRing` / `filter_suggestions` /
+    `complete_prefix` を再エクスポート (Textual 依存は PEP 562 lazy import で
+    UI 非依存テストに巻き込まない).
+  - 全 29 件 PASS — 純粋関数 23 (filter / complete / HistoryRing) +
+    Widget 6 (run_test() による boot / submit / 履歴 / 補完 / 候補表示 /
+    Modal 開閉). ruff クリーン. フルスイート 284 PASS + 1 skip 維持.
+
 ### Added — F20 Command Palette dispatch core (推奨順 D 完了, 2026-05-10)
 
 - **D. F20 Command Palette 最小骨組み** (`llove/term/`):
