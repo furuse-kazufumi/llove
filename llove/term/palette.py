@@ -20,6 +20,7 @@ F20 仕上げ:
 
 from __future__ import annotations
 
+from rich.text import Text as _RT
 from textual import events
 from textual.app import ComposeResult
 from textual.binding import Binding
@@ -41,17 +42,24 @@ from llove.term.completion import (
     highlight_match,
 )
 
-_OUTPUT_LIMIT = 200  # RichLog に保持する最大行数
+_OUTPUT_LIMIT = 200  # RichLog / _output_lines の保持行数上限
 
 
-def _format_result(result: CommandResult) -> list[str]:
-    """``CommandResult`` を画面に並べる行リストに整形."""
-    rows: list[str] = []
+def _format_result(result: CommandResult) -> list[_RT]:
+    """``CommandResult`` を ``rich.text.Text`` リストに整形.
+
+    エラーは赤スタイル適用. 通常行はプレーンテキストとして保持するため
+    ``[`` が Rich markup として誤解釈される問題を回避する.
+    """
+    rows: list[_RT] = []
     if result.error:
-        rows.append(f"[red]✘ {result.error}[/red]")
-    rows.extend(result.output)
+        t = _RT("✘ " + result.error)
+        t.stylize("red")
+        rows.append(t)
+    for line in result.output:
+        rows.append(_RT(line))
     if result.suggested:
-        rows.append("候補: " + ", ".join(f":{s}" for s in result.suggested))
+        rows.append(_RT("候補: " + ", ".join(f":{s}" for s in result.suggested)))
     return rows
 
 
