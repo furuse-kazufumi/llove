@@ -219,4 +219,5 @@ __all__ = [
     "HistoryRing",
     "complete_prefix",
     "filter_suggestions",
+    "highlight_match",
 ]
