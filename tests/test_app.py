@@ -107,6 +107,24 @@ async def test_app_quit_binding_terminates_cleanly() -> None:
 
 
 @pytest.mark.asyncio
+async def test_colon_key_opens_command_palette_screen() -> None:
+    """':' binding pushes CommandPaletteScreen as a modal."""
+    from llove.term.palette import CommandPaletteScreen
+
+    src = _StaticSource([Event(kind=EventKind.AUDIT, payload={"event": "ok"})])
+    app = LoveApp(src)
+    async with app.run_test(size=(120, 40)) as pilot:
+        await pilot.pause(0.05)
+        assert not any(isinstance(s, CommandPaletteScreen) for s in app.screen_stack)
+        await pilot.press(":")
+        await pilot.pause(0.05)
+        assert isinstance(app.screen, CommandPaletteScreen)
+        await pilot.press("escape")
+        await pilot.pause(0.05)
+        assert not isinstance(app.screen, CommandPaletteScreen)
+
+
+@pytest.mark.asyncio
 async def test_app_continues_when_a_view_raises() -> None:
     """A misbehaving view must not bring down the app."""
 
