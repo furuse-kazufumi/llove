@@ -163,9 +163,11 @@ class CommandPaletteWidget(Vertical):
         candidates = filter_suggestions(text, self.registry.names())
         suggest = self.query_one("#cp-suggest", Static)
         if not candidates:
+            self.last_suggest_text = ""
             suggest.update("")
             return
-        suggest.update("候補: " + "  ".join(f":{c}" for c in candidates))
+        self.last_suggest_text = "候補: " + "  ".join(f":{c}" for c in candidates)
+        suggest.update(self.last_suggest_text)
 
 
 class CommandPaletteScreen(ModalScreen[None]):
