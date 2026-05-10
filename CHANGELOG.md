@@ -5,6 +5,35 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Changed — F15 (t3) MermaidImagePane 非同期化 (2026-05-10)
+
+- **`set_render_async(mr)` 新設**: `Textual run_worker(thread=True)` を
+  使って subprocess (chafa 等) を別スレッドに逃がし、メインスレッドが
+  即座に返るので大きな diagram を貼っても **UI が凍らない**。
+- **`worker_dispatcher` 注入点**: コンストラクタ引数で work 関数の
+  dispatch 戦略を差し替え可能。テストでは同期実行する fake を渡して、
+  worker 経由のフローを 1 回呼んだだけで pane の更新を検証できる。
+- **`_compute_text(mr) → str` 抽出**: pure 関数。subprocess の起動 + 戻り値
+  処理 + fallback 文字列計算をここに閉じ込め、widget 更新は
+  `_apply_text` / `_apply_text_thread_safe` 側に分離。
+- **`_apply_text_thread_safe`**: worker thread から widget を更新するときは
+  `self.app.call_from_thread` 経由で main thread に飛ばす (Textual の
+  thread safety 規約)。App 外なら直接 `_apply_text` で OK。
+- **3 段 fallback**: ① `worker_dispatcher` (注入されていれば) → ② Textual
+  `self.run_worker(thread=True, exclusive=True)` → ③ 同期 fallback
+  (App 未 mount / 例外) のどこかで必ず work が実行される。
+- **ANSI 自動判定**: `_apply_text` は文字列に ESC (`\x1b`) が含まれていれば
+  `Text.from_ansi` 経由で描画、それ以外はプレーン表示。
+- **`make_mermaid_image_callback(pane, *, async_dispatch=True)`**:
+  デフォルトで async 経路を使う。`async_dispatch=False` で旧来の同期 path に
+  切り替え可能。MarkdownView 側からは shape は同じなので非互換変更なし。
+- **テスト 9 件追加** (`test_mermaid_pane_async.py`):
+  `_compute_text` 3 件 (image 成功 / 失敗 / ascii) /
+  `set_render_async` 4 件 (dispatcher 注入 / dispatcher 無し fallback /
+  dispatcher 例外 fallback / ascii subprocess 呼ばない) /
+  callback factory 2 件 (async 既定 / `async_dispatch=False`)。
+  フルスイート **415 PASS + 3 skipped** (406 → +9)、ruff クリーン、回帰ゼロ。
+
 ### Added — F15 (t3) Textual subprocess worker + MermaidImagePane (2026-05-10)
 
 - **新モジュール `llove/views/mermaid_pane.py`** — `MermaidRender(kind="image")`
