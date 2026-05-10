@@ -65,7 +65,7 @@ class CommandPaletteWidget(Vertical):
     DEFAULT_CSS = """
     CommandPaletteWidget {
         height: auto;
-        max-height: 24;
+        max-height: 32;
         background: $boost;
         border: round $primary;
         padding: 0 1;
@@ -75,8 +75,8 @@ class CommandPaletteWidget(Vertical):
         height: auto;
     }
     CommandPaletteWidget #cp-output {
-        color: $text;
-        height: auto;
+        height: 8;
+        min-height: 3;
         margin-top: 1;
     }
     """
