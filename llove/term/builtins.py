@@ -232,6 +232,75 @@ def _cmd_macro(args: list[str], ctx: CommandContext) -> CommandResult:
 
 
 # ---------------------------------------------------------------------------
+# F15 (u8) Foldable Blocks — `:fold` ディスパッチャ
+# ---------------------------------------------------------------------------
+
+# 受け付ける動詞. UI 層のフックに転送する verb 名と一致させる.
+_FOLD_VERBS: tuple[str, ...] = ("close-all", "open-all", "by-tag", "toggle")
+
+
+def _cmd_fold(args: list[str], ctx: CommandContext) -> CommandResult:
+    """`:fold <verb> [args]` — F15 (u8) フォールド操作のフロントエンド.
+
+    動詞:
+        close-all       全 fold を閉じる (Vim ``zM``)
+        open-all        全 fold を開く  (Vim ``zR``)
+        by-tag <kind>   特定 kind (heading / code / table) のみ閉じる
+        toggle <line>   特定行の fold を反転 (将来的なホットキー連携用)
+
+    実体は ``ctx.hooks['fold']`` に bind された callable に委譲する.
+    フックが未設定でも verb が正当であれば audit-warn 風の通知に留める
+    (F20(i) fail-closed). フックが verb を扱えない場合 (=None 返却)
+    のみ ok=False とする.
+    """
+    if not args:
+        return CommandResult(
+            ok=False,
+            error=(
+                "usage: :fold <close-all|open-all|by-tag <kind>|toggle <line>>"
+            ),
+        )
+    verb, *rest = args
+    if verb not in _FOLD_VERBS:
+        return CommandResult(
+            ok=False,
+            error=(
+                f"unknown fold verb: {verb!r}. valid: {', '.join(_FOLD_VERBS)}"
+            ),
+        )
+    if verb == "by-tag" and len(rest) != 1:
+        return CommandResult(
+            ok=False,
+            error="usage: :fold by-tag <heading|code|table>",
+        )
+    if verb == "toggle" and len(rest) != 1:
+        return CommandResult(
+            ok=False,
+            error="usage: :fold toggle <line>",
+        )
+
+    fold_hook = ctx.hooks.get("fold")
+    if fold_hook is None:
+        # 正当な verb だが受け取り手が居ない. audit-warn 相当でユーザーに
+        # 「無視した」事を明示し, 通常運転 (ok=True) で返す.
+        return CommandResult(
+            ok=True,
+            output=(
+                "(no active foldable view — fold ignored, "
+                "ensure a MarkdownView / NotebookView is mounted)",
+            ),
+        )
+
+    output = fold_hook(verb, list(rest))
+    if output is None:
+        return CommandResult(
+            ok=False,
+            error=f"current view does not support fold verb: {verb!r}",
+        )
+    return CommandResult(ok=True, output=tuple(output))
+
+
+# ---------------------------------------------------------------------------
 # Registration
 # ---------------------------------------------------------------------------
 
