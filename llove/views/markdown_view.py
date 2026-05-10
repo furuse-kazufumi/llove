@@ -73,7 +73,14 @@ class MarkdownView(Static, View):
     }
     """
 
-    def __init__(self, *, limit: int = 4, width: int = 100) -> None:
+    def __init__(
+        self,
+        *,
+        limit: int = 4,
+        width: int = 100,
+        doc_id: str | None = None,
+        fold_persist_dir: Path | None = None,
+    ) -> None:
         # Localised placeholder mirrors NarrationView so the i18n surface is
         # consistent across both panes; we fall back to a literal if a key is
         # missing in a particular locale.
@@ -87,13 +94,19 @@ class MarkdownView(Static, View):
         self._width = width
         self.last_source: str = ""
         self.last_render: str = self._initial
+        # F15 (u3) persistence wiring. With a doc_id we read the previous
+        # FoldState from disk on construction and write back on every mutating
+        # fold operation. Without one, persistence is silently disabled —
+        # legacy callers keep their existing behaviour.
+        self._doc_id: str | None = doc_id
+        self._fold_persist_dir: Path | None = fold_persist_dir
         # F15 (u): foldable blocks. We keep a single FoldState attached to the
         # view; folds apply to the *latest* entry's user text (where the user
         # is currently looking and interacting). Older history entries always
         # pass through verbatim — folding them would surprise users browsing
         # back through narration. State is keyed on line numbers (in
         # `last_source`), so a re-feed of the same document keeps folds shut.
-        self.fold_state: FoldState = FoldState()
+        self.fold_state: FoldState = self._load_fold_state_or_empty()
         try:
             self.border_title = t("ui.pane.markdown.title")
         except Exception:  # nosec B110 — i18n missing key.
