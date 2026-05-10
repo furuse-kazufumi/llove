@@ -6,6 +6,68 @@
 
 ---
 
+## 2026-05-10 (続き 2) — F15 (t3) MarkdownView mermaid 自動展開統合
+
+### 完成したもの
+
+`MarkdownView` に opt-in で mermaid 自動展開を統合。前段で作った
+`mermaid_render.py` を View 側から呼び出し、本文を実描画に置換する。
+
+- 新パラメータ 4 つ (デフォルト OFF で既存呼び出し側を破壊しない):
+  - `mermaid_render: bool = False` — 機能 ON/OFF
+  - `mermaid_renderer` — renderer fn (None なら `render_mermaid` ラップ)
+  - `mermaid_image_callback` — image kind の結果を受け取るホストフック
+  - `mermaid_cache_dir` — SVG キャッシュ先 (None で tempdir)
+- `_expand_mermaid_in()`: `find_code_block_regions` で `kind="mermaid"` の
+  フェンスを抽出 → 内側 DSL を renderer に流して、ASCII 経路は本文に
+  fallback 文字列を差し込み、image 経路はマーカー (`◇ mermaid diagram →
+  rendered separately via chafa`) を残し callback で MermaidRender を渡す。
+- **fold との順序**: fold が走った後で展開する。閉じ折られた mermaid は
+  サマリ行に置換済みなので、開いているフェンスだけが renderer に流れる。
+- **キャッシュ**: 同じ mermaid source は SHA-256 16 桁の subdir に集約。
+  再 feed で SVG を作り直さない。
+- **2 段 fail-closed**: renderer 例外 → 元 source 表示 / callback 例外 →
+  マーカーだけ残して view は健全。
+- 旧履歴は展開対象外 (最新エントリのみ)。スクロールバック中の fold が
+  動かないようにする方針 (fold と統一)。
+
+### テスト
+
+- 9 件追加 (`test_markdown_view_mermaid.py`):
+  default disabled / 通常 code 不変 / ASCII 経路 / 複数ブロック /
+  image callback / ASCII 時 callback 不発 / renderer 例外 / callback 例外 /
+  fold 互換性。
+- フルスイート **394 PASS + 3 skipped** (385 → +9)、ruff クリーン、回帰ゼロ。
+
+### 次セッションで着手する候補 (重要度順)
+
+1. **Textual subprocess worker** — 現在 callback で MermaidRender を渡す
+   までで止まっている。これを Textual の `run_worker` か `subprocess`
+   モジュールで実起動して、kitty graphics / sixel を View 上に貼る。
+   chafa は stdout 直書き派なので Textual が画面を奪われない仕組み
+   (Pixels widget / Term Image 連携) が必要。
+2. **(t2) SVG レンダラ** — `rsvg-convert` 検出 → image チェイン。
+   mermaid_render.py の構造をテンプレに `svg_render.py` を複製、
+   View 側統合は本セッションのパターンを再利用。
+3. **キーバインド (Vim/VSCode)** — `za` / `zM` / `zR` / `Ctrl+Shift+[`。
+4. **JSON ツリービュー / ログペイン fold** — folding.py の純粋関数を
+   別ビューに展開。
+5. **タスクリスト / コールアウト / 数式 (t1 拡張)** — `mdit-py-plugins`。
+
+### 設計メモ (将来参照)
+
+- 統合は `_expand_mermaid_in(text)` という pure 関数 1 本に閉じている
+  ので、Notebook View / DiagramPane が同じパターンを再利用できる。
+- 画像経路で本文にマーカーだけ残すのは「画像が後から非同期で出てくる」
+  ケースを想定 (Textual subprocess worker は async)。同期 callback で
+  既に画像表示が済んでいる場合もマーカーだけ残るが、これは「位置を
+  予約する」役割として正しい。
+- `mermaid_cache_dir` を tempdir デフォルトにしているのは、ユーザが
+  cache 場所を意識せず使えるようにするため。本格運用時は doc_id 連動
+  の永続キャッシュが望ましいが、F15 (t3) のスコープ外。
+
+---
+
 ## 2026-05-10 (続き) — F15 (t3) mmdc → SVG → 画像チェイン基盤
 
 ### 完成したもの
