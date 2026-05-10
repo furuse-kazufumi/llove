@@ -6,6 +6,63 @@
 
 ---
 
+## 2026-05-10 (続き 3) — F15 (t3) Textual subprocess worker + MermaidImagePane
+
+### 完成したもの
+
+mermaid 統合の最後のピース。MarkdownView の callback で受けた
+`MermaidRender(kind="image")` を実 subprocess (chafa) に流して、stdout の
+ANSI 出力を Textual widget に貼る経路。
+
+- 新モジュール `llove/views/mermaid_pane.py`:
+  - `run_image_render(argv, *, runner, timeout)`: pure 関数。argv を
+    実行 → stdout 文字列を返す。失敗時 None。runner 注入でテスト可。
+  - `MermaidImagePane(Static)`: Textual widget。`set_render(mr)` で
+    image / ascii / 失敗を分岐表示。Rich `Text.from_ansi` で ANSI を貼る。
+  - `make_mermaid_image_callback(pane)`: 同期 callback ファクトリ。
+    `MarkdownView.mermaid_image_callback` 互換。pane 側例外を吸収。
+- セキュリティ: subprocess list-based argv のみ、timeout 必須 (10s 既定)、
+  例外 / 非ゼロ / TimeoutExpired は全部 None 経由で fallback に降りる。
+- テスト容易性: runner 注入 + Static.update() が App 不要なので、12 件
+  全て subprocess を実行せずに走る。
+
+### テスト
+
+- 12 件追加 (`test_mermaid_pane.py`): pure runner 4 / Pane 5 / callback 2 /
+  end-to-end (MarkdownView → callback → pane → ANSI) 1。
+- フルスイート **406 PASS + 3 skipped** (394 → +12)、ruff クリーン、回帰ゼロ。
+
+### 次セッションで着手する候補 (重要度順)
+
+1. **Textual `run_worker(thread=True)` で `set_render` 非同期化** — 大き
+   な diagram で chafa が遅いと UI が凍る。現状は同期。スレッドに逃すと
+   UI が動き続けるが、widget update は main thread 経由が必要 (Textual の
+   `call_from_thread` パターン)。テストは sleep の代わりに mock runner で
+   制御。
+2. **実 chafa での E2E 検証 / 動作確認** — chafa が実際にインストール
+   されている開発環境で `llove demo` (or 専用 demo) を起動して
+   mermaid → image の見栄えを確認。CI ではスキップ (binary 依存)。
+3. **(t2) SVG レンダラ** — `rsvg-convert` 検出 → image チェイン。
+   `mermaid_render.py` + `mermaid_pane.py` の構造をそのままテンプレ化。
+4. **キーバインド (Vim/VSCode)** — `za` / `zM` / `zR` / `Ctrl+Shift+[`。
+5. **JSON ツリービュー / ログペイン fold** — folding.py の純粋関数を
+   別ビューに展開。
+
+### 設計メモ (将来参照)
+
+- `set_render` を同期にしたのは、テストを `runner` 注入だけで完結させる
+  ため。非同期化するときは `set_render` の中で `self.run_worker(...)` を
+  呼ぶラッパー (例 `set_render_async`) を足し、テストはそのまま同期版で
+  カバーし続けるのが楽。
+- `run_image_render` の戻り値は str (UTF-8 デコード済) にした。chafa は
+  ANSI を bytes で吐くが、Rich の `Text.from_ansi` が str を期待するため
+  型変換のレイヤを 1 箇所に閉じ込めた。デコード不能な bytes は
+  `errors="replace"` で生き残らせる (UI が落ちない方を優先)。
+- `MermaidImagePane` は `Static.update()` を try/except で囲んで App 外
+  でも落ちないようにした。これは MarkdownView の既存パターンと統一。
+
+---
+
 ## 2026-05-10 (続き 2) — F15 (t3) MarkdownView mermaid 自動展開統合
 
 ### 完成したもの
