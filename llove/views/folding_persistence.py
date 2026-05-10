@@ -23,16 +23,10 @@ from __future__ import annotations
 
 import os
 import re
-import sys
+import tomllib
 from pathlib import Path
 
 from llove.views.folding import FoldState
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:  # pragma: no cover — Python <3.11 is out of support, defensive only.
-    import tomli as tomllib  # type: ignore[import-not-found]
-
 
 FOLD_STATE_VERSION = 1
 """On-disk format version. Bumped when the schema changes incompatibly."""
