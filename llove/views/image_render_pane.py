@@ -1,6 +1,7 @@
-"""F15 (t3) — Mermaid 画像描画 Pane (Textual subprocess worker 連携).
+"""F15 (t2/t3) — Diagram 画像描画 Pane (Textual subprocess worker 連携).
 
-`MermaidRender(kind="image")` を受け取り、サブプロセス
+`MermaidRender` / `SVGRender` どちらも (kind / argv / ascii_text を共有
+する dataclass なら何でも) 受け取れる汎用 image render pane。subprocess
 (chafa / viu / timg / kitty +kitten icat / wezterm imgcat) を実起動して
 **stdout の ANSI 出力を Static widget に貼る** Textual ペイン。
 
@@ -9,12 +10,12 @@
 1. ``run_image_render(argv, runner)`` — pure 関数。argv を実行して stdout
    を str で返す。失敗時は ``None``。テストでは ``runner`` を注入し
    subprocess を踏まずに argv 検証ができる。
-2. ``MermaidImagePane(Static)`` — Textual widget。``set_render(mr)`` で
+2. ``ImageRenderPane(Static)`` — Textual widget。``set_render(result)`` で
    上記 helper を呼び、結果を Rich の ``Text.from_ansi`` 経由で widget に
    貼る。失敗時は ASCII fallback / 「render unavailable」マーカー。
-3. ``make_mermaid_image_callback(pane)`` — ``MarkdownView`` の
-   ``mermaid_image_callback`` 互換ファクトリ。同期 callback として動き、
-   内部で ``pane.set_render(mr)`` を呼ぶ。
+3. ``make_image_render_callback(pane)`` — ``MarkdownView`` の
+   ``diagram_image_callback`` 互換ファクトリ。同期 callback として動き、
+   内部で ``pane.set_render_async(result)`` を呼ぶ (既定)。
 
 セキュリティ:
 - subprocess は **list-based argv のみ** (shell=True 禁止)
@@ -25,6 +26,8 @@
 テスト容易性:
 - ``runner`` 差し替えで subprocess を踏まずに argv / 出力検証可能
 - ``Static.update()`` は App mount 不要なので widget 単体テスト可能
+- 型を Protocol で構造的に縛るので mermaid_render / svg_render に依存せず
+  テストが MermaidRender / SVGRender / 任意の互換 dataclass を渡せる
 """
 
 from __future__ import annotations
@@ -32,15 +35,31 @@ from __future__ import annotations
 import contextlib
 import subprocess  # nosec B404 — list-based argv only.
 from collections.abc import Callable
-from typing import TYPE_CHECKING
+from typing import Protocol
 
 from rich.text import Text
 from textual.widgets import Static
 
-from llove.views.mermaid_render import MermaidRender
 
-if TYPE_CHECKING:
-    pass
+# ---------------------------------------------------------------------------
+# 受け入れる結果の構造的型
+# ---------------------------------------------------------------------------
+
+
+class DiagramRenderResult(Protocol):
+    """Pane が必要とする最小限のフィールドだけを縛る Protocol.
+
+    ``MermaidRender`` (mermaid_render.py) / ``SVGRender`` (svg_render.py)
+    両方が満たす。後続フォーマットも同じ shape で書けば自動対応。
+
+    Pane は ``mr.kind`` / ``mr.argv`` / ``mr.ascii_text`` の 3 つしか
+    見ない。``svg_path`` / ``png_path`` / ``image_tool`` 等の追加フィールドは
+    pane の知ったことではない (caller が renderer 側で持つ)。
+    """
+
+    kind: str
+    argv: tuple[str, ...]
+    ascii_text: str
 
 
 # ---------------------------------------------------------------------------
@@ -100,26 +119,26 @@ def run_image_render(
 # Widget
 # ---------------------------------------------------------------------------
 
-_PLACEHOLDER = "_(no mermaid render yet)_"
+_PLACEHOLDER = "_(no diagram render yet)_"
 _UNAVAILABLE_MARKER = "_(◇ image render unavailable — falling back to ASCII)_"
 
 
-class MermaidImagePane(Static):
-    """Textual pane that displays the latest mermaid image render.
+class ImageRenderPane(Static):
+    """Textual pane that displays the latest diagram (mermaid / svg / ...) render.
 
     Lifecycle:
         - 初期表示は placeholder
-        - ``set_render(mr)`` で MermaidRender を渡すと、kind に応じて
-          subprocess (image) / ascii_text (ascii) を表示する
-        - subprocess 失敗時は ASCII fallback (mr.ascii_text) があればそれ、
+        - ``set_render(result)`` で ``DiagramRenderResult`` を渡すと、kind に
+          応じて subprocess (image) / ascii_text (ascii) を表示する
+        - subprocess 失敗時は ASCII fallback (result.ascii_text) があればそれ、
           無ければ ``_UNAVAILABLE_MARKER`` を出す
     """
 
-    name = "mermaid_image"
-    title = "Mermaid"
+    name = "diagram_image"
+    title = "Diagram"
 
     DEFAULT_CSS = """
-    MermaidImagePane {
+    ImageRenderPane {
         height: 1fr;
         border: round $accent;
         padding: 0 1;
@@ -140,22 +159,22 @@ class MermaidImagePane(Static):
         # にフォールバックを試み、それも失敗したら同期実行に降りる。
         self._worker_dispatcher: WorkerDispatcher | None = worker_dispatcher
         self.last_render: str = _PLACEHOLDER
-        self.border_title = "Mermaid"
+        self.border_title = "Diagram"
 
     # ------------------------------------------------------------------
     # 公開 API
     # ------------------------------------------------------------------
-    def set_render(self, mr: MermaidRender) -> None:
-        """``MermaidRender`` を受け取り、**同期で** widget の表示を更新する.
+    def set_render(self, result: DiagramRenderResult) -> None:
+        """``DiagramRenderResult`` を受け取り、**同期で** widget の表示を更新する.
 
         subprocess は呼び出しスレッドで走る。chafa が遅い diagram で UI を
         凍らせたくない場合は ``set_render_async`` を使うこと。
         """
-        text = self._compute_text(mr)
+        text = self._compute_text(result)
         self._apply_text(text)
 
-    def set_render_async(self, mr: MermaidRender) -> None:
-        """``MermaidRender`` を **worker 経由で非同期に** 適用する.
+    def set_render_async(self, result: DiagramRenderResult) -> None:
+        """``DiagramRenderResult`` を **worker 経由で非同期に** 適用する.
 
         worker_dispatcher が注入されていればそれを使う。注入されていない場合
         Textual の ``self.run_worker(thread=True)`` を試み、それも使えない
@@ -164,34 +183,34 @@ class MermaidImagePane(Static):
         気にしなくて良い。
         """
         def work() -> None:
-            text = self._compute_text(mr)
+            text = self._compute_text(result)
             self._apply_text_thread_safe(text)
 
         try:
             self._dispatch_to_worker(work)
         except Exception:
             # dispatch 自体が落ちた → 同期 fallback で widget を更新
-            self.set_render(mr)
+            self.set_render(result)
 
     # ------------------------------------------------------------------
     # 内部
     # ------------------------------------------------------------------
-    def _compute_text(self, mr: MermaidRender) -> str:
-        """``MermaidRender`` から widget に貼る文字列を計算する pure 関数.
+    def _compute_text(self, result: DiagramRenderResult) -> str:
+        """``DiagramRenderResult`` から widget に貼る文字列を計算する pure 関数.
 
         画像経路で subprocess が成功すれば ANSI 文字列を返す (ESC が含まれる
         ので ``_apply_text`` 側が Rich の ``Text.from_ansi`` で描画する)。
-        失敗時は ``mr.ascii_text`` か ``_UNAVAILABLE_MARKER`` に降りる。
+        失敗時は ``result.ascii_text`` か ``_UNAVAILABLE_MARKER`` に降りる。
         """
-        if mr.kind == "image":
+        if result.kind == "image":
             captured = run_image_render(
-                list(mr.argv), runner=self._runner, timeout=self._timeout
+                list(result.argv), runner=self._runner, timeout=self._timeout
             )
             if captured is not None and captured.strip():
                 return captured
-            return mr.ascii_text or _UNAVAILABLE_MARKER
-        if mr.kind == "ascii":
-            return mr.ascii_text or _PLACEHOLDER
+            return result.ascii_text or _UNAVAILABLE_MARKER
+        if result.kind == "ascii":
+            return result.ascii_text or _PLACEHOLDER
         # 想定外 kind: placeholder ではなく unavailable で「描けない」と伝える
         return _UNAVAILABLE_MARKER
 
@@ -240,12 +259,12 @@ class MermaidImagePane(Static):
 # ---------------------------------------------------------------------------
 
 
-def make_mermaid_image_callback(
-    pane: MermaidImagePane,
+def make_image_render_callback(
+    pane: ImageRenderPane,
     *,
     async_dispatch: bool = True,
-) -> Callable[[MermaidRender], None]:
-    """``MarkdownView.mermaid_image_callback`` 互換の同期 callback を作る.
+) -> Callable[[DiagramRenderResult], None]:
+    """``MarkdownView.diagram_image_callback`` 互換の同期 callback を作る.
 
     既定 (``async_dispatch=True``) では `pane.set_render_async` 経由で
     Textual worker に dispatch する (UI が凍らない)。テストや subprocess
@@ -255,20 +274,21 @@ def make_mermaid_image_callback(
     波及させないため)。
     """
 
-    def callback(mr: MermaidRender) -> None:
+    def callback(result: DiagramRenderResult) -> None:
         with contextlib.suppress(Exception):
             if async_dispatch:
-                pane.set_render_async(mr)
+                pane.set_render_async(result)
             else:
-                pane.set_render(mr)
+                pane.set_render(result)
 
     return callback
 
 
 __all__ = [
-    "MermaidImagePane",
+    "DiagramRenderResult",
+    "ImageRenderPane",
     "SubprocessRunner",
     "WorkerDispatcher",
-    "make_mermaid_image_callback",
+    "make_image_render_callback",
     "run_image_render",
 ]
