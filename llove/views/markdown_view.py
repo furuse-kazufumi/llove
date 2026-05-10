@@ -394,7 +394,7 @@ class MarkdownView(Static, View):
             # 現在のところ「最新エントリのみ」展開する — 旧履歴を後から
             # mermaid 化すると過去のスクロール位置が崩れるため。
             if idx == 0:
-                shown = self._expand_mermaid_in(shown)
+                shown = self._expand_diagram_blocks_in(shown)
             rendered_chunks.append(_markdown_to_text(shown, width=self._width))
             live_chunks.append(shown)
         rendered = "\n".join(rendered_chunks)
