@@ -204,10 +204,10 @@ def test_image_callback_exception_does_not_break_view(tmp_path: Path) -> None:
         raise RuntimeError("dispatch broke")
 
     v = MarkdownView(
-        mermaid_render=True,
-        mermaid_renderer=renderer,
-        mermaid_image_callback=bad_callback,
-        mermaid_cache_dir=tmp_path,
+        diagram_render=True,
+        diagram_renderers={"mermaid": renderer},
+        diagram_image_callback=bad_callback,
+        diagram_cache_dir=tmp_path,
     )
     v.feed(_narration("```mermaid\nflowchart LR\n```\n"))
     assert v.last_render  # didn't blow up
