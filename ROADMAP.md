@@ -239,6 +239,18 @@
       - スクリーンリーダー連携 (espeak / festival / say) — オプション
       - 統合 URI: `md://`, `svg://`, `mermaid://`
 - [ ] **F15 (u) Foldable Blocks (ブロック折り畳み)** (2026-05-10 ユーザ要望):
+      - **(u 段階 1) UI 非依存データ層 + 見出しセクション折り畳み 完了
+        (2026-05-10)**: `llove/views/folding.py` に
+        `FoldRegion / FoldState / find_heading_regions / apply_folds` を
+        新設 (純粋関数 + 不変/可変データクラス、Textual/Rich 非依存)。
+        ATX 見出し抽出はネスト + code fence 回避対応。
+        `▶ ## Heading (N lines)` サマリ生成 (u4)。MarkdownView に
+        `toggle_fold / close_all_folds / open_all_folds / fold_regions`
+        を統合。最新エントリのみに fold 適用 (旧履歴は常に展開)、
+        line-number ベース永続性で同一文書再 feed でも保持。
+        テスト 19 件全 PASS。次段階: コードブロック/Mermaid/表 fold,
+        キーバインド (Vim/VSCode), `~/.config/llove/folds/<doc-id>.toml`
+        永続化, F20 コマンドパレット `:fold ...` 連携。
       - 対象: 見出しセクション / コードブロック / Mermaid / SVG / 画像 /
         表 / 引用 / コールアウト / JSON ツリー / ログペイン / Notebook セル /
         Command Palette 出力履歴
