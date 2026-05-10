@@ -120,8 +120,7 @@ async def test_suggestion_panel_updates_on_change() -> None:
         inp.focus()
         await pilot.press(*":p")
         await pilot.pause(0.02)
-        sug = app.palette.query_one("#cp-suggest").renderable
-        text = str(sug)
+        text = app.palette.last_suggest_text
         assert ":peer" in text and ":play" in text
 
 
