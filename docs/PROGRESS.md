@@ -6,6 +6,67 @@
 
 ---
 
+## 2026-05-10 (続き 4) — F15 (t3) MermaidImagePane 非同期化
+
+### 完成したもの
+
+`set_render_async(mr)` を追加し、subprocess を別スレッドに逃がして UI を
+凍らせない経路を完成。
+
+- 3 段 fallback で「必ず work が走る」状態:
+  1. `worker_dispatcher` 注入 (テスト / 特殊用途)
+  2. Textual の `self.run_worker(work, thread=True, exclusive=True)`
+  3. 同期 fallback (App 未 mount / 例外時)
+- pure 関数 `_compute_text(mr) -> str` を抽出し、subprocess + 戻り値
+  処理 + fallback 計算をここに閉じ込め。widget 更新は `_apply_text` /
+  `_apply_text_thread_safe` に分離。
+- `_apply_text_thread_safe` は worker thread から widget を更新するときの
+  入口で、Textual App 内なら `self.app.call_from_thread` 経由で main
+  thread へ飛ばし、App 外なら直接更新する (テスト互換)。
+- ANSI 自動判定: `_apply_text` は ESC (`\x1b`) を含む文字列を
+  Rich `Text.from_ansi` で描画。プレーンは `update(text)` で直貼り。
+- `make_mermaid_image_callback(pane, *, async_dispatch=True)` のデフォルトを
+  async に変更。`async_dispatch=False` で旧来の同期 path に戻せるので、
+  テストや「即座に結果が欲しい」用途は両立可能。
+
+### テスト
+
+- 9 件追加 (`test_mermaid_pane_async.py`):
+  `_compute_text` 3 / `set_render_async` 4 / callback factory 2。
+- フルスイート **415 PASS + 3 skipped** (406 → +9)、ruff クリーン、回帰ゼロ。
+
+### 次セッションで着手する候補 (重要度順)
+
+1. **実 chafa での E2E 検証** — chafa を実際にインストールした dev 環境で
+   `llove demo` 経由で mermaid → image の見栄えを確認。CI ではスキップ
+   (binary 依存)。
+2. **(t2) SVG レンダラ** — `rsvg-convert` 検出 → image チェイン。
+   `mermaid_render.py` + `mermaid_pane.py` の構造をそのままテンプレ化
+   できるはず。
+3. **キーバインド (Vim/VSCode)** — `za` / `zM` / `zR` / `Ctrl+Shift+[`。
+4. **JSON ツリービュー / ログペイン fold** — folding.py の純粋関数を
+   別ビューに展開。
+5. **タスクリスト / コールアウト / 数式 (t1 拡張)** — `mdit-py-plugins`。
+
+### 設計メモ (将来参照)
+
+- worker thread からの widget 更新は `call_from_thread` 経由が原則。
+  Textual の widget は主に main loop 上で操作される前提なので、これを
+  破ると race condition のリスクがある。`_apply_text_thread_safe` で
+  この規約を 1 箇所に閉じ込めた。
+- `worker_dispatcher` の注入を可能にしたのは、テストで「dispatch されたか」
+  「何回呼ばれたか」「同期 fallback が効いたか」を順序付きで検証するため。
+  本番では None で十分 (Textual `self.run_worker` が選ばれる)。
+- `exclusive=True` を `run_worker` に付けたのは、同じ pane で連続して
+  mermaid が来たときに古い render を打ち切って最新だけを表示するため。
+  Textual のデフォルトは並列なので、画面が一瞬古い image で上書きされる
+  問題を予防。
+- ANSI 自動判定 (ESC 含む?) は単純だが堅い。Rich の `Text.from_ansi` は
+  ANSI が無い文字列を渡しても安全に動くが、無駄な解析を避けるため
+  分岐させている。
+
+---
+
 ## 2026-05-10 (続き 3) — F15 (t3) Textual subprocess worker + MermaidImagePane
 
 ### 完成したもの
