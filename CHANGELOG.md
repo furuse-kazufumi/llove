@@ -5,6 +5,35 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — F15 (t3) Textual subprocess worker + MermaidImagePane (2026-05-10)
+
+- **新モジュール `llove/views/mermaid_pane.py`** — `MermaidRender(kind="image")`
+  を受け取り、subprocess (chafa / viu / timg / kitty +kitten icat /
+  wezterm imgcat) を実起動して **stdout の ANSI 出力を Static widget に貼る**。
+- **`run_image_render(argv, *, runner, timeout)`** — pure 関数。argv を実行
+  し、捕捉した stdout を str で返す。失敗時 (空 argv / 非ゼロ終了 /
+  OSError / TimeoutExpired) は ``None``。テストでは ``runner`` 注入で
+  subprocess を踏まずに argv 検証可能。
+- **`MermaidImagePane(Static)`** — Textual widget。``set_render(mr)`` で
+  `MermaidRender` を受け、kind に応じて分岐:
+  - `image` → subprocess 起動 → 成功なら `Text.from_ansi()` で widget 更新
+  - `ascii` → `mr.ascii_text` をそのまま貼る
+  - 失敗 → `mr.ascii_text` か `_UNAVAILABLE_MARKER` で fallback
+- **`make_mermaid_image_callback(pane)`** — `MarkdownView.mermaid_image_callback`
+  互換ファクトリ。同期 callback として動き、内部で `pane.set_render(mr)`
+  を呼ぶ。`set_render` の例外は `contextlib.suppress` で握り潰して
+  View 側に波及させない。
+- **セキュリティ**: subprocess は list-based argv のみ (shell=True 禁止)、
+  必ず timeout 付き (デフォルト 10 秒)。
+- **テスト容易性**: `runner` 差し替えで subprocess 不要 / `Static.update()`
+  は App mount 不要 → widget 単体テスト可能。
+- **テスト 12 件追加** (`test_mermaid_pane.py`):
+  runner pure 関数 4 件 (成功 / 非ゼロ / OSError / 空 argv) /
+  Pane 5 件 (placeholder / image 成功 / ascii / 失敗 / argv 空) /
+  callback ファクトリ 2 件 (正常ルーティング / pane 例外吸収) /
+  end-to-end MarkdownView → pane 1 件。
+  フルスイート **406 PASS + 3 skipped** (394 → +12)、ruff クリーン、回帰ゼロ。
+
 ### Added — F15 (t3) MarkdownView mermaid 自動展開統合 (2026-05-10)
 
 - **`MarkdownView` 4 つの新パラメータ** (全て opt-in、デフォルトは既存挙動維持):
