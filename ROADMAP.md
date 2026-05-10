@@ -284,8 +284,17 @@
         I/O 失敗は黙って続行 (UI を絶対に止めない fail-closed)。
         明示 flush 用 `save_folds()` 追加。`doc_id` 未指定時は完全に
         レガシー動作。テスト 6 件追加、フルスイート 343 PASS。
-        次段階: キーバインド (Vim/VSCode), Mermaid 図 fold,
-        :fold preset 拡張。
+      - **(u 段階 6 = u8 補) `:fold preset` 4 種実装 完了 (2026-05-10)**:
+        `outline` (h1/h2 のみ展開) / `code` (code のみ展開) /
+        `data-only` (table のみ展開) / `prose` (見出しのみ展開) を
+        folding.py の純粋関数 `apply_preset` で実装 (冪等、不明名は
+        fail-safe defensive copy)。`:fold preset <name>` 動詞を
+        `_cmd_fold` に追加、`make_markdown_fold_hook` で MarkdownView
+        に bind (適用後 `_render` + `_persist_fold_state` で永続化も
+        自動)。`by-tag` 動詞も永続化フック追加。
+        テスト 10 件追加、フルスイート 353 PASS。次段階:
+        キーバインド (Vim/VSCode マウス), Mermaid 図 fold,
+        JSONTreeView / NotebookView 連携。
       - 対象: 見出しセクション / コードブロック / Mermaid / SVG / 画像 /
         表 / 引用 / コールアウト / JSON ツリー / ログペイン / Notebook セル /
         Command Palette 出力履歴
