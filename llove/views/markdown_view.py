@@ -268,6 +268,11 @@ class MarkdownView(Static, View):
         rendered = "\n".join(rendered_chunks)
         self.last_render = rendered
 
+        # F15 (u6): keep the border subtitle in sync with the fold metric so
+        # the user sees `[fold: 3 closed / 12 total]` without us having to
+        # plumb a status bar through every container.
+        self.border_subtitle = self.fold_status()
+
         # Live update for an actually-mounted widget. Rich Markdown is the
         # source of truth on screen; the string snapshot above is for tests,
         # exports, and SVG capture.
