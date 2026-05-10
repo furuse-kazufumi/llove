@@ -13,7 +13,6 @@ Summary lines per (u4):
 
 from __future__ import annotations
 
-
 # ----------------------------------------------------------------------
 # find_code_block_regions
 # ----------------------------------------------------------------------
@@ -162,7 +161,12 @@ def test_apply_folds_table_summary_format() -> None:
 
 def test_apply_folds_mixed_kinds_independent() -> None:
     """Closing a code fold must not affect a sibling table fold."""
-    from llove.views.folding import FoldState, apply_folds, find_code_block_regions, find_table_regions
+    from llove.views.folding import (
+        FoldState,
+        apply_folds,
+        find_code_block_regions,
+        find_table_regions,
+    )
 
     src = (
         "```py\nx = 1\n```\n"
@@ -182,7 +186,12 @@ def test_apply_folds_mixed_kinds_independent() -> None:
 
 
 def test_apply_folds_close_by_kind_code_only() -> None:
-    from llove.views.folding import FoldState, apply_folds, find_code_block_regions, find_heading_regions
+    from llove.views.folding import (
+        FoldState,
+        apply_folds,
+        find_code_block_regions,
+        find_heading_regions,
+    )
 
     src = "# A\nbody A\n```py\nx = 1\n```\n# B\n"
     regions = find_heading_regions(src) + find_code_block_regions(src)

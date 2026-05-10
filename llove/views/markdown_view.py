@@ -163,7 +163,7 @@ class MarkdownView(Static, View):
             return entry
         if not self.last_source or not entry.endswith(self.last_source):
             return entry
-        regions = find_heading_regions(self.last_source)
+        regions = self.fold_regions()
         if not regions:
             return entry
         folded = apply_folds(self.last_source, regions, self.fold_state)
