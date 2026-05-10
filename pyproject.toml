@@ -71,6 +71,10 @@ dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
     "pytest-cov>=5.0",
+    # Textual snapshot testing — captures actual widget renders as SVG
+    # baselines, so CSS / レイアウト / placeholder の表示崩れを回帰検知
+    # できる (F15 (t2/t3) ImageRenderPane の visual regression テスト用)。
+    "pytest-textual-snapshot>=1.0",
     "hypothesis>=6.0",
     "ruff>=0.5",
     "bandit>=1.8",
