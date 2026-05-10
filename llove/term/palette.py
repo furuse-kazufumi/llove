@@ -100,6 +100,10 @@ class CommandPaletteWidget(Vertical):
         self.history = history or HistoryRing(maxlen=max_history)
         self._placeholder = placeholder
         self._output_lines: list[str] = []
+        # Textual ``Static`` は内部表現が版で変わるため, テスト & 観測用に
+        # 直近の表示テキストを Widget 側でも保持しておく.
+        self.last_suggest_text: str = ""
+        self.last_output_text: str = ""
 
     # ------------------------------------------------------------------ compose
     def compose(self) -> ComposeResult:
