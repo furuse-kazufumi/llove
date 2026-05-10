@@ -227,6 +227,17 @@
         絵文字短縮形は次段階で markdown-it-py プラグイン経由で拡張予定。
       - SVG ターミナル表示 (`rsvg-convert` / `cairosvg` → Pillow → 既存 image
         チェイン), `[browser-svg]` extras
+      - **MermaidImagePane 非同期化完了 (2026-05-10, F15 (t3))**:
+        `set_render_async(mr)` を追加し Textual `run_worker(thread=True,
+        exclusive=True)` 経由で subprocess を別スレッドに逃がす。3 段
+        fallback (`worker_dispatcher` 注入 → `self.run_worker` → 同期実行)
+        で App 未 mount / 例外でも必ず work が走る。worker thread からの
+        widget 更新は `app.call_from_thread` 経由 (Textual thread safety
+        規約)。`_compute_text` を pure 関数として切り出してテスト容易化。
+        `make_mermaid_image_callback` のデフォルトを async に変更
+        (旧来挙動は `async_dispatch=False` で復活可能)。テスト 9 件追加、
+        フルスイート 415 PASS。**残課題**: 実 chafa での E2E 検証
+        (現状は runner / dispatcher 注入の単体テストのみ)。
       - **Textual subprocess worker + MermaidImagePane 完了
         (2026-05-10, F15 (t3))**: 新モジュール `llove/views/mermaid_pane.py` で
         `MermaidImagePane(Static)` widget + `run_image_render` (pure 関数,
