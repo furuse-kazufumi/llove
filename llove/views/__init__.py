@@ -60,6 +60,7 @@ __all__ = [
     "View",
     "apply_folds",
     "ascii_fallback",
+    "ascii_fallback_for_svg",
     "default_fold_state_path",
     "find_code_block_regions",
     "find_heading_regions",
