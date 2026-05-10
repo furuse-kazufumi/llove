@@ -148,12 +148,18 @@ class MarkdownView(Static, View):
         # `diagram_renderers[kind]` に流して、ASCII フォールバック文字列の
         # 差込 or image callback への通知に分岐する。
         self._diagram_render: bool = diagram_render
-        # 注入された renderers を既定マップにマージ。ユーザは kind 単位で
-        # 上書きでき、未指定 kind は既定 renderer に落ちる。
-        merged: dict[str, DiagramRendererFn] = _default_diagram_renderers()
-        if diagram_renderers:
-            merged.update(diagram_renderers)
-        self._diagram_renderers: dict[str, DiagramRendererFn] = merged
+        # ``diagram_renderers`` の解釈:
+        #   None       → 既定 (mermaid + svg) を使う
+        #   非空 dict  → そのキーセットだけが diagram として展開対象。
+        #                既定とのマージはしない (「mermaid だけ展開して
+        #                svg は触らないでほしい」を表現できる方を優先)。
+        #   merge したい呼び出し側は明示的に
+        #   ``_default_diagram_renderers() | {...}`` を渡す。
+        self._diagram_renderers: dict[str, DiagramRendererFn] = (
+            dict(diagram_renderers)
+            if diagram_renderers is not None
+            else _default_diagram_renderers()
+        )
         self._diagram_image_callback: DiagramImageCallback | None = (
             diagram_image_callback
         )
