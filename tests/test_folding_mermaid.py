@@ -85,9 +85,12 @@ def test_summary_line_for_mermaid_uses_marker_prefix() -> None:
 
 def test_apply_preset_prose_folds_mermaid() -> None:
     """The `prose` preset hides distractions; mermaid counts as one."""
-    from llove.views.folding import FoldState, apply_preset
-
-    from llove.views.folding import find_code_block_regions, find_heading_regions
+    from llove.views.folding import (
+        FoldState,
+        apply_preset,
+        find_code_block_regions,
+        find_heading_regions,
+    )
 
     src = "# H\n```mermaid\nflowchart LR\n```\n```py\nx = 1\n```\n"
     regions = find_heading_regions(src) + find_code_block_regions(src)
