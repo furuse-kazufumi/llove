@@ -225,6 +225,14 @@
         `ui.pane.markdown.title` / `ui.pane.markdown.empty` を ja/en に追加。
         テスト 12 件 PASS。コールアウト / 数式 / フットノート / タスクリスト /
         絵文字短縮形は次段階で markdown-it-py プラグイン経由で拡張予定。
+      - **MermaidImagePane → ImageRenderPane リネーム完了
+        (2026-05-10, F15 (t2/t3))**: `mermaid_pane.py` を削除し
+        `image_render_pane.py` を新設。`DiagramRenderResult` Protocol
+        (kind / argv / ascii_text 構造的型付け) で pane の入力型を抽象化、
+        `MermaidRender` / `SVGRender` 両方が満たす。後続フォーマットも
+        Protocol を満たせば pane を触らず対応可能。`make_image_render_callback`
+        も同名修正。テスト 21 件を新ファイルに移行 (Protocol 互換テスト
+        1 件追加)、フルスイート 442 PASS、新ファイルは ruff クリーン。
       - **MarkdownView を mermaid + svg 統一処理に汎化完了
         (2026-05-10, F15 (t2/t3))**: `mermaid_*` パラメータを `diagram_*`
         に rename し (`diagram_render` / `diagram_renderers: dict[str,
