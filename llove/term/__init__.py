@@ -39,7 +39,7 @@ from llove.term.completion import (
 )
 
 
-def __getattr__(name: str):  # noqa: ANN202 -- PEP 562 lazy import
+def __getattr__(name: str):  # PEP 562 lazy import
     """UI widget は Textual を import するため遅延ロード.
 
     UI 非依存層 (command / completion / builtins) をテストする時に
