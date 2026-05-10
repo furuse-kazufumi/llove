@@ -92,6 +92,10 @@ class MarkdownView(Static, View):
         width: int = 100,
         doc_id: str | None = None,
         fold_persist_dir: Path | None = None,
+        mermaid_render: bool = False,
+        mermaid_renderer: MermaidRendererFn | None = None,
+        mermaid_image_callback: MermaidImageCallback | None = None,
+        mermaid_cache_dir: Path | None = None,
     ) -> None:
         # Localised placeholder mirrors NarrationView so the i18n surface is
         # consistent across both panes; we fall back to a literal if a key is
