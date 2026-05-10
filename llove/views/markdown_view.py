@@ -123,6 +123,22 @@ class MarkdownView(Static, View):
         # back through narration. State is keyed on line numbers (in
         # `last_source`), so a re-feed of the same document keeps folds shut.
         self.fold_state: FoldState = self._load_fold_state_or_empty()
+        # F15 (t3) Mermaid 描画統合. デフォルト無効 (既存呼び出し側を破壊しない)。
+        # mermaid_render=True にすると _render() の最後で kind="mermaid" の
+        # フェンスを renderer に流して、ASCII フォールバック文字列の差込 or
+        # image callback への通知のいずれかに分岐する。
+        self._mermaid_render: bool = mermaid_render
+        self._mermaid_renderer: MermaidRendererFn = (
+            mermaid_renderer or _default_mermaid_renderer
+        )
+        self._mermaid_image_callback: MermaidImageCallback | None = (
+            mermaid_image_callback
+        )
+        self._mermaid_cache_dir: Path = (
+            mermaid_cache_dir
+            if mermaid_cache_dir is not None
+            else Path(tempfile.gettempdir()) / "llove-mermaid-cache"
+        )
         try:
             self.border_title = t("ui.pane.markdown.title")
         except Exception:  # nosec B110 — i18n missing key.
