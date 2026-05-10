@@ -3,13 +3,15 @@
 > 自動生成: `libexec/raptor-auto-summary` (Stop hook)
 > 次回 ccr 起動時に CLAUDE.md SESSION START で自動的に読み取られる。
 
-- **最終更新**: 2026-05-10 13:54:39
+- **最終更新**: 2026-05-10 16:16:33
 - **プロジェクト**: `D:/projects/llove`
 - **ブランチ**: `main`
 
 ## 直近の git log
 
 ```
+8bfed67 auto: test_mermaid_render.py 編集前 (2026-05-10 16:15)
+c8d416d auto: test_diagram_properties.py 編集前 (2026-05-10 16:06)
 6b2dc5a docs(readme): F15 (t2/t3) Diagram auto-render パイプライン完成を反映
 685946e auto: README.md 編集前 (2026-05-10 13:52)
 7e4a97b refactor(views): F15 (t2/t3) MermaidImagePane → ImageRenderPane リネーム
@@ -18,34 +20,34 @@ cc9e612 auto: PROGRESS.md 編集前 (2026-05-10 13:47)
 fe307ed auto: CHANGELOG.md 編集前 (2026-05-10 13:47)
 786956f auto: __init__.py 編集前 (2026-05-10 13:44)
 bf67e75 auto: __init__.py 編集前 (2026-05-10 13:44)
-5430f50 auto: __init__.py 編集前 (2026-05-10 13:44)
-6624917 auto: __init__.py 編集前 (2026-05-10 13:44)
 ```
 
 ## 現在の git status
 
 ```
-M docs/SESSION_SUMMARY.md
+M tests/test_diagram_properties.py
+ M tests/test_e2e_real_chafa.py
+ M tests/test_mermaid_render.py
 ```
 
 ## 直近 2 時間に変更されたファイル
 
 ```
-13:53 docs/SESSION_SUMMARY.md
-13:52 README.md
-13:52 .pytest_cache/v/cache/nodeids
-13:52 .hypothesis/tmp/tmp_huv4m9d
-13:47 docs/PROGRESS.md
-13:47 ROADMAP.md
-13:47 CHANGELOG.md
-13:46 .ruff_cache/0.15.9/7613058446763943040
-13:46 .hypothesis/tmp/tmphk9tynzg
-13:46 .hypothesis/constants/f26f2a0c0755c906
-13:46 .hypothesis/constants/dc2e7fab69e37b49
-13:46 llove/views/image_render_pane.py
-13:46 llove/views/__init__.py
-13:46 .ruff_cache/0.15.9/6864149886187679858
-13:45 .hypothesis/tmp/tmpz7u4ca__
+16:16 .pytest_cache/v/cache/nodeids
+16:15 .hypothesis/tmp/tmpnw_50ice
+16:15 .pytest_cache/v/cache/lastfailed
+16:15 .hypothesis/tmp/tmp0z85wuu9
+16:15 tests/test_e2e_real_chafa.py
+16:15 tests/test_diagram_properties.py
+16:15 .ruff_cache/0.15.9/7613058446763943040
+16:15 tests/test_mermaid_render.py
+16:14 .hypothesis/tmp/tmp9zxnalza
+16:13 tests/__snapshots__/test_image_render_pane_snapshot/test_pane_placeholder_snapshot.svg
+16:13 tests/__snapshots__/test_image_render_pane_snapshot/test_pane_image_snapshot.svg
+16:13 tests/__snapshots__/test_image_render_pane_snapshot/test_pane_ascii_snapshot.svg
+16:13 tests/test_image_render_pane_snapshot.py
+16:06 .hypothesis/tmp/tmpdi_sruqp
+16:06 .hypothesis/tmp/tmp44ds9sc6
 ```
 
 ---

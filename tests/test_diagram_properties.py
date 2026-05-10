@@ -16,7 +16,6 @@ from __future__ import annotations
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
-
 # ---------------------------------------------------------------------------
 # folding.py — どんな入力でも raise しない / 矛盾しない
 # ---------------------------------------------------------------------------

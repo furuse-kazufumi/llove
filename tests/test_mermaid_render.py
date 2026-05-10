@@ -218,7 +218,7 @@ def test_render_mermaid_returns_image_when_both_tools_present(
 
 
 def test_render_mermaid_falls_back_to_ascii_without_mmdc(
-    tmp_path: Path,
+    tmp_path: Path, monkeypatch
 ) -> None:
     from llove.browser.external import ExternalTool
     from llove.views import mermaid_render
@@ -226,6 +226,11 @@ def test_render_mermaid_falls_back_to_ascii_without_mmdc(
     image_tool = ExternalTool(
         name="chafa", scheme="image", args_template=["--", "{path}"], priority=10
     )
+
+    # 実 dev 環境に mmdc が入っていても確実に「不在」を表現するため
+    # shutil.which を抑制する (auto-detect の経路も含めて mmdc 不在状態を
+    # forge する)。
+    monkeypatch.setattr(mermaid_render.shutil, "which", lambda name: None)
 
     result = mermaid_render.render_mermaid(
         "flowchart LR\nA --> B\n",

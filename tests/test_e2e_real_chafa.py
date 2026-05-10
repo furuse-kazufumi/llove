@@ -6,7 +6,7 @@ CI ではバイナリ非依存なのでスキップ。手動 dev 環境での動
 from __future__ import annotations
 
 import shutil
-import subprocess  # noqa: S404 — list-based argv only
+import subprocess
 import tempfile
 from pathlib import Path
 
@@ -54,7 +54,7 @@ def test_real_e2e_mermaid_to_chafa_via_pane() -> None:
         # 2) SVG → ANSI via real chafa, fed through ImageRenderPane
 
         def real_runner(argv: list[str], *, timeout: int) -> tuple[int, bytes, bytes]:
-            proc = subprocess.run(  # noqa: S603 — argv is fully controlled
+            proc = subprocess.run(
                 argv,
                 check=False,
                 capture_output=True,
