@@ -224,11 +224,13 @@ def test_mermaid_expansion_keeps_fold_state_intact(tmp_path: Path) -> None:
     from llove.views.markdown_view import MarkdownView
 
     v = MarkdownView(
-        mermaid_render=True,
-        mermaid_renderer=lambda s, o: mr.MermaidRender(
-            kind="ascii", ascii_text=mr.ascii_fallback(s)
-        ),
-        mermaid_cache_dir=tmp_path,
+        diagram_render=True,
+        diagram_renderers={
+            "mermaid": lambda s, o: mr.MermaidRender(
+                kind="ascii", ascii_text=mr.ascii_fallback(s)
+            )
+        },
+        diagram_cache_dir=tmp_path,
     )
     v.feed(_narration("```mermaid\nflowchart LR\nA --> B\n```\n"))
     # fold_regions は元 source ベースなので mermaid kind が見える
