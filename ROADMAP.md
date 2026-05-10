@@ -276,9 +276,16 @@
         (XDG_CONFIG_HOME or `~/.config/llove/folds/`, doc_id サニタイズで
         path traversal 防止)。`FOLD_STATE_VERSION = 1` で先方互換管理。
         手書き TOML シリアライザで追加依存なし。テスト 14 件追加、
-        フルスイート 337 PASS。次段階: MarkdownView 統合
-        (load on construct / save on close), キーバインド (Vim/VSCode),
-        Mermaid 図 fold。
+        フルスイート 337 PASS。
+      - **(u 段階 5) MarkdownView 永続化統合 完了 (2026-05-10)**:
+        `MarkdownView(doc_id, fold_persist_dir)` 引数追加。構築時に
+        `load_fold_state` で自動復元、`toggle_fold / close_all_folds /
+        open_all_folds` の各 mutation 後に `save_fold_state` で自動保存。
+        I/O 失敗は黙って続行 (UI を絶対に止めない fail-closed)。
+        明示 flush 用 `save_folds()` 追加。`doc_id` 未指定時は完全に
+        レガシー動作。テスト 6 件追加、フルスイート 343 PASS。
+        次段階: キーバインド (Vim/VSCode), Mermaid 図 fold,
+        :fold preset 拡張。
       - 対象: 見出しセクション / コードブロック / Mermaid / SVG / 画像 /
         表 / 引用 / コールアウト / JSON ツリー / ログペイン / Notebook セル /
         Command Palette 出力履歴
