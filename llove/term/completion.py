@@ -65,6 +65,42 @@ def filter_suggestions(
     return difflib.get_close_matches(needle, pool, n=limit, cutoff=fuzzy_cutoff)
 
 
+def highlight_match(needle: str, name: str) -> str:
+    """``needle`` が ``name`` 内でマッチする文字を Textual markup で強調する.
+
+    - ``needle`` 先頭の ``:`` は剥がしてから照合する
+    - 空 ``needle`` はそのまま ``name`` を返す
+    - マッチ文字を ``[bold]...[/bold]`` で囲んで返す (Textual markup 形式)
+
+    例::
+
+        highlight_match("he", "help")  -> "[bold]he[/bold]lp"
+        highlight_match(":hlp", "help") -> "[bold]h[/bold]e[bold]lp[/bold]"
+        highlight_match("", "help")    -> "help"
+    """
+    n = _strip_colon(needle)
+    if not n:
+        return name
+    matcher = difflib.SequenceMatcher(None, n, name, autojunk=False)
+    matched: set[int] = set()
+    for _, j, size in matcher.get_matching_blocks():
+        matched.update(range(j, j + size))
+    parts: list[str] = []
+    in_bold = False
+    for i, ch in enumerate(name):
+        is_m = i in matched
+        if is_m and not in_bold:
+            parts.append("[bold]")
+            in_bold = True
+        elif not is_m and in_bold:
+            parts.append("[/bold]")
+            in_bold = False
+        parts.append(ch)
+    if in_bold:
+        parts.append("[/bold]")
+    return "".join(parts)
+
+
 def complete_prefix(text: str, names: Iterable[str]) -> str:
     """Tab 補完: 候補の最大共通プレフィックスを返す.
 
