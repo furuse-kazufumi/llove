@@ -5,6 +5,33 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — F15 (t3) MarkdownView mermaid 自動展開統合 (2026-05-10)
+
+- **`MarkdownView` 4 つの新パラメータ** (全て opt-in、デフォルトは既存挙動維持):
+  - `mermaid_render: bool = False` — 機能 ON/OFF
+  - `mermaid_renderer: Callable[[str, Path], MermaidRender] | None` —
+    描画エンジン (None なら自動検出する `render_mermaid` をラップ)
+  - `mermaid_image_callback: Callable[[MermaidRender], None] | None` —
+    image kind の結果を受け取り、subprocess 起動はホストに委譲
+  - `mermaid_cache_dir: Path | None` — SVG キャッシュ先 (None で
+    `tempfile.gettempdir() / "llove-mermaid-cache"`)
+- **`_expand_mermaid_in()` 新メソッド**: `find_code_block_regions` で
+  `kind="mermaid"` のフェンスを抽出し、内側の DSL を renderer に流して
+  本文を差し替える。fold の **後** に動くので、閉じ折られた mermaid は
+  サマリ行のままスキップされる (期待通り)。
+- **キャッシュ戦略**: 同じ mermaid source は SHA-256 ハッシュ先頭 16 桁の
+  サブディレクトリに集約される。再 feed で SVG を作り直さなくて済む。
+- **2 段の fail-closed**:
+  - renderer が raise → 元 source を本文に戻す
+  - image_callback が raise → view は落ちず、本文マーカーは出す
+- 旧履歴エントリは展開対象外 (最新エントリだけ)。スクロールバック中の
+  fold/レイアウトを動かさないため。fold 同様の方針。
+- **テスト 9 件追加** (`test_markdown_view_mermaid.py`):
+  default disabled / 通常 code 不変 / ASCII 経路 / 複数ブロック /
+  image callback 起動 / ASCII 時 callback 不発 / renderer 例外 /
+  callback 例外 / fold 互換性。
+  フルスイート **394 PASS + 3 skipped** (385 → +9)、ruff クリーン、回帰ゼロ。
+
 ### Added — F15 (t3) mmdc → SVG → ターミナル画像チェイン (2026-05-10)
 
 - **新モジュール `llove.views.mermaid_render`**: Mermaid source を
