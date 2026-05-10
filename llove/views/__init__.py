@@ -54,6 +54,7 @@ __all__ = [
     "MermaidRender",
     "NarrationView",
     "SPCChartView",
+    "SVGRender",
     "SensorStreamView",
     "SubprocessRunner",
     "View",
