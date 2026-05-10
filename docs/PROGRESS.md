@@ -6,6 +6,60 @@
 
 ---
 
+## 2026-05-10 (続き) — F15 (t3) mmdc → SVG → 画像チェイン基盤
+
+### 完成したもの
+
+`llove/views/mermaid_render.py` を新設。`folding.py` が
+`kind="mermaid"` で識別したフェンスを **実描画** に流すための薄い shim。
+
+- 公開 API: `MermaidRender` / `mmdc_available()` / `find_image_tool()` /
+  `render_mermaid_to_svg()` / `render_mermaid()` / `ascii_fallback()`。
+  すべて `llove.views` から再公開。
+- パイプライン: `source` → `mmdc -i .mmd -o .svg` → 既存 image catalog
+  (chafa/viu/timg/kitty/wezterm) の最優先ツール → ターミナル画像。
+- Fail-closed: mmdc 欠損 / 画像ツール欠損 / mmdc 失敗 / OSError は
+  すべて **ASCII フォールバック** (マーカー + 罫線 + source) に降りる。
+  UI が renderer 失敗で落ちることはない。
+- セキュリティ: subprocess は list-based argv のみ (shell=True 禁止)。
+  mermaid source は temp `.mmd` 経由 (引数経由の長文流入を避ける)。
+- 依存性注入: `mmdc_path` / `image_tool` / `runner` を全部差し替え可能で、
+  mmdc 未インストールの CI でも 16 件の単体テスト全 PASS。
+
+### テスト
+
+- 16 件追加 (`test_mermaid_render.py`): 検出 4 / SVG 変換 5 (argv 検証 +
+  失敗パス) / ASCII fallback 2 / 統合 5 (image 成功 / mmdc 欠 / image 欠 /
+  mmdc 失敗 / 自動検出)。
+- フルスイート **385 PASS + 3 skipped** (前回 369 → +16)、回帰ゼロ、
+  ruff クリーン。
+
+### 次セッションで着手する候補 (重要度順)
+
+1. **MarkdownView 統合** — mermaid kind の region を見つけたら、本文の
+   フェンス内容を `render_mermaid()` に流して `MermaidRender.argv` で
+   subprocess 起動 / `ascii_text` で本文置換。Textual の subprocess 連携
+   (worker thread) が必要。
+2. **(t2) SVG レンダラ** — `rsvg-convert` 検出 → image チェイン。
+   mermaid_render の構造をテンプレに `svg_render.py` として複製。
+3. **キーバインド (Vim/VSCode)** — `za` / `zM` / `zR` / `Ctrl+Shift+[`。
+4. **JSON ツリービュー / ログペイン fold (u)** — folding.py の純粋関数を
+   別ビューに展開。
+5. **タスクリスト / コールアウト / 数式 (t1 拡張)** — `mdit-py-plugins`。
+
+### 設計メモ (将来参照)
+
+- mermaid_render は **describe-only**: 実 subprocess 起動は呼び出し側
+  (MarkdownView / DiagramPane) の責務。Pure 関数化 + dataclass 戻り値で
+  テスト容易性を保ち、Textual との結合点を最後にずらした。
+- temp `.mmd` は `output.with_suffix(".mmd")` で SVG と同ディレクトリに
+  書き出すため、caller は tmpdir を 1 つ管理するだけで両方掃除できる。
+- 画像ツール検出は `llove.browser.external.available_tools("image")` 経由
+  なので、catalog に新ツール (例: img2sixel) を 1 行追加するだけで
+  mermaid_render も自動的に対応する。
+
+---
+
 ## 2026-05-10 — F15 (t1) MarkdownView + F15 (u) Foldable Blocks ひと山完成
 
 ### 完成したもの (9 コミット連続)
