@@ -306,10 +306,9 @@ class MarkdownView(Static, View):
             return source
         if result.kind == "image":
             if self._mermaid_image_callback is not None:
-                try:
+                # Fail-closed: callback 失敗は view を壊さない
+                with contextlib.suppress(Exception):
                     self._mermaid_image_callback(result)
-                except Exception:  # nosec B110 — callback 失敗は view を壊さない
-                    pass
             tool = result.argv[0] if result.argv else "image tool"
             return f"_(◇ mermaid diagram → rendered separately via {tool})_"
         # ascii kind (or unexpected): fall back to ascii_text if present
