@@ -120,8 +120,19 @@ class MarkdownView(Static, View):
     # F15 (u) Foldable Blocks — public API
     # ------------------------------------------------------------------
     def fold_regions(self) -> list[FoldRegion]:
-        """Return the foldable regions in the *latest* entry's user text."""
-        return find_heading_regions(self.last_source)
+        """Return every foldable region in the *latest* entry's user text.
+
+        Headings, fenced code blocks, and GFM tables are surfaced together
+        and sorted by `start_line`, so a single "toggle fold on this line"
+        command works regardless of construct kind.
+        """
+        src = self.last_source
+        regions = (
+            find_heading_regions(src)
+            + find_code_block_regions(src)
+            + find_table_regions(src)
+        )
+        return sorted(regions, key=lambda r: (r.start_line, r.end_line))
 
     def toggle_fold(self, start_line: int) -> None:
         """Toggle the fold whose region starts at `start_line` (0-indexed)."""
