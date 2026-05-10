@@ -24,8 +24,8 @@ Design notes:
 from __future__ import annotations
 
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Iterable
 
 # Compile once. ATX-only for v1 — Setext (`Title\n===`) can come later if a
 # scenario actually needs it; pinning ATX keeps the surface predictable.
