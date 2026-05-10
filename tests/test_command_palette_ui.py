@@ -78,8 +78,7 @@ async def test_submit_dispatches_and_renders_output() -> None:
         await pilot.pause(0.05)
         # 履歴に push され, 出力欄に何か出ている
         assert ":help" in app.palette.history.items
-        out_text = app.palette.query_one("#cp-output").renderable
-        assert "[core]" in str(out_text)
+        assert "[core]" in app.palette.last_output_text
         # 入力欄はクリア
         assert inp.value == ""
 
