@@ -130,10 +130,10 @@ def test_mermaid_image_callback_invoked_on_image_render(tmp_path: Path) -> None:
         )
 
     v = MarkdownView(
-        mermaid_render=True,
-        mermaid_renderer=fake_renderer,
-        mermaid_image_callback=callback_calls.append,
-        mermaid_cache_dir=tmp_path,
+        diagram_render=True,
+        diagram_renderers={"mermaid": fake_renderer},
+        diagram_image_callback=callback_calls.append,
+        diagram_cache_dir=tmp_path,
     )
     v.feed(_narration("```mermaid\nflowchart LR\nA --> B\n```\n"))
 
