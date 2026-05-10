@@ -148,6 +148,36 @@ class HistoryRing:
     def at_end(self) -> bool:
         return self._idx >= len(self.items)
 
+    # ------------------------------------------------------------------ persistence
+
+    @classmethod
+    def default_path(cls) -> Path:
+        return Path.home() / ".llove" / "history"
+
+    def load(self, path: Path | None = None) -> None:
+        """ファイルから履歴を読み込む。存在しなければ無視。"""
+        p = path or self.default_path()
+        try:
+            lines = p.read_text(encoding="utf-8").splitlines()
+        except OSError:
+            return
+        for line in lines:
+            line = line.strip()
+            if line:
+                self.items.append(line)
+        if len(self.items) > self.maxlen:
+            self.items = self.items[-self.maxlen:]
+        self._idx = len(self.items)
+
+    def save(self, path: Path | None = None) -> None:
+        """履歴をファイルに書き出す。失敗しても例外を上げない（fail-closed）。"""
+        p = path or self.default_path()
+        try:
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text("\n".join(self.items[-self.maxlen:]) + "\n", encoding="utf-8")
+        except OSError:
+            pass
+
 
 __all__ = [
     "HistoryRing",
