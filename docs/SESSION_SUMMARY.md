@@ -3,23 +3,23 @@
 > 自動生成: `libexec/raptor-auto-summary` (Stop hook)
 > 次回 ccr 起動時に CLAUDE.md SESSION START で自動的に読み取られる。
 
-- **最終更新**: 2026-05-10 13:41:30
+- **最終更新**: 2026-05-10 13:47:56
 - **プロジェクト**: `D:/projects/llove`
 - **ブランチ**: `main`
 
 ## 直近の git log
 
 ```
+7e4a97b refactor(views): F15 (t2/t3) MermaidImagePane → ImageRenderPane リネーム
+cc9e612 auto: PROGRESS.md 編集前 (2026-05-10 13:47)
+6a63ea0 auto: ROADMAP.md 編集前 (2026-05-10 13:47)
+fe307ed auto: CHANGELOG.md 編集前 (2026-05-10 13:47)
+786956f auto: __init__.py 編集前 (2026-05-10 13:44)
+bf67e75 auto: __init__.py 編集前 (2026-05-10 13:44)
+5430f50 auto: __init__.py 編集前 (2026-05-10 13:44)
+6624917 auto: __init__.py 編集前 (2026-05-10 13:44)
 535beb2 feat(views): F15 (t2/t3) MarkdownView を mermaid + svg 統一処理に汎化
 63ce852 auto: PROGRESS.md 編集前 (2026-05-10 13:40)
-1a2d537 auto: ROADMAP.md 編集前 (2026-05-10 13:40)
-e93d1f2 auto: CHANGELOG.md 編集前 (2026-05-10 13:40)
-5386aa1 auto: svg_render.py 編集前 (2026-05-10 13:39)
-9390c1a auto: markdown_view.py 編集前 (2026-05-10 13:38)
-8e830c1 auto: test_mermaid_pane.py 編集前 (2026-05-10 13:37)
-df9239a auto: test_markdown_view_mermaid.py 編集前 (2026-05-10 13:37)
-056f441 auto: test_markdown_view_mermaid.py 編集前 (2026-05-10 13:37)
-f22c151 auto: test_markdown_view_mermaid.py 編集前 (2026-05-10 13:36)
 ```
 
 ## 現在の git status
@@ -31,21 +31,21 @@ f22c151 auto: test_markdown_view_mermaid.py 編集前 (2026-05-10 13:36)
 ## 直近 2 時間に変更されたファイル
 
 ```
-13:41 docs/PROGRESS.md
-13:40 ROADMAP.md
-13:40 CHANGELOG.md
-13:39 .ruff_cache/0.15.9/7613058446763943040
-13:39 .ruff_cache/0.15.9/6864149886187679858
-13:39 .pytest_cache/v/cache/nodeids
-13:39 .hypothesis/tmp/tmp6iwchawu
-13:39 .hypothesis/constants/666e234273dec6d9
-13:39 .hypothesis/constants/489b2b64460b0e72
-13:39 .hypothesis/constants/17e9dd181c7ed060
-13:39 .pytest_cache/v/cache/lastfailed
-13:39 llove/views/svg_render.py
-13:39 llove/views/markdown_view.py
-13:38 tests/test_markdown_view_svg.py
-13:37 tests/test_mermaid_pane.py
+13:47 docs/PROGRESS.md
+13:47 ROADMAP.md
+13:47 CHANGELOG.md
+13:46 .ruff_cache/0.15.9/7613058446763943040
+13:46 .pytest_cache/v/cache/nodeids
+13:46 .hypothesis/tmp/tmphk9tynzg
+13:46 .hypothesis/constants/f26f2a0c0755c906
+13:46 .hypothesis/constants/dc2e7fab69e37b49
+13:46 llove/views/image_render_pane.py
+13:46 llove/views/__init__.py
+13:46 .ruff_cache/0.15.9/6864149886187679858
+13:45 .hypothesis/tmp/tmpz7u4ca__
+13:45 .hypothesis/constants/9666fbfa68e58783
+13:45 .hypothesis/constants/055ef728a4a279b3
+13:45 tests/test_image_render_pane_async.py
 ```
 
 ---
