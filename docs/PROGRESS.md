@@ -6,6 +6,75 @@
 
 ---
 
+## 2026-05-10 (続き 5) — F15 (t2) SVG → PNG → 画像チェイン基盤
+
+### 完成したもの
+
+mermaid_render の構造をテンプレに `llove/views/svg_render.py` を新設。
+SVG XML → temp `.svg` → `rsvg-convert -o output.png input.svg` → 既存
+image catalog (chafa/viu/timg/kitty/wezterm) の最優先ツール → ターミナル画像。
+
+- 公開 API (mermaid_render と一対一対応):
+  - `SVGRender` (kind/argv/png_path/ascii_text/image_tool dataclass)
+  - `rsvg_convert_available()` / `find_image_tool()`
+  - `render_svg_to_png(source, output, *, rsvg_path, runner)` — argv
+    `[rsvg, "-o", out.png, in.svg]` を組んで実行
+  - `render_svg(source, *, output_dir, rsvg_path, image_tool, runner)` —
+    高レベル統合、自動検出付き
+  - `ascii_fallback_for_svg(source)` — 先頭 240 文字に切ってマーカー付き
+    表示 (XML 全文を流すと爆発するため)
+- セキュリティ: subprocess は list-based argv のみ (shell=True 禁止)、
+  入力 XML は temp `.svg` 経由。
+- Fail-closed: rsvg 欠損 / image tool 欠損 / 異常終了 / OSError は全て
+  ASCII fallback に降りる。
+- 依存性注入: rsvg / image_tool / runner を全部差し替え可能で、
+  rsvg-convert + chafa 未インストールの CI でも全機能テスト可能。
+
+### MermaidImagePane との互換性
+
+`SVGRender` は `MermaidRender` と同じ shape (kind/argv/ascii_text を共有)
+なので、既存の `MermaidImagePane.set_render(mr)` にそのまま渡せる
+(duck typing)。pane 名を将来 `ImageRenderPane` にリネームすると意図が
+明確になるが、現状はそのまま再利用が動く。
+
+### テスト
+
+- 14 件追加 (`test_svg_render.py`):
+  検出 2 / `render_svg_to_png` argv + 失敗パス 5 / ASCII fallback 2 /
+  統合 5 (image 成功 / rsvg 欠 / image 欠 / rsvg 失敗 / 自動検出)。
+- フルスイート **429 PASS + 3 skipped** (415 → +14)、ruff クリーン、回帰ゼロ。
+
+### 次セッションで着手する候補 (重要度順)
+
+1. **MarkdownView svg ブロック自動展開統合** — mermaid と同じパターンで
+   `<svg>...</svg>` または `svg://path` を fold 後段で展開して `render_svg`
+   に流す。MarkdownView の `_expand_mermaid_in` を `_expand_diagram_blocks_in`
+   に汎化するのが自然。
+2. **MermaidImagePane → ImageRenderPane リネーム** — 既に SVGRender も
+   受けられる形になっているので、名前を汎用化して mermaid / svg /
+   今後の他フォーマットを統一する。
+3. **実 chafa + rsvg-convert での E2E 検証** — dev 環境で `llove demo` 経由
+   で動作確認。CI ではスキップ (binary 依存)。
+4. **キーバインド (Vim/VSCode)** — `za` / `zM` / `zR` / `Ctrl+Shift+[`。
+5. **JSON ツリービュー / ログペイン fold** — folding.py の純粋関数を
+   別ビューに展開。
+
+### 設計メモ (将来参照)
+
+- `mermaid_render.py` と `svg_render.py` の **構造が一対一に揃っている** の
+  は意図的。後続 (PlantUML, graphviz dot, ditaa, ...) を足すときも同じ
+  テンプレで書けば、テスト 14 件を雛形として再利用できる。
+- ASCII fallback の方針は format によって分けた:
+  mermaid → 元 source 全部 (人間可読 DSL なので情報落ちなし)
+  svg → 先頭 240 文字 + 「...」(XML は人間可読でないため抜粋で十分)
+- `rsvg-convert` の argv は `-o output input` の順序。mermaid の mmdc は
+  `-i input -o output`。両者で違うので argv 構築は format ごとに分けた。
+- 中間ファイル名は両者とも `output_dir / "diagram.<ext>"` 固定。caller が
+  output_dir を unique にすれば衝突しない (現状 MarkdownView 側で
+  SHA-256 16 桁 subdir を使っている)。
+
+---
+
 ## 2026-05-10 (続き 4) — F15 (t3) MermaidImagePane 非同期化
 
 ### 完成したもの
