@@ -225,6 +225,21 @@
         `ui.pane.markdown.title` / `ui.pane.markdown.empty` を ja/en に追加。
         テスト 12 件 PASS。コールアウト / 数式 / フットノート / タスクリスト /
         絵文字短縮形は次段階で markdown-it-py プラグイン経由で拡張予定。
+      - **MarkdownView を mermaid + svg 統一処理に汎化完了
+        (2026-05-10, F15 (t2/t3))**: `mermaid_*` パラメータを `diagram_*`
+        に rename し (`diagram_render` / `diagram_renderers: dict[str,
+        Callable]` / `diagram_image_callback` / `diagram_cache_dir`)、
+        `_expand_mermaid_in` を `_expand_diagram_blocks_in` に汎化。
+        kind ∈ {mermaid, svg, ...} に対応する renderer を dict から動的
+        ディスパッチする構造に変更。`folding.py` も svg fence の `kind="svg"`
+        認識 + prose preset 拡張 + summary marker 追加でフルサポート。
+        ユーザは constructor で `{"plantuml": fn, "dot": fn, ...}` 等の
+        kind を追加でき、find_code_block_regions が同 kind を返せば
+        即座に展開対象になる拡張点を提供。Alpha 段階のため既存
+        `mermaid_*` パラメータは互換 alias を残さず非互換 rename。
+        既存 9 テスト移行 + svg 統合 5 件 + folding-svg 7 件追加、フル
+        スイート 441 PASS、回帰ゼロ。**残課題**: `MermaidImagePane` →
+        `ImageRenderPane` リネーム / 実 chafa での E2E。
       - **SVG ターミナル表示 (rsvg-convert → PNG → image チェイン) 基盤完了
         (2026-05-10, F15 (t2))**: `llove/views/svg_render.py` を新設。
         mermaid_render と一対一対応する構造で、SVG XML → temp `.svg` →
