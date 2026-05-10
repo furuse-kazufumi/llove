@@ -5,6 +5,30 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — F15 (u3) MarkdownView 永続化統合 (2026-05-10)
+
+- **MarkdownView を folding_persistence と統合**:
+  - 新コンストラクタ引数:
+    `MarkdownView(doc_id="...", fold_persist_dir=...)`
+  - `doc_id` 設定時、構築時に `load_fold_state` で前回状態を自動復元、
+    `toggle_fold / close_all_folds / open_all_folds` の各 mutation 後に
+    `save_fold_state` で自動保存。
+  - `save_folds()` を公開メソッドに追加 — `fold_state` を直接いじった
+    ケースや app shutdown 時に明示 flush 可能。
+  - **Fail-closed (u10)**: I/O 失敗時 (disk full / 権限 / 不正パス等)
+    でも view は raise しない。`load` 失敗 → 空 FoldState、
+    `save` 失敗 → 黙って続行。UI が状態保存問題で止まらない設計。
+  - **doc_id 不正時の安全弁**: `default_fold_state_path` が ValueError
+    を投げた場合は内部で握りつぶし、永続化を黙って無効化
+    (空 FoldState で起動)。
+  - `doc_id` 未指定時は完全にレガシー動作 (永続化フックは何もしない、
+    `tmp_path` 等を渡しても書き込まない)。
+- **テスト 6 件追加** (`test_markdown_view_persistence.py`):
+  close_all → 書込 / 構築時 load → 自動再現 / doc_id 無し → 書込なし /
+  toggle 永続性 / `save_fold_state` raise でも view 続行 (monkeypatch) /
+  `save_folds()` 明示 flush。
+  フルスイート **343 PASS** + 3 skipped、ruff クリーン。
+
 ### Added — F15 (u3) Fold 状態永続化 (TOML) (2026-05-10)
 
 - **`llove/views/folding_persistence.py`** を新設:
