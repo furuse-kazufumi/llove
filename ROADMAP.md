@@ -267,9 +267,18 @@
         1 行 bind。フック未設定でも verb 正当なら audit-warn 通知に留め、
         verb 非対応 (None 返却) のみ ok=False。`:help` /
         `:help fold` から探索可能。ビルトイン総数 11→12。テスト
-        18 件追加、フルスイート 323 PASS。次段階: Mermaid 図 fold,
-        キーバインド (Vim/VSCode), `~/.config/llove/folds/<doc-id>.toml`
-        永続化 (u3)。
+        18 件追加、フルスイート 323 PASS。
+      - **(u 段階 4 = u3) Fold 状態 TOML 永続化 完了 (2026-05-10)**:
+        `llove/views/folding_persistence.py` を新設。
+        `save_fold_state(state, path, *, doc_id)` (atomic rename) +
+        `load_fold_state(path)` (fail-closed: 不在/不正/異 version は
+        空 FoldState 返却) + `default_fold_state_path(doc_id, base_dir)`
+        (XDG_CONFIG_HOME or `~/.config/llove/folds/`, doc_id サニタイズで
+        path traversal 防止)。`FOLD_STATE_VERSION = 1` で先方互換管理。
+        手書き TOML シリアライザで追加依存なし。テスト 14 件追加、
+        フルスイート 337 PASS。次段階: MarkdownView 統合
+        (load on construct / save on close), キーバインド (Vim/VSCode),
+        Mermaid 図 fold。
       - 対象: 見出しセクション / コードブロック / Mermaid / SVG / 画像 /
         表 / 引用 / コールアウト / JSON ツリー / ログペイン / Notebook セル /
         Command Palette 出力履歴
