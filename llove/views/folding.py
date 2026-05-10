@@ -7,10 +7,12 @@ covers every view kind (u6).
 Public surface:
     FoldRegion        — one foldable span (kind/level/label/start/end)
     FoldState         — open/closed bookkeeping (toggle, close-all, ...)
-    find_heading_regions(source)  — Markdown ATX-heading sections
+    find_heading_regions(source)     — Markdown ATX-heading sections
+    find_code_block_regions(source)  — fenced ```/~~~ code blocks
+    find_table_regions(source)       — GFM pipe tables
     apply_folds(source, regions, state)
-                      — collapse closed sections to a `▶ Heading (N lines)`
-                        summary line per spec (u4); return rendered text
+                      — collapse closed sections to a one-line summary
+                        per spec (u4); return rendered text
 
 Design notes:
     * Pure functions and a small dataclass — no Textual / Rich imports here.
@@ -31,6 +33,15 @@ from dataclasses import dataclass, field
 # scenario actually needs it; pinning ATX keeps the surface predictable.
 _RE_ATX_HEADING = re.compile(r"^(?P<hashes>#{1,6})\s+(?P<label>.+?)\s*#*\s*$")
 _RE_FENCE = re.compile(r"^\s*(```|~~~)")
+# Match an opening code fence and capture its info-string (the language hint
+# that appears after the backticks, e.g. ```python). The closing fence has no
+# info string; we identify it by absence of language-only content rather than
+# a separate regex.
+_RE_FENCE_OPEN = re.compile(r"^\s*(?P<marker>```|~~~)\s*(?P<info>[^\s`~]*)\s*$")
+# A GFM alignment row: pipes around dashes, optional colons for alignment,
+# possibly with leading/trailing whitespace. Empty cells (just `--`) count.
+_RE_TABLE_ALIGN = re.compile(r"^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)+\|?\s*$")
+_RE_TABLE_ROW = re.compile(r"^\s*\|.*\|\s*$")
 
 
 @dataclass(frozen=True)
