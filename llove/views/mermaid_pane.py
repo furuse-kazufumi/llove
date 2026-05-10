@@ -268,6 +268,7 @@ def make_mermaid_image_callback(
 __all__ = [
     "MermaidImagePane",
     "SubprocessRunner",
+    "WorkerDispatcher",
     "make_mermaid_image_callback",
     "run_image_render",
 ]
