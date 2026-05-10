@@ -3,49 +3,49 @@
 > 自動生成: `libexec/raptor-auto-summary` (Stop hook)
 > 次回 ccr 起動時に CLAUDE.md SESSION START で自動的に読み取られる。
 
-- **最終更新**: 2026-05-10 11:31:27
+- **最終更新**: 2026-05-10 12:14:53
 - **プロジェクト**: `D:/projects/llove`
 - **ブランチ**: `main`
 
 ## 直近の git log
 
 ```
+6eb05b2 feat(views): F15 (t3) mmdc → SVG → ターミナル画像チェイン基盤
+f885f76 auto: PROGRESS.md 編集前 (2026-05-10 12:12)
+d94ad3f auto: ROADMAP.md 編集前 (2026-05-10 12:12)
+c7b0439 auto: CHANGELOG.md 編集前 (2026-05-10 12:11)
+3ab5a1a auto: mermaid_render.py 編集前 (2026-05-10 12:10)
+60e1f4f auto: test_mermaid_render.py 編集前 (2026-05-10 12:09)
+855fa84 auto: __init__.py 編集前 (2026-05-10 12:09)
 1e09df9 docs: F15 (t)(u) ひと山の進捗ログ追加 (PROGRESS.md)
 414f1b8 feat(views): F15 (u6) MarkdownView fold ステータス表示
 43e88ac auto: ROADMAP.md 編集前 (2026-05-10 10:54)
-01a71b4 auto: CHANGELOG.md 編集前 (2026-05-10 10:53)
-e26259a auto: markdown_view.py 編集前 (2026-05-10 10:52)
-31efe85 auto: markdown_view.py 編集前 (2026-05-10 10:52)
-3ad757f feat(views): F15 (t3 prep) Mermaid ブロックを kind=mermaid として特別認識
-9f2f700 auto: ROADMAP.md 編集前 (2026-05-10 10:51)
-49a456e auto: CHANGELOG.md 編集前 (2026-05-10 10:50)
-daab88d auto: markdown_view.py 編集前 (2026-05-10 10:49)
 ```
 
 ## 現在の git status
 
 ```
-M docs/SESSION_SUMMARY.md
+(clean)
 ```
 
 ## 直近 2 時間に変更されたファイル
 
 ```
-10:56 docs/SESSION_SUMMARY.md
-10:55 docs/PROGRESS.md
-10:54 ROADMAP.md
-10:54 CHANGELOG.md
-10:53 .ruff_cache/0.15.9/7613058446763943040
-10:53 .ruff_cache/0.15.9/6864149886187679858
-10:53 .pytest_cache/v/cache/nodeids
-10:53 .hypothesis/tmp/tmpck_zal4z
-10:53 .hypothesis/constants/dc9d648cb1d12003
-10:52 llove/views/markdown_view.py
-10:52 tests/test_markdown_view_fold_status.py
-10:50 tests/test_folding_mermaid.py
-10:50 .hypothesis/tmp/tmpgl2sji0y
-10:49 .hypothesis/constants/826c230da7d2b511
-10:49 .hypothesis/constants/76eea50072db2081
+12:12 docs/PROGRESS.md
+12:12 ROADMAP.md
+12:11 CHANGELOG.md
+12:11 .pytest_cache/v/cache/nodeids
+12:11 .hypothesis/tmp/tmphwcfg7un
+12:11 .hypothesis/tmp/tmphp6bwwr1
+12:10 .ruff_cache/0.15.9/7613058446763943040
+12:10 .ruff_cache/0.15.9/6864149886187679858
+12:10 .hypothesis/tmp/tmp5b6oj145
+12:10 .hypothesis/constants/ce16a9905590c41f
+12:10 tests/test_mermaid_render.py
+12:10 llove/views/mermaid_render.py
+12:09 .hypothesis/tmp/tmp8c2ojka8
+12:09 .hypothesis/constants/9850f7efc3c79452
+12:09 .hypothesis/constants/203f76240baf568d
 ```
 
 ---
