@@ -60,6 +60,7 @@ __all__ = [
     "SVGRender",
     "SensorStreamView",
     "SubprocessRunner",
+    "WorkerDispatcher",
     "View",
     "apply_folds",
     "ascii_fallback",
