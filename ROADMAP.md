@@ -292,8 +292,15 @@
         `_cmd_fold` に追加、`make_markdown_fold_hook` で MarkdownView
         に bind (適用後 `_render` + `_persist_fold_state` で永続化も
         自動)。`by-tag` 動詞も永続化フック追加。
-        テスト 10 件追加、フルスイート 353 PASS。次段階:
-        キーバインド (Vim/VSCode マウス), Mermaid 図 fold,
+        テスト 10 件追加、フルスイート 353 PASS。
+      - **(u 段階 7 = t3 prep) Mermaid ブロック識別 完了 (2026-05-10)**:
+        ` ```mermaid``` ` フェンスを `find_code_block_regions` 内で
+        `kind="mermaid"` にリラベル。`apply_folds` summary は
+        `▶ ◇ mermaid: <label> (N lines)` で diagram を視覚区別。
+        `:fold by-tag mermaid` が動作 (hook の valid kind に追加)。
+        `prose` preset を mermaid 畳みに拡張。テスト 9 件追加、
+        フルスイート 362 PASS。次段階: mmdc 連携 (Mermaid → SVG → image
+        チェイン), キーバインド (Textual binding システム),
         JSONTreeView / NotebookView 連携。
       - 対象: 見出しセクション / コードブロック / Mermaid / SVG / 画像 /
         表 / 引用 / コールアウト / JSON ツリー / ログペイン / Notebook セル /
