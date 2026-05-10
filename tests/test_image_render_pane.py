@@ -1,20 +1,20 @@
-"""F15 (t3) — Mermaid 画像描画 Pane (Textual subprocess worker 連携).
+"""F15 (t2/t3) — Diagram 画像描画 Pane (ImageRenderPane) のテスト.
 
-`MermaidRender(kind="image")` を受け取り、subprocess (chafa / viu / ...) を
-実起動して **stdout の ANSI 出力を Static widget に貼る** 経路。
+`MermaidRender` / `SVGRender` どちらも (kind/argv/ascii_text を共有する
+dataclass なら何でも) 受け取れる ImageRenderPane と、subprocess を実起動
+して **stdout の ANSI 出力を Static widget に貼る** 経路を検証する。
 
 役割分担:
 
 - ``run_image_render(argv, runner=None)``: pure 関数。argv を実行して
   捕捉した stdout (str) を返す。失敗時は ``None``。テストでは runner を
   注入して subprocess を踏まずに argv 検証 / 出力検証ができる。
-- ``MermaidImagePane(Static)``: Textual widget。``set_render(mr)`` で
+- ``ImageRenderPane(Static)``: Textual widget。``set_render(result)`` で
   上記 helper を呼び、結果を ``Text.from_ansi`` で widget に貼る。
   失敗時は ASCII fallback または「render unavailable」マーカー。
-- ``make_mermaid_image_callback(pane)``: MarkdownView の
-  ``mermaid_image_callback`` 互換ファクトリ。同期 callback として動き、
-  内部で pane.set_render(mr) を呼ぶ。Textual の worker thread 連携は
-  pane 側責務 (UI スレッド凍結を回避)。
+- ``make_image_render_callback(pane)``: MarkdownView の
+  ``diagram_image_callback`` 互換ファクトリ。同期 callback として動き、
+  内部で pane.set_render_async(result) を呼ぶ (既定 async)。
 
 設計の柱:
 - subprocess は list-based argv のみ。timeout 付き。
@@ -34,7 +34,7 @@ from llove.views import mermaid_render as mr
 
 
 def test_run_image_render_returns_stdout_on_success() -> None:
-    from llove.views.mermaid_pane import run_image_render
+    from llove.views.image_render_pane import run_image_render
 
     captured: dict[str, list[str]] = {}
 
@@ -49,7 +49,7 @@ def test_run_image_render_returns_stdout_on_success() -> None:
 
 
 def test_run_image_render_returns_none_on_nonzero_exit() -> None:
-    from llove.views.mermaid_pane import run_image_render
+    from llove.views.image_render_pane import run_image_render
 
     out = run_image_render(
         ["chafa", "--", "/missing.svg"],
@@ -59,7 +59,7 @@ def test_run_image_render_returns_none_on_nonzero_exit() -> None:
 
 
 def test_run_image_render_returns_none_on_oserror() -> None:
-    from llove.views.mermaid_pane import run_image_render
+    from llove.views.image_render_pane import run_image_render
 
     def explode(argv: list[str], *, timeout: int):
         raise OSError("not found")
@@ -69,34 +69,34 @@ def test_run_image_render_returns_none_on_oserror() -> None:
 
 
 def test_run_image_render_returns_none_on_empty_argv() -> None:
-    from llove.views.mermaid_pane import run_image_render
+    from llove.views.image_render_pane import run_image_render
 
     assert run_image_render([]) is None
 
 
 # ---------------------------------------------------------------------------
-# MermaidImagePane
+# ImageRenderPane
 # ---------------------------------------------------------------------------
 
 
-def test_mermaid_image_pane_initial_state_is_placeholder() -> None:
-    from llove.views.mermaid_pane import MermaidImagePane
+def test_image_render_pane_initial_state_is_placeholder() -> None:
+    from llove.views.image_render_pane import ImageRenderPane
 
-    pane = MermaidImagePane()
+    pane = ImageRenderPane()
     # placeholder 文字列 (詳細は実装側で決めて良いが、空ではない)
     assert pane.last_render
     assert isinstance(pane.last_render, str)
 
 
-def test_mermaid_image_pane_set_render_image_updates_with_stdout(
+def test_image_render_pane_set_render_image_updates_with_stdout(
     tmp_path: Path,
 ) -> None:
-    from llove.views.mermaid_pane import MermaidImagePane
+    from llove.views.image_render_pane import ImageRenderPane
 
     svg = tmp_path / "x.svg"
     svg.write_text("<svg/>", encoding="utf-8")
 
-    pane = MermaidImagePane(
+    pane = ImageRenderPane(
         runner=lambda argv, *, timeout: (0, b"\x1b[32mok\x1b[0m image", b"")
     )
     pane.set_render(
@@ -109,13 +109,13 @@ def test_mermaid_image_pane_set_render_image_updates_with_stdout(
     assert "ok" in pane.last_render
 
 
-def test_mermaid_image_pane_set_render_ascii_shows_fallback_text(
+def test_image_render_pane_set_render_ascii_shows_fallback_text(
     tmp_path: Path,
 ) -> None:
     """ASCII kind を渡されても落ちず、ascii_text を表示する."""
-    from llove.views.mermaid_pane import MermaidImagePane
+    from llove.views.image_render_pane import ImageRenderPane
 
-    pane = MermaidImagePane()
+    pane = ImageRenderPane()
     pane.set_render(
         mr.MermaidRender(
             kind="ascii",
@@ -125,16 +125,16 @@ def test_mermaid_image_pane_set_render_ascii_shows_fallback_text(
     assert "A --> B" in pane.last_render
 
 
-def test_mermaid_image_pane_subprocess_failure_falls_back_to_ascii(
+def test_image_render_pane_subprocess_failure_falls_back_to_ascii(
     tmp_path: Path,
 ) -> None:
     """subprocess 失敗 → ASCII fallback に降りる (UI 凍結なし)."""
-    from llove.views.mermaid_pane import MermaidImagePane
+    from llove.views.image_render_pane import ImageRenderPane
 
     svg = tmp_path / "x.svg"
     svg.write_text("<svg/>", encoding="utf-8")
 
-    pane = MermaidImagePane(runner=lambda argv, *, timeout: (1, b"", b"err"))
+    pane = ImageRenderPane(runner=lambda argv, *, timeout: (1, b"", b"err"))
     pane.set_render(
         mr.MermaidRender(
             kind="image",
@@ -147,32 +147,60 @@ def test_mermaid_image_pane_subprocess_failure_falls_back_to_ascii(
     assert "image render unavailable" in pane.last_render.lower() or "fail" in pane.last_render.lower()
 
 
-def test_mermaid_image_pane_set_render_image_without_argv_falls_back() -> None:
-    from llove.views.mermaid_pane import MermaidImagePane
+def test_image_render_pane_set_render_image_without_argv_falls_back() -> None:
+    from llove.views.image_render_pane import ImageRenderPane
 
-    pane = MermaidImagePane()
+    pane = ImageRenderPane()
     pane.set_render(mr.MermaidRender(kind="image", argv=()))
     assert pane.last_render
     # サブプロセスを呼ぶべき argv が無いので何らかの fallback メッセージ
     assert "unavailable" in pane.last_render.lower() or "fail" in pane.last_render.lower()
 
 
+def test_image_render_pane_accepts_svg_render_via_protocol(
+    tmp_path: Path,
+) -> None:
+    """ImageRenderPane は MermaidRender だけでなく SVGRender も受ける.
+
+    DiagramRenderResult Protocol が kind/argv/ascii_text 3 フィールドを
+    要求するだけなので、shape が同じ dataclass なら何でも受けられる。
+    """
+    from llove.views import svg_render as sv
+    from llove.views.image_render_pane import ImageRenderPane
+
+    png = tmp_path / "x.png"
+    png.write_bytes(b"\x89PNG\r\n")
+
+    pane = ImageRenderPane(
+        runner=lambda argv, *, timeout: (0, b"svg-image-bytes", b"")
+    )
+    pane.set_render(
+        sv.SVGRender(
+            kind="image",
+            argv=("chafa", "--", str(png)),
+            png_path=png,
+        )
+    )
+    assert "svg-image-bytes" in pane.last_render
+
+
 # ---------------------------------------------------------------------------
-# make_mermaid_image_callback — MarkdownView との繋ぎ込み
+# make_image_render_callback — MarkdownView との繋ぎ込み
 # ---------------------------------------------------------------------------
 
 
-def test_make_mermaid_image_callback_routes_to_pane(tmp_path: Path) -> None:
-    from llove.views.mermaid_pane import (
-        MermaidImagePane,
-        make_mermaid_image_callback,
+def test_make_image_render_callback_routes_to_pane(tmp_path: Path) -> None:
+    from llove.views.image_render_pane import (
+        ImageRenderPane,
+        make_image_render_callback,
     )
 
     svg = tmp_path / "y.svg"
     svg.write_text("<svg/>", encoding="utf-8")
 
-    pane = MermaidImagePane(runner=lambda argv, *, timeout: (0, b"chafa-out", b""))
-    cb = make_mermaid_image_callback(pane)
+    # async_dispatch=False で同期実行 (即座に検証可能)
+    pane = ImageRenderPane(runner=lambda argv, *, timeout: (0, b"chafa-out", b""))
+    cb = make_image_render_callback(pane, async_dispatch=False)
 
     cb(
         mr.MermaidRender(
@@ -184,13 +212,16 @@ def test_make_mermaid_image_callback_routes_to_pane(tmp_path: Path) -> None:
 
 def test_callback_is_safe_when_pane_set_render_raises() -> None:
     """pane が暴れても callback は raise しない (View を巻き込まないため)."""
-    from llove.views.mermaid_pane import make_mermaid_image_callback
+    from llove.views.image_render_pane import make_image_render_callback
 
     class BadPane:
         def set_render(self, *args, **kwargs):
             raise RuntimeError("pane broken")
 
-    cb = make_mermaid_image_callback(BadPane())  # type: ignore[arg-type]
+        def set_render_async(self, *args, **kwargs):
+            raise RuntimeError("pane broken async too")
+
+    cb = make_image_render_callback(BadPane())  # type: ignore[arg-type]
     # 例外が外まで漏れない
     cb(mr.MermaidRender(kind="ascii", ascii_text="x"))
 
@@ -201,13 +232,13 @@ def test_callback_is_safe_when_pane_set_render_raises() -> None:
 
 
 def test_full_chain_markdownview_to_pane(tmp_path: Path) -> None:
-    """MarkdownView (mermaid_render=True) → callback → pane.set_render → ANSI."""
+    """MarkdownView (diagram_render=True) → callback → pane.set_render → ANSI."""
     from llove.events import Event, EventKind
-    from llove.views.markdown_view import MarkdownView
-    from llove.views.mermaid_pane import (
-        MermaidImagePane,
-        make_mermaid_image_callback,
+    from llove.views.image_render_pane import (
+        ImageRenderPane,
+        make_image_render_callback,
     )
+    from llove.views.markdown_view import MarkdownView
 
     svg = tmp_path / "diag.svg"
 
@@ -221,10 +252,10 @@ def test_full_chain_markdownview_to_pane(tmp_path: Path) -> None:
             svg_path=target,
         )
 
-    pane = MermaidImagePane(
+    pane = ImageRenderPane(
         runner=lambda argv, *, timeout: (0, b"\x1b[33mPANE-IMAGE\x1b[0m", b"")
     )
-    callback = make_mermaid_image_callback(pane)
+    callback = make_image_render_callback(pane, async_dispatch=False)
 
     view = MarkdownView(
         diagram_render=True,

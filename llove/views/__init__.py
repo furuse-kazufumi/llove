@@ -18,7 +18,6 @@ from .folding_persistence import (
     load_fold_state,
     save_fold_state,
 )
-from .markdown_view import MarkdownView
 from .image_render_pane import (
     DiagramRenderResult,
     ImageRenderPane,
@@ -27,6 +26,7 @@ from .image_render_pane import (
     make_image_render_callback,
     run_image_render,
 )
+from .markdown_view import MarkdownView
 from .mermaid_render import (
     MermaidRender,
     ascii_fallback,
@@ -49,9 +49,9 @@ from .svg_render import (
 __all__ = [
     "FOLD_STATE_VERSION",
     "AuditLogView",
+    "DiagramRenderResult",
     "FoldRegion",
     "FoldState",
-    "DiagramRenderResult",
     "ImageRenderPane",
     "MarkdownView",
     "MermaidRender",
@@ -60,8 +60,8 @@ __all__ = [
     "SVGRender",
     "SensorStreamView",
     "SubprocessRunner",
-    "WorkerDispatcher",
     "View",
+    "WorkerDispatcher",
     "apply_folds",
     "ascii_fallback",
     "ascii_fallback_for_svg",
@@ -71,7 +71,7 @@ __all__ = [
     "find_image_tool",
     "find_table_regions",
     "load_fold_state",
-    "make_mermaid_image_callback",
+    "make_image_render_callback",
     "mmdc_available",
     "render_mermaid",
     "render_mermaid_to_svg",
