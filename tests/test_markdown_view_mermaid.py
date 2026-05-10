@@ -63,11 +63,13 @@ def test_mermaid_ascii_fallback_when_tools_missing(tmp_path: Path) -> None:
     from llove.views.markdown_view import MarkdownView
 
     v = MarkdownView(
-        mermaid_render=True,
-        mermaid_renderer=lambda src, out: mr.MermaidRender(
-            kind="ascii", ascii_text=mr.ascii_fallback(src)
-        ),
-        mermaid_cache_dir=tmp_path,
+        diagram_render=True,
+        diagram_renderers={
+            "mermaid": lambda src, out: mr.MermaidRender(
+                kind="ascii", ascii_text=mr.ascii_fallback(src)
+            )
+        },
+        diagram_cache_dir=tmp_path,
     )
     v.feed(_narration("```mermaid\nflowchart LR\nA --> B\n```\n"))
     # マーカー行 + 元 source が描画に乗ること
