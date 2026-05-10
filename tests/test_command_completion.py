@@ -12,6 +12,7 @@ from llove.term.completion import (
     HistoryRing,
     complete_prefix,
     filter_suggestions,
+    highlight_match,
 )
 
 NAMES = [
