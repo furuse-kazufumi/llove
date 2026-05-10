@@ -19,6 +19,12 @@ from .folding_persistence import (
     save_fold_state,
 )
 from .markdown_view import MarkdownView
+from .mermaid_pane import (
+    MermaidImagePane,
+    SubprocessRunner,
+    make_mermaid_image_callback,
+    run_image_render,
+)
 from .mermaid_render import (
     MermaidRender,
     ascii_fallback,
