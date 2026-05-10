@@ -6,6 +6,75 @@
 
 ---
 
+## 2026-05-10 (続き 6) — F15 (t2/t3) MarkdownView を mermaid + svg 統一処理に汎化
+
+### 完成したもの
+
+`MarkdownView._expand_mermaid_in` を `_expand_diagram_blocks_in` に汎化。
+mermaid + svg を同じ経路で処理し、後続フォーマット (PlantUML / dot /
+ditaa) も constructor で 1 行追加するだけで対応できる構造になった。
+
+- パラメータ rename (alpha 段階のため非互換):
+  - `mermaid_render` → `diagram_render`
+  - `mermaid_renderer: Callable` → `diagram_renderers: dict[kind, Callable]`
+  - `mermaid_image_callback` → `diagram_image_callback`
+  - `mermaid_cache_dir` → `diagram_cache_dir`
+- `diagram_renderers` の解釈:
+  - `None` → 既定 `{"mermaid": render_mermaid, "svg": render_svg}` を使う
+  - 非空 dict → そのキーセットだけが展開対象 (デフォルトとマージしない)。
+    「mermaid だけ展開、svg は触らない」を表現可能。マージしたい場合は
+    明示的に `_default_diagram_renderers() | {...}` を渡す。
+- `folding.py` の svg 認識:
+  - `find_code_block_regions` が ` ```svg ` を `kind="svg"` にリラベル
+  - `_preset_prose` を `(code, table, mermaid, svg)` に拡張
+  - `apply_folds` summary に `▶ ◇ svg: <label>` を追加 (diagram 視覚区別)
+  - `make_markdown_fold_hook` の valid kind に "svg" 追加
+- `ascii_fallback_for_svg` の HTML エスケープ問題修正:
+  抜粋を ` ```text ` フェンスで囲み、Rich Markdown が `<svg>` を生 HTML
+  として処理して消してしまう問題を防止。
+
+### テスト
+
+- 既存 mermaid テスト 9 件を新パラメータ名に移行
+  (`test_markdown_view_mermaid.py`, `test_mermaid_pane.py`)
+- svg 統合テスト 5 件追加 (`test_markdown_view_svg.py`):
+  単独 svg 展開 / svg image callback / mermaid+svg 共存 /
+  未登録 kind 不変 / 既定 renderer (auto)
+- folding svg 認識テスト 7 件追加 (`test_folding_svg.py`):
+  単独 svg 識別 / 大文字 / mermaid + code 共存 / close_by_kind /
+  summary marker / prose preset / fold-by-tag dispatch
+- フルスイート **441 PASS + 3 skipped** (429 → +12)、ruff クリーン、回帰ゼロ。
+
+### 次セッションで着手する候補 (重要度順)
+
+1. **`MermaidImagePane` → `ImageRenderPane` リネーム** — 既に SVGRender を
+   duck typing で受けられる状態なので、名前を generalize して mermaid /
+   svg / 今後の他フォーマットを統一する。`mermaid_pane.py` →
+   `image_render_pane.py` 移動 + 既存 export を後方互換 re-export。
+2. **実 chafa + mmdc + rsvg-convert での E2E 検証** — dev 環境で
+   `llove demo` 経由で動作確認。CI ではスキップ (binary 依存)。
+3. **PlantUML / Graphviz dot 対応** — `plantuml_render.py` /
+   `dot_render.py` を mermaid_render テンプレで作って、constructor で
+   登録するだけで動くことを E2E 検証。
+4. **キーバインド (Vim/VSCode)** — `za` / `zM` / `zR` / `Ctrl+Shift+[`。
+5. **JSON ツリービュー / ログペイン fold** — folding.py の純粋関数を
+   別ビューに展開。
+
+### 設計メモ (将来参照)
+
+- `diagram_renderers` を merge ではなく **完全上書き** にしたのは、
+  「特定 kind だけ無効化」の表現を素直にするため。merge にすると
+  「svg を無効化」を表すのに `{"mermaid": fn, "svg": _no_op}` のような
+  unintuitive な書き方が必要になる。
+- ASCII fallback の format 別ポリシー:
+  - mermaid: 元 source 全文を罫線で挟む (人間可読 DSL なので無圧縮)
+  - svg: 先頭 240 文字を ` ```text ` フェンスで挟む (XML は不可読 + Rich
+    Markdown の HTML 食い対策)
+- `_default_diagram_renderers()` を関数として公開しているのは、
+  ユーザが「既定 + 自分の追加」を 1 行で書けるように。
+
+---
+
 ## 2026-05-10 (続き 5) — F15 (t2) SVG → PNG → 画像チェイン基盤
 
 ### 完成したもの
