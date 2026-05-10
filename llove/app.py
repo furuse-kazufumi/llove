@@ -299,6 +299,9 @@ class LoveApp(App):
     def action_show_help(self) -> None:
         self.push_screen(HelpScreen())
 
+    def action_command_palette(self) -> None:
+        self.push_screen(CommandPaletteScreen())
+
     def action_quit_now(self) -> None:
         """Synchronous quit so it can be wired from Button.Pressed."""
         self.exit()
