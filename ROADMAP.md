@@ -258,9 +258,18 @@
         table: `▶ | table (3 cols) (N rows)`)。MarkdownView の
         `fold_regions()` は 3 種を統合して `start_line` 順返却 — 単一の
         toggle で構文種を問わず動作。テスト追加 18 件、フルスイート
-        305 PASS + 3 skipped。次段階: Mermaid 図 fold, キーバインド
-        (Vim/VSCode), `~/.config/llove/folds/<doc-id>.toml` 永続化,
-        F20 `:fold ...` コマンド連携。
+        305 PASS + 3 skipped。
+      - **(u 段階 3 = u8) F20 `:fold` コマンドパレット連携 完了
+        (2026-05-10)**: ビルトイン `:fold close-all|open-all|
+        by-tag <kind>|toggle <line>` を `llove/term/builtins.py` に追加
+        (フックパターン: 実体は `ctx.hooks['fold']` 経由)。
+        `make_markdown_fold_hook(view)` factory で MarkdownView と
+        1 行 bind。フック未設定でも verb 正当なら audit-warn 通知に留め、
+        verb 非対応 (None 返却) のみ ok=False。`:help` /
+        `:help fold` から探索可能。ビルトイン総数 11→12。テスト
+        18 件追加、フルスイート 323 PASS。次段階: Mermaid 図 fold,
+        キーバインド (Vim/VSCode), `~/.config/llove/folds/<doc-id>.toml`
+        永続化 (u3)。
       - 対象: 見出しセクション / コードブロック / Mermaid / SVG / 画像 /
         表 / 引用 / コールアウト / JSON ツリー / ログペイン / Notebook セル /
         Command Palette 出力履歴
