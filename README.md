@@ -28,9 +28,16 @@
 > **v0.3.0a1 (pre-release):** llmesh ノード identity を全デモの先頭で
 > AUDIT に流す統合 / shogi MVP2a (Ed25519 per-move 署名付きの実対局
 > ループ + `llove play shogi`) / F15 ブラウザ並み表示の URI / Camera /
-> Viewer 基盤 / F16 chess (`[chess]` extras) / F21 タイピングデモ
-> (8 ジャンル辞書) / F17 WindowManager 最小骨組み (Free/Locked
-> Container + IconSet 3 段 + layout.toml). 全 216 件 PASS.
+> Viewer 基盤 / F15 (t1) MarkdownView (Rich GFM レンダラ) + (u)
+> Foldable Blocks (見出し / コード / 表 / mermaid / svg + プリセット
+> 4 種 + TOML 永続化 + ステータスバー連携) / **F15 (t2/t3) Diagram
+> auto-render パイプライン: mmdc / rsvg-convert で mermaid / svg を
+> SVG/PNG 化し、chafa / viu / timg / kitty / wezterm の最優先ツールに
+> 流して `ImageRenderPane` 上に画像表示。Textual `run_worker(thread=True)`
+> で UI 凍結を回避、3 段 fallback で fail-closed。** /
+> F16 chess (`[chess]` extras) / F21 タイピングデモ (8 ジャンル辞書) /
+> F17 WindowManager 最小骨組み (Free/Locked Container + IconSet 3 段 +
+> layout.toml). 全 **442 件 PASS** + 3 skipped, ruff クリーン.
 > 詳細は [CHANGELOG.md](CHANGELOG.md) と [ROADMAP.md](ROADMAP.md) を参照.
 
 ```bash
