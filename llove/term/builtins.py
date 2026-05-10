@@ -384,6 +384,13 @@ def builtin_commands() -> tuple[Command, ...]:
             args_hint="[<name> <body>]",
             category="core",
         ),
+        Command(
+            name="fold",
+            handler=_cmd_fold,
+            summary="ブロック折り畳み (F15 u): close-all / open-all / by-tag / toggle",
+            args_hint="<verb> [args]",
+            category="viewer",
+        ),
     )
 
 
