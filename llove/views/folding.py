@@ -157,6 +157,125 @@ def find_heading_regions(source: str) -> list[FoldRegion]:
     return regions
 
 
+def find_code_block_regions(source: str) -> list[FoldRegion]:
+    """Extract fenced code block regions (``` or ~~~ pairs) from `source`.
+
+    Each region spans from the opening fence line through the closing fence
+    line, both inclusive. The label carries the info-string (language hint)
+    when present; otherwise it falls back to the literal ``"code"``.
+
+    Fail-closed: a fence that is opened but never closed produces no region.
+    Returning a phantom span would cause `apply_folds` to swallow the rest
+    of the document, which is the wrong default for a malformed snippet.
+    """
+    if not isinstance(source, str) or not source:
+        return []
+
+    lines = source.splitlines()
+    regions: list[FoldRegion] = []
+    i = 0
+    n = len(lines)
+    while i < n:
+        line = lines[i]
+        m = _RE_FENCE_OPEN.match(line)
+        if not m:
+            i += 1
+            continue
+        marker = m.group("marker")
+        info = m.group("info") or "code"
+        # Look for the matching closing fence (same marker family). A blank
+        # info string is what closes; anything with text would re-open with a
+        # different language, which we don't accept here.
+        close_idx = -1
+        for j in range(i + 1, n):
+            stripped = lines[j].strip()
+            if stripped == marker:
+                close_idx = j
+                break
+        if close_idx == -1:
+            # No closing fence — bail out (fail-closed).
+            break
+        regions.append(
+            FoldRegion(
+                kind="code",
+                level=0,
+                label=info.strip() or "code",
+                start_line=i,
+                end_line=close_idx,
+            )
+        )
+        i = close_idx + 1
+    return regions
+
+
+def find_table_regions(source: str) -> list[FoldRegion]:
+    """Extract GFM pipe-table regions (header row + alignment row + body).
+
+    A table is recognised only when an alignment row (`|---|---|`) immediately
+    follows a pipe-row header. Body rows continue while consecutive lines look
+    like pipe rows; the first non-pipe row terminates the table. Tables
+    inside fenced code blocks are skipped.
+    """
+    if not isinstance(source, str) or not source:
+        return []
+
+    lines = source.splitlines()
+    regions: list[FoldRegion] = []
+    in_fence = False
+    i = 0
+    n = len(lines)
+    while i < n:
+        line = lines[i]
+        if _RE_FENCE.match(line):
+            in_fence = not in_fence
+            i += 1
+            continue
+        if in_fence:
+            i += 1
+            continue
+        # We need at least header + alignment + ≥0 body rows. Header is a
+        # pipe-row, alignment is the dashed row immediately after.
+        if not _RE_TABLE_ROW.match(line):
+            i += 1
+            continue
+        if i + 1 >= n or not _RE_TABLE_ALIGN.match(lines[i + 1]):
+            i += 1
+            continue
+        # Count columns in the header for the label.
+        cols = max(1, line.strip().strip("|").count("|") + 1)
+        # Walk forward through body rows.
+        end = i + 1  # alignment row is part of the table
+        j = i + 2
+        while j < n and _RE_TABLE_ROW.match(lines[j]):
+            end = j
+            j += 1
+        regions.append(
+            FoldRegion(
+                kind="table",
+                level=0,
+                label=f"table ({cols} cols)",
+                start_line=i,
+                end_line=end,
+            )
+        )
+        i = end + 1
+    return regions
+
+
+def _summary_line(region: FoldRegion, hidden: int) -> str:
+    """Format a closed-region summary line per (u4)."""
+    if region.kind == "heading":
+        hashes = "#" * region.level
+        return f"▶ {hashes} {region.label} ({hidden} lines)"
+    if region.kind == "code":
+        return f"▶ ```{region.label} ({hidden} lines)"
+    if region.kind == "table":
+        # Tables count rows rather than lines; "rows" reads more naturally
+        # for a table fold, even though both are line counts internally.
+        return f"▶ | {region.label} ({hidden} rows)"
+    return f"▶ {region.label} ({hidden} lines)"
+
+
 def apply_folds(
     source: str,
     regions: Iterable[FoldRegion],
@@ -164,14 +283,15 @@ def apply_folds(
 ) -> str:
     """Collapse closed regions to a one-line summary; pass open content through.
 
-    Per spec u4, a closed region renders as::
+    Per spec u4, a closed region renders as one of::
 
         ▶ ## Heading (N lines)
+        ▶ ```python (N lines)
+        ▶ | table (3 cols) (N rows)
 
-    where N is the count of body lines hidden (i.e. excluding the header
-    line itself). Nested closed regions are absorbed by the outer fold —
-    we walk top-to-bottom and skip any line covered by an already-emitted
-    closed region.
+    where N counts the body lines hidden. Nested closed regions are absorbed
+    by the outer fold — we walk top-to-bottom and skip any line covered by an
+    already-emitted closed region.
     """
     if not isinstance(source, str):
         return ""
@@ -200,11 +320,8 @@ def apply_folds(
             out.append(lines[i])
             i += 1
             continue
-        # Build the summary line. body = lines (i+1 .. end_line) inclusive.
-        hidden = match.end_line - match.start_line  # number of body lines
-        hashes = "#" * match.level if match.kind == "heading" else ""
-        prefix = f"{hashes} " if hashes else ""
-        out.append(f"▶ {prefix}{match.label} ({hidden} lines)")
+        hidden = match.end_line - match.start_line  # body line count
+        out.append(_summary_line(match, hidden))
         # Skip everything inside, including any nested closed regions.
         i = match.end_line + 1
 
