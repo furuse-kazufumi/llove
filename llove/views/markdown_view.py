@@ -15,6 +15,7 @@ from __future__ import annotations
 
 from collections import deque
 from io import StringIO
+from pathlib import Path
 
 from rich.console import Console
 from rich.markdown import Markdown
@@ -30,6 +31,11 @@ from llove.views.folding import (
     find_code_block_regions,
     find_heading_regions,
     find_table_regions,
+)
+from llove.views.folding_persistence import (
+    default_fold_state_path,
+    load_fold_state,
+    save_fold_state,
 )
 
 
