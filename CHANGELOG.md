@@ -5,6 +5,32 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — F15 (u) Foldable Blocks コードブロック / 表 fold 拡張 (2026-05-10)
+
+- **コードブロック fold + 表 fold** を folding.py に追加:
+  - `find_code_block_regions(source)` — fenced ``` / ~~~ ペアを抽出。
+    info-string (例: `python`) を `label` に保持。閉じフェンス無し時は
+    fail-closed で空リストを返却 (phantom region 防止)。
+  - `find_table_regions(source)` — GFM パイプテーブル
+    (header + alignment + 0+ body 行) を抽出。alignment 行が直後に
+    ない場合は table と認識しない。code fence 内のテーブルは無視。
+    `label` に列数を保持 (`"table (3 cols)"`)。
+  - `apply_folds` の summary 書式を kind 別に拡張:
+    - `heading` → `▶ ## 見出し (N lines)` (既存)
+    - `code`    → `▶ \`\`\`python (N lines)`
+    - `table`   → `▶ | table (3 cols) (N rows)`
+- **MarkdownView 統合**: `fold_regions()` が見出し + コード + 表を
+  すべて返し `start_line` 順にソートして公開。`toggle_fold(line)` /
+  `close_all_folds()` は構文種別を意識せず動作 — 1 つのキーバインドで
+  あらゆる fold を扱える。
+- **テスト 18 件追加** (`test_folding_code_table.py` 13件 +
+  `test_markdown_view_code_table_fold.py` 5件):
+  単一/複数 fence / 言語ラベル無し / ~~~ fence / 未閉じ fence /
+  table 基本 / 列数ラベル / alignment 必須 / fence 内 table 無視 /
+  各 kind の summary 書式 / 混在 fold 独立性 / `close_by_kind` /
+  MarkdownView 経由の code/table fold 動作 / `close_all_folds` 全 kind 一括.
+  フルスイート **305 PASS** + 3 skipped、ruff クリーン。
+
 ### Added — F15 (u) Foldable Blocks 見出しセクション折り畳み (2026-05-10)
 
 - **F15 (u) Foldable Blocks**: UI 非依存の純粋データ層
