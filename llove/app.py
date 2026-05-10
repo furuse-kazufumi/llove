@@ -16,6 +16,7 @@ from llove.events import Event, EventKind
 from llove.i18n import t
 from llove.identity import load_local_identity
 from llove.sources.base import DataSource
+from llove.term.palette import CommandPaletteScreen
 from llove.views.audit_log import AuditLogView
 from llove.views.base import View
 from llove.views.narration import NarrationView
