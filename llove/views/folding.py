@@ -346,6 +346,9 @@ def _summary_line(region: FoldRegion, hidden: int) -> str:
         return f"▶ {hashes} {region.label} ({hidden} lines)"
     if region.kind == "code":
         return f"▶ ```{region.label} ({hidden} lines)"
+    if region.kind == "mermaid":
+        # Diamond marker hints visually that this is a diagram, not code.
+        return f"▶ ◇ mermaid: {region.label} ({hidden} lines)"
     if region.kind == "table":
         # Tables count rows rather than lines; "rows" reads more naturally
         # for a table fold, even though both are line counts internally.
