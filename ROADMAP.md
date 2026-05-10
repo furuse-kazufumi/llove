@@ -227,6 +227,19 @@
         絵文字短縮形は次段階で markdown-it-py プラグイン経由で拡張予定。
       - SVG ターミナル表示 (`rsvg-convert` / `cairosvg` → Pillow → 既存 image
         チェイン), `[browser-svg]` extras
+      - **MarkdownView mermaid 自動展開統合完了 (2026-05-10, F15 (t3))**:
+        `MarkdownView` に opt-in パラメータ 4 つ
+        (`mermaid_render` / `mermaid_renderer` / `mermaid_image_callback` /
+        `mermaid_cache_dir`) を追加。`_expand_mermaid_in` が fold の後段で
+        `kind="mermaid"` フェンスを抽出 → renderer に流して本文を差し替え。
+        ASCII 経路は本文に fallback 文字列を直接差し込み、image 経路は
+        本文にマーカーを残しつつ `MermaidRender` を callback に渡して
+        subprocess 起動はホスト責務 (Textual worker からも安全に呼べる)。
+        SHA-256 16 桁ハッシュで同一 source は SVG キャッシュ共有。renderer /
+        callback の例外は 2 段で fail-closed (元 source に戻る or マーカー
+        だけ表示)。最新エントリのみ展開し旧履歴は不変。テスト 9 件追加、
+        フルスイート 394 PASS。**残課題**: Textual subprocess worker での
+        実 chafa 起動 + 画像描画完了通知 (現状は callback まで)。
       - **Mermaid 図インライン表示 (mmdc → SVG → image チェイン) 基盤完了
         (2026-05-10, F15 (t3))**: `llove/views/mermaid_render.py` に
         `MermaidRender` (kind/argv/svg_path/ascii_text) と
