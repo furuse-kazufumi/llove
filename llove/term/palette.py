@@ -111,6 +111,10 @@ class CommandPaletteWidget(Vertical):
         yield Static("", id="cp-suggest")
         yield Static("", id="cp-output")
 
+    def on_mount(self) -> None:
+        self.history.load()
+        self.query_one("#cp-input", Input).focus()
+
     # ------------------------------------------------------------------ events
     def on_input_changed(self, event: Input.Changed) -> None:
         if event.input.id != "cp-input":
