@@ -74,6 +74,13 @@ class MarkdownView(Static, View):
         self._width = width
         self.last_source: str = ""
         self.last_render: str = self._initial
+        # F15 (u): foldable blocks. We keep a single FoldState attached to the
+        # view; folds apply to the *latest* entry's user text (where the user
+        # is currently looking and interacting). Older history entries always
+        # pass through verbatim — folding them would surprise users browsing
+        # back through narration. State is keyed on line numbers (in
+        # `last_source`), so a re-feed of the same document keeps folds shut.
+        self.fold_state: FoldState = FoldState()
         try:
             self.border_title = t("ui.pane.markdown.title")
         except Exception:  # nosec B110 — i18n missing key.
@@ -97,13 +104,62 @@ class MarkdownView(Static, View):
         document = header + text
         self._entries.appendleft(document)
         self._beats += 1
-        # Track raw source so callers can introspect what was last fed in.
+        # Track raw source so callers can introspect what was last fed in,
+        # and so fold operations have a stable substrate.
         self.last_source = text
+        self._render()
 
-        # Rasterise the full history (latest first) into a text snapshot.
+    # ------------------------------------------------------------------
+    # F15 (u) Foldable Blocks — public API
+    # ------------------------------------------------------------------
+    def fold_regions(self) -> list[FoldRegion]:
+        """Return the foldable regions in the *latest* entry's user text."""
+        return find_heading_regions(self.last_source)
+
+    def toggle_fold(self, start_line: int) -> None:
+        """Toggle the fold whose region starts at `start_line` (0-indexed)."""
+        self.fold_state.toggle(start_line)
+        self._render()
+
+    def close_all_folds(self) -> None:
+        """Close every foldable region in the latest entry (Vim `zM`)."""
+        self.fold_state.close_all(self.fold_regions())
+        self._render()
+
+    def open_all_folds(self) -> None:
+        """Open every fold (Vim `zR`)."""
+        self.fold_state.open_all()
+        self._render()
+
+    # ------------------------------------------------------------------
+    # Internal rendering
+    # ------------------------------------------------------------------
+    def _folded_latest_entry(self, entry: str) -> str:
+        """Apply current fold state to the latest entry only.
+
+        Older history entries are not folded — folding them would lose
+        scroll-back context. We only operate on the entry whose user text
+        equals `last_source` (i.e. the most recent feed).
+        """
+        if not self.fold_state.closed_starts:
+            return entry
+        if not self.last_source or not entry.endswith(self.last_source):
+            return entry
+        regions = find_heading_regions(self.last_source)
+        if not regions:
+            return entry
+        folded = apply_folds(self.last_source, regions, self.fold_state)
+        prefix = entry[: -len(self.last_source)]
+        return prefix + folded
+
+    def _render(self) -> None:
+        """Rasterise the history (latest first) into both string + live widget."""
         rendered_chunks: list[str] = []
-        for entry in self._entries:
-            rendered_chunks.append(_markdown_to_text(entry, width=self._width))
+        live_chunks: list[str] = []
+        for idx, entry in enumerate(self._entries):
+            shown = self._folded_latest_entry(entry) if idx == 0 else entry
+            rendered_chunks.append(_markdown_to_text(shown, width=self._width))
+            live_chunks.append(shown)
         rendered = "\n".join(rendered_chunks)
         self.last_render = rendered
 
@@ -111,6 +167,6 @@ class MarkdownView(Static, View):
         # source of truth on screen; the string snapshot above is for tests,
         # exports, and SVG capture.
         try:
-            self.update(Markdown("\n\n---\n\n".join(self._entries)))
+            self.update(Markdown("\n\n---\n\n".join(live_chunks)))
         except Exception:  # nosec B110 — fail-closed to plain text outside an App.
             self.update(rendered)
