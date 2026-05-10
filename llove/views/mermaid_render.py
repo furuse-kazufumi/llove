@@ -37,7 +37,6 @@ from typing import Literal
 
 from llove.browser.external import ExternalTool, available_tools
 
-
 # ---------------------------------------------------------------------------
 # 結果
 # ---------------------------------------------------------------------------
@@ -97,8 +96,7 @@ def _default_runner(argv: list[str]) -> int:
         proc = subprocess.run(  # nosec B603 — argv is fully controlled.
             argv,
             check=False,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             timeout=30,
         )
         return proc.returncode

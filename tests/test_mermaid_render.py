@@ -17,8 +17,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest  # noqa: F401
-
+import pytest
 
 # ---------------------------------------------------------------------------
 # 検出系
