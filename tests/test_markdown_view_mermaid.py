@@ -179,9 +179,9 @@ def test_renderer_exception_falls_back_to_raw_source(tmp_path: Path) -> None:
         raise RuntimeError("renderer broke")
 
     v = MarkdownView(
-        mermaid_render=True,
-        mermaid_renderer=bad,
-        mermaid_cache_dir=tmp_path,
+        diagram_render=True,
+        diagram_renderers={"mermaid": bad},
+        diagram_cache_dir=tmp_path,
     )
     v.feed(_narration("```mermaid\nflowchart LR\nA --> B\n```\n"))
     # 例外で view が壊れず、最低限元 source は見えること
