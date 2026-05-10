@@ -22,7 +22,7 @@ from __future__ import annotations
 import difflib
 from collections.abc import Iterable
 from dataclasses import dataclass, field
-from os import path as _ospath  # noqa: F401  -- 文字幅判定で必要なら import 追加余地
+from os import path as _ospath
 
 # ---------------------------------------------------------------------------
 # Suggestion filter
