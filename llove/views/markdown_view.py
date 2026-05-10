@@ -13,7 +13,10 @@ swap one for the other.
 
 from __future__ import annotations
 
+import hashlib
+import tempfile
 from collections import deque
+from collections.abc import Callable
 from io import StringIO
 from pathlib import Path
 
@@ -37,6 +40,15 @@ from llove.views.folding_persistence import (
     load_fold_state,
     save_fold_state,
 )
+from llove.views.mermaid_render import MermaidRender, render_mermaid
+
+MermaidRendererFn = Callable[[str, Path], MermaidRender]
+MermaidImageCallback = Callable[[MermaidRender], None]
+
+
+def _default_mermaid_renderer(source: str, output_dir: Path) -> MermaidRender:
+    """Wrap `render_mermaid` so the default path auto-detects mmdc + image tool."""
+    return render_mermaid(source, output_dir=output_dir)
 
 
 def _markdown_to_text(source: str, *, width: int = 100) -> str:
