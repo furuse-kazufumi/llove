@@ -5,6 +5,37 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Changed — F15 (t2/t3) MarkdownView を mermaid + svg 統一処理に汎化 (2026-05-10)
+
+- **MarkdownView パラメータ rename (非互換、alpha 段階)**:
+  - `mermaid_render` → `diagram_render`
+  - `mermaid_renderer: Callable` → `diagram_renderers: dict[str, Callable]`
+  - `mermaid_image_callback` → `diagram_image_callback`
+  - `mermaid_cache_dir` → `diagram_cache_dir`
+- **`_expand_mermaid_in` → `_expand_diagram_blocks_in`**: kind ∈ {mermaid, svg, ...}
+  に対応する renderer を `diagram_renderers[kind]` で動的にディスパッチ。
+  既定では `{"mermaid": render_mermaid, "svg": render_svg}` が登録済み。
+- **kind を増やす拡張**: ユーザは constructor で
+  `diagram_renderers={"plantuml": fn, "dot": fn, ...}` のように追加でき、
+  `find_code_block_regions` が同じ kind を返せばその場で展開対象になる。
+- **`folding.py` の svg 認識**: ` ```svg ... ``` ` フェンスを `kind="svg"`
+  にリラベル (mermaid と並行)。`_preset_prose` も svg を対象に拡張、
+  `apply_folds` summary も `▶ ◇ svg: <label>` で diagram と分かる表示に。
+  `make_markdown_fold_hook` の valid kind に "svg" を追加。
+- **`SVGRender ≡ MermaidRender` shape の活用**: 既存 `MermaidImagePane` は
+  duck typing で SVGRender も受け取れる。
+- **dispatch 仕様**: `diagram_renderers` を渡すと完全な上書き
+  (デフォルトとマージしない)。「mermaid だけ展開して svg は触らない」が
+  自然に表現できる方を優先。マージしたい場合は明示的に
+  `_default_diagram_renderers() | {...}` を渡す。
+- **`ascii_fallback_for_svg` の HTML エスケープ修正**: 抜粋を ` ```text `
+  フェンスで囲み、Rich Markdown が `<svg>` 等を生 HTML として処理して
+  消してしまう問題を防止。
+- **既存テスト 9 件を新名前に移行** + **新 SVG 統合テスト 5 件追加**
+  (`test_markdown_view_svg.py`) + **folding svg 認識テスト 7 件追加**
+  (`test_folding_svg.py`)。
+  フルスイート **441 PASS + 3 skipped** (429 → +12)、ruff クリーン、回帰ゼロ。
+
 ### Added — F15 (t2) SVG → PNG → ターミナル画像チェイン (2026-05-10)
 
 - **新モジュール `llove/views/svg_render.py`**: mermaid_render と並行する
