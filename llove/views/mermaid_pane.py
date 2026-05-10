@@ -131,10 +131,14 @@ class MermaidImagePane(Static):
         *,
         runner: SubprocessRunner | None = None,
         timeout: int = 10,
+        worker_dispatcher: WorkerDispatcher | None = None,
     ) -> None:
         super().__init__(_PLACEHOLDER)
         self._runner: SubprocessRunner = runner or _default_runner
         self._timeout: int = timeout
+        # worker_dispatcher が None のときは Textual の ``self.run_worker``
+        # にフォールバックを試み、それも失敗したら同期実行に降りる。
+        self._worker_dispatcher: WorkerDispatcher | None = worker_dispatcher
         self.last_render: str = _PLACEHOLDER
         self.border_title = "Mermaid"
 
@@ -142,46 +146,93 @@ class MermaidImagePane(Static):
     # 公開 API
     # ------------------------------------------------------------------
     def set_render(self, mr: MermaidRender) -> None:
-        """``MermaidRender`` を受け取り、widget の表示を更新する.
+        """``MermaidRender`` を受け取り、**同期で** widget の表示を更新する.
 
-        - kind == "image": subprocess を起動して stdout (ANSI) を貼る
-        - kind == "ascii": ascii_text を貼る
-        - 失敗時: ASCII fallback or unavailable マーカー
+        subprocess は呼び出しスレッドで走る。chafa が遅い diagram で UI を
+        凍らせたくない場合は ``set_render_async`` を使うこと。
+        """
+        text = self._compute_text(mr)
+        self._apply_text(text)
+
+    def set_render_async(self, mr: MermaidRender) -> None:
+        """``MermaidRender`` を **worker 経由で非同期に** 適用する.
+
+        worker_dispatcher が注入されていればそれを使う。注入されていない場合
+        Textual の ``self.run_worker(thread=True)`` を試み、それも使えない
+        (App 未 mount / 例外) なら同期 fallback で `set_render` 相当の処理を
+        実行する。最後の砦として fallback が走るので呼び出し側は失敗を
+        気にしなくて良い。
+        """
+        def work() -> None:
+            text = self._compute_text(mr)
+            self._apply_text_thread_safe(text)
+
+        try:
+            self._dispatch_to_worker(work)
+        except Exception:
+            # dispatch 自体が落ちた → 同期 fallback で widget を更新
+            self.set_render(mr)
+
+    # ------------------------------------------------------------------
+    # 内部
+    # ------------------------------------------------------------------
+    def _compute_text(self, mr: MermaidRender) -> str:
+        """``MermaidRender`` から widget に貼る文字列を計算する pure 関数.
+
+        画像経路で subprocess が成功すれば ANSI 文字列を返す (ESC が含まれる
+        ので ``_apply_text`` 側が Rich の ``Text.from_ansi`` で描画する)。
+        失敗時は ``mr.ascii_text`` か ``_UNAVAILABLE_MARKER`` に降りる。
         """
         if mr.kind == "image":
             captured = run_image_render(
                 list(mr.argv), runner=self._runner, timeout=self._timeout
             )
             if captured is not None and captured.strip():
-                self._show_ansi(captured)
-                return
-            # 失敗時: ascii_text があれば使う、無ければ unavailable
-            self._show_text(mr.ascii_text or _UNAVAILABLE_MARKER)
-            return
+                return captured
+            return mr.ascii_text or _UNAVAILABLE_MARKER
         if mr.kind == "ascii":
-            self._show_text(mr.ascii_text or _PLACEHOLDER)
-            return
-        # 想定外 kind: placeholder に戻すと意味不明なので unavailable を出す
-        self._show_text(_UNAVAILABLE_MARKER)
+            return mr.ascii_text or _PLACEHOLDER
+        # 想定外 kind: placeholder ではなく unavailable で「描けない」と伝える
+        return _UNAVAILABLE_MARKER
 
-    # ------------------------------------------------------------------
-    # 内部
-    # ------------------------------------------------------------------
-    def _show_ansi(self, ansi: str) -> None:
-        """ANSI 文字列を Rich Text 経由で widget に貼る."""
-        self.last_render = ansi
-        try:
-            self.update(Text.from_ansi(ansi))
-        except Exception:  # nosec B110 — widget が App 外でも落ちない
-            self.update(ansi)
-
-    def _show_text(self, text: str) -> None:
-        """プレーン文字列を widget に貼る."""
+    def _apply_text(self, text: str) -> None:
+        """widget に文字列を貼る. ESC を含むなら ANSI 経由で描画."""
         self.last_render = text
+        is_ansi = "\x1b" in text
         try:
-            self.update(text)
+            self.update(Text.from_ansi(text) if is_ansi else text)
         except Exception:  # nosec B110 — widget が App 外でも落ちない
+            with contextlib.suppress(Exception):
+                self.update(text)
+
+    def _apply_text_thread_safe(self, text: str) -> None:
+        """worker thread から widget を更新するための入口.
+
+        Textual App 内なら ``self.app.call_from_thread`` 経由で main thread に
+        飛ばす。App 外なら直接更新で問題ない (テストはこちらの経路に乗る)。
+        """
+        try:
+            self.app.call_from_thread(self._apply_text, text)
             return
+        except Exception:  # nosec B110 — App 外 or call_from_thread 不可
+            self._apply_text(text)
+
+    def _dispatch_to_worker(self, work: Callable[[], None]) -> None:
+        """work 関数を worker に dispatch する.
+
+        優先度:
+            1. ``worker_dispatcher`` が注入されていればそれ
+            2. Textual の ``self.run_worker(work, thread=True, exclusive=True)``
+            3. 同期実行 (fallback)
+        """
+        if self._worker_dispatcher is not None:
+            self._worker_dispatcher(work)
+            return
+        try:
+            self.run_worker(work, thread=True, exclusive=True)
+            return
+        except Exception:  # nosec B110 — App 外 / 利用不可
+            work()
 
 
 # ---------------------------------------------------------------------------
