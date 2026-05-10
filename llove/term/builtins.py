@@ -236,17 +236,25 @@ def _cmd_macro(args: list[str], ctx: CommandContext) -> CommandResult:
 # ---------------------------------------------------------------------------
 
 # 受け付ける動詞. UI 層のフックに転送する verb 名と一致させる.
-_FOLD_VERBS: tuple[str, ...] = ("close-all", "open-all", "by-tag", "toggle")
+_FOLD_VERBS: tuple[str, ...] = (
+    "close-all",
+    "open-all",
+    "by-tag",
+    "toggle",
+    "preset",
+)
 
 
 def _cmd_fold(args: list[str], ctx: CommandContext) -> CommandResult:
     """`:fold <verb> [args]` — F15 (u8) フォールド操作のフロントエンド.
 
     動詞:
-        close-all       全 fold を閉じる (Vim ``zM``)
-        open-all        全 fold を開く  (Vim ``zR``)
-        by-tag <kind>   特定 kind (heading / code / table) のみ閉じる
-        toggle <line>   特定行の fold を反転 (将来的なホットキー連携用)
+        close-all          全 fold を閉じる (Vim ``zM``)
+        open-all           全 fold を開く  (Vim ``zR``)
+        by-tag <kind>      特定 kind (heading / code / table) のみ閉じる
+        toggle <line>      特定行の fold を反転
+        preset <name>      プリセット適用
+                           (outline / code / data-only / prose)
 
     実体は ``ctx.hooks['fold']`` に bind された callable に委譲する.
     フックが未設定でも verb が正当であれば audit-warn 風の通知に留める
@@ -257,7 +265,8 @@ def _cmd_fold(args: list[str], ctx: CommandContext) -> CommandResult:
         return CommandResult(
             ok=False,
             error=(
-                "usage: :fold <close-all|open-all|by-tag <kind>|toggle <line>>"
+                "usage: :fold <close-all|open-all|"
+                "by-tag <kind>|toggle <line>|preset <name>>"
             ),
         )
     verb, *rest = args
@@ -277,6 +286,11 @@ def _cmd_fold(args: list[str], ctx: CommandContext) -> CommandResult:
         return CommandResult(
             ok=False,
             error="usage: :fold toggle <line>",
+        )
+    if verb == "preset" and len(rest) != 1:
+        return CommandResult(
+            ok=False,
+            error="usage: :fold preset <outline|code|data-only|prose>",
         )
 
     fold_hook = ctx.hooks.get("fold")
