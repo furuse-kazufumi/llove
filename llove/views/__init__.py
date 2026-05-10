@@ -71,6 +71,9 @@ __all__ = [
     "mmdc_available",
     "render_mermaid",
     "render_mermaid_to_svg",
+    "render_svg",
+    "render_svg_to_png",
+    "rsvg_convert_available",
     "run_image_render",
     "save_fold_state",
 ]

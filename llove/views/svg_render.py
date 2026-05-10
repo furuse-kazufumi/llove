@@ -35,7 +35,6 @@ from typing import Literal
 
 from llove.browser.external import ExternalTool, available_tools
 
-
 # ---------------------------------------------------------------------------
 # 結果
 # ---------------------------------------------------------------------------
