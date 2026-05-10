@@ -227,6 +227,20 @@
         絵文字短縮形は次段階で markdown-it-py プラグイン経由で拡張予定。
       - SVG ターミナル表示 (`rsvg-convert` / `cairosvg` → Pillow → 既存 image
         チェイン), `[browser-svg]` extras
+      - **Textual subprocess worker + MermaidImagePane 完了
+        (2026-05-10, F15 (t3))**: 新モジュール `llove/views/mermaid_pane.py` で
+        `MermaidImagePane(Static)` widget + `run_image_render` (pure 関数,
+        runner 注入可) + `make_mermaid_image_callback` (MarkdownView 互換)
+        を提供。`set_render(mr)` で chafa を実起動 → stdout の ANSI 出力を
+        Rich `Text.from_ansi` 経由で widget に貼る。subprocess は
+        list-based argv + timeout 必須 (10s)、失敗時は ascii_text or
+        unavailable マーカーに 2 段で降りる fail-closed。MarkdownView と
+        組み合わせると本文にマーカー / pane に画像という分割表示になり、
+        Textual の画面オーナーシップを壊さない。テスト 12 件追加、
+        フルスイート 406 PASS。**残課題**: 実 chafa での E2E 検証 (現状は
+        `runner` 注入の単体テストのみ)、Textual `run_worker(thread=True)`
+        による非同期化 (現状は同期 `set_render`、画像描画が遅い場合の
+        UI 凍結対策)。
       - **MarkdownView mermaid 自動展開統合完了 (2026-05-10, F15 (t3))**:
         `MarkdownView` に opt-in パラメータ 4 つ
         (`mermaid_render` / `mermaid_renderer` / `mermaid_image_callback` /
