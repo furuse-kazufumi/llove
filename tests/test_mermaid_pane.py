@@ -227,10 +227,10 @@ def test_full_chain_markdownview_to_pane(tmp_path: Path) -> None:
     callback = make_mermaid_image_callback(pane)
 
     view = MarkdownView(
-        mermaid_render=True,
-        mermaid_renderer=fake_renderer,
-        mermaid_image_callback=callback,
-        mermaid_cache_dir=tmp_path,
+        diagram_render=True,
+        diagram_renderers={"mermaid": fake_renderer},
+        diagram_image_callback=callback,
+        diagram_cache_dir=tmp_path,
     )
     view.feed(
         Event(
