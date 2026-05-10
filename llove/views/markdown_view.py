@@ -92,10 +92,7 @@ class MarkdownView(Static, View):
         # Build the markdown document for this entry.
         # Keep timestamp + title inline as a small header so latest-first
         # history reads naturally.
-        if title:
-            header = f"**{ts}** — _{title}_\n\n"
-        else:
-            header = f"**{ts}**\n\n"
+        header = f"**{ts}** — _{title}_\n\n" if title else f"**{ts}**\n\n"
         document = header + text
         self._entries.appendleft(document)
         self._beats += 1
