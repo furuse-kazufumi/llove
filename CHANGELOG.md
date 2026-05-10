@@ -5,6 +5,23 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — F15 (u6) Fold ステータス表示 (2026-05-10)
+
+- **`MarkdownView.fold_metrics()` / `fold_status()` 公開 API**:
+  - `fold_metrics() -> tuple[int, int]` で `(closed, total)` を返す
+    pure 計算メソッド。view が未 feed でも `(0, 0)` を返し raise しない。
+  - `fold_status() -> str` で `"fold: 3 closed / 12 total"` の正準
+    ステータス文字列を返す。
+- **border_subtitle 自動更新**: `_render()` 末尾で
+  `self.border_subtitle = self.fold_status()` を呼び、Textual ボーダー
+  に常に最新の fold メトリクスが表示される (要件 u6 ステータスバー)。
+  Static widget でテスト可 — App mount 不要。
+- **テスト 7 件追加** (`test_markdown_view_fold_status.py`):
+  未 feed → (0, 0) / total 計数 (h+code 等) / close-all 後 closed=total /
+  status 文字列の数値検証 / 空 view の status / `border_subtitle` が
+  close_all で更新 / open_all で 0 復帰。
+  フルスイート **369 PASS** + 3 skipped、ruff クリーン。
+
 ### Added — F15 (t3 prep / u) Mermaid ブロック識別 (2026-05-10)
 
 - ` ```mermaid ... ``` ` フェンスを **`kind="mermaid"` として特別認識**:
