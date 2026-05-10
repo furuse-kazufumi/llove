@@ -46,7 +46,7 @@ def test_normal_code_block_is_never_expanded() -> None:
     """通常 ``` の code フェンスは mermaid_render=True でも触らない."""
     from llove.views.markdown_view import MarkdownView
 
-    v = MarkdownView(mermaid_render=True)
+    v = MarkdownView(diagram_render=True)
     src = "intro\n```python\nprint(1)\n```\n"
     v.feed(_narration(src))
     assert "print(1)" in v.last_render
