@@ -313,52 +313,61 @@ class MarkdownView(Static, View):
         return prefix + folded
 
     # ------------------------------------------------------------------
-    # F15 (t3) Mermaid 自動展開
+    # F15 (t2/t3) Diagram 自動展開 (mermaid + svg を統一処理)
     # ------------------------------------------------------------------
-    def _mermaid_block_dir(self, source: str) -> Path:
-        """同じ mermaid source なら同じ subdir にキャッシュさせる."""
+    def _diagram_block_dir(self, kind: str, source: str) -> Path:
+        """同じ (kind, source) なら同じ subdir にキャッシュさせる."""
         digest = hashlib.sha256(source.encode("utf-8")).hexdigest()[:16]
-        return self._mermaid_cache_dir / digest
+        return self._diagram_cache_dir / kind / digest
 
-    def _call_mermaid_renderer(self, source: str) -> str:
-        """renderer 呼び出し → 本文に差し込む文字列を返す. Fail-closed."""
+    def _call_diagram_renderer(self, kind: str, source: str) -> str:
+        """kind 別 renderer 呼び出し → 本文に差し込む文字列を返す. Fail-closed."""
+        renderer = self._diagram_renderers.get(kind)
+        if renderer is None:
+            # 登録されていない kind は触らずに source を残す (将来追加用)
+            return source
         try:
-            result = self._mermaid_renderer(source, self._mermaid_block_dir(source))
+            result = renderer(source, self._diagram_block_dir(kind, source))
         except Exception:  # nosec B110 — renderer 失敗時は元 source を残す
             return source
         if result.kind == "image":
-            if self._mermaid_image_callback is not None:
+            if self._diagram_image_callback is not None:
                 # Fail-closed: callback 失敗は view を壊さない
                 with contextlib.suppress(Exception):
-                    self._mermaid_image_callback(result)
+                    self._diagram_image_callback(result)
             tool = result.argv[0] if result.argv else "image tool"
-            return f"_(◇ mermaid diagram → rendered separately via {tool})_"
+            return f"_(◇ {kind} diagram → rendered separately via {tool})_"
         # ascii kind (or unexpected): fall back to ascii_text if present
         return result.ascii_text or source
 
-    def _expand_mermaid_in(self, text: str) -> str:
-        """text 内の `kind="mermaid"` フェンスを renderer 出力で置換する.
+    def _expand_diagram_blocks_in(self, text: str) -> str:
+        """text 内の diagram-kind フェンスを renderer 出力で置換する.
 
-        ``mermaid_render=False`` のときは何もしない (既存挙動を保つ)。
+        ``diagram_render=False`` のときは何もしない (既存挙動を保つ)。
         通常の code フェンスは触らない。fold で閉じられたフェンスは
         サマリ行に置き換わっている (再開フェンスが無い) ため、ここでは
-        自動的に「開いている mermaid フェンスのみ」が展開される。
+        自動的に「開いている diagram フェンスのみ」が展開される。
+
+        現在対応する kind は ``diagram_renderers`` のキー集合 — 既定では
+        ``{"mermaid", "svg"}``。ユーザは constructor で kind を追加 / 上書き
+        できる (例: ``{"plantuml": ..., "dot": ...}``)。
         """
-        if not self._mermaid_render or not text:
+        if not self._diagram_render or not text:
             return text
+        diagram_kinds = set(self._diagram_renderers)
         regions = find_code_block_regions(text)
-        mermaid_regions = sorted(
-            (r for r in regions if r.kind == "mermaid"),
+        diagram_regions = sorted(
+            (r for r in regions if r.kind in diagram_kinds),
             key=lambda r: r.start_line,
         )
-        if not mermaid_regions:
+        if not diagram_regions:
             return text
 
         lines = text.splitlines()
         out: list[str] = []
         i = 0
         n = len(lines)
-        region_iter = iter(mermaid_regions)
+        region_iter = iter(diagram_regions)
         next_region = next(region_iter, None)
         while i < n:
             if next_region is not None and i == next_region.start_line:
@@ -366,7 +375,7 @@ class MarkdownView(Static, View):
                 body = "\n".join(
                     lines[next_region.start_line + 1 : next_region.end_line]
                 )
-                out.append(self._call_mermaid_renderer(body))
+                out.append(self._call_diagram_renderer(next_region.kind, body))
                 i = next_region.end_line + 1
                 next_region = next(region_iter, None)
             else:
