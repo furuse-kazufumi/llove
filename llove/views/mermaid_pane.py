@@ -242,18 +242,25 @@ class MermaidImagePane(Static):
 
 def make_mermaid_image_callback(
     pane: MermaidImagePane,
+    *,
+    async_dispatch: bool = True,
 ) -> Callable[[MermaidRender], None]:
     """``MarkdownView.mermaid_image_callback`` 互換の同期 callback を作る.
 
-    ``MarkdownView`` の callback は同期。pane 側で実 subprocess 起動を
-    する設計 (将来 Textual の ``run_worker(thread=True)`` でラップする
-    ときも、この callback ファクトリは触らずに pane の中だけ書き換えれば
-    良い)。callback 自体は ``pane.set_render`` 例外を吸収するだけ。
+    既定 (``async_dispatch=True``) では `pane.set_render_async` 経由で
+    Textual worker に dispatch する (UI が凍らない)。テストや subprocess
+    完了を即座に待ちたい場合は ``async_dispatch=False`` で同期版に切替。
+
+    どちらの場合も pane 側の例外は callback の外まで漏れない (View に
+    波及させないため)。
     """
 
     def callback(mr: MermaidRender) -> None:
         with contextlib.suppress(Exception):
-            pane.set_render(mr)
+            if async_dispatch:
+                pane.set_render_async(mr)
+            else:
+                pane.set_render(mr)
 
     return callback
 
