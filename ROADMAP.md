@@ -225,8 +225,20 @@
         `ui.pane.markdown.title` / `ui.pane.markdown.empty` を ja/en に追加。
         テスト 12 件 PASS。コールアウト / 数式 / フットノート / タスクリスト /
         絵文字短縮形は次段階で markdown-it-py プラグイン経由で拡張予定。
-      - SVG ターミナル表示 (`rsvg-convert` / `cairosvg` → Pillow → 既存 image
-        チェイン), `[browser-svg]` extras
+      - **SVG ターミナル表示 (rsvg-convert → PNG → image チェイン) 基盤完了
+        (2026-05-10, F15 (t2))**: `llove/views/svg_render.py` を新設。
+        mermaid_render と一対一対応する構造で、SVG XML → temp `.svg` →
+        `rsvg-convert -o output.png input.svg` → image catalog 経由で
+        chafa / viu / timg / kitty / wezterm の最優先ツールに流す。
+        ASCII fallback は XML 全文ではなく先頭 240 文字の抜粋を出す
+        (SVG は人間可読 DSL ではないため)。`SVGRender` は `MermaidRender`
+        と同じ shape (kind/argv/ascii_text) なので、`MermaidImagePane`
+        にそのまま渡せて duck typing で再利用可能。subprocess は
+        list-based argv + temp file 経由でセキュアに固定。テスト 14 件、
+        フルスイート 429 PASS。`[browser-svg]` extras + cairosvg バックエンド
+        (Python 純粋実装) は今後の追加候補。
+        次段階: MarkdownView 内 svg ブロック / `<svg>` タグ自動展開統合
+        (現状はモジュール公開のみ。mermaid と同じパターンで足せる)。
       - **MermaidImagePane 非同期化完了 (2026-05-10, F15 (t3))**:
         `set_render_async(mr)` を追加し Textual `run_worker(thread=True,
         exclusive=True)` 経由で subprocess を別スレッドに逃がす。3 段
