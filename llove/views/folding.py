@@ -111,9 +111,8 @@ class FoldState:
 
 # Each preset is a predicate over (kind, level) that says
 # "should this region be CLOSED under this preset?". Open is the default.
-_FOLD_PRESETS: dict[str, "FoldPredicate"] = {}
-
-FoldPredicate = "Callable[[str, int], bool]"  # forward-ish; see typing below
+# Declared and populated below; the dict literal stays right after the
+# predicate definitions so cross-referencing during review is easy.
 
 
 def _preset_outline(kind: str, level: int) -> bool:
