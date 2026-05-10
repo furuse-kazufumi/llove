@@ -264,13 +264,18 @@ def make_markdown_fold_hook(view: MarkdownView):
     that to the user as an error rather than silently dropping the request.
 
     Supported verbs:
-        close-all      — close every fold in the latest entry
-        open-all       — open every fold
-        by-tag <kind>  — close only folds whose `kind` matches (heading /
-                         code / table)
-        toggle <line>  — toggle the fold whose region starts at <line>
-                         (integer; non-integer arg returns None)
+        close-all       — close every fold in the latest entry
+        open-all        — open every fold
+        by-tag <kind>   — close only folds whose `kind` matches (heading /
+                          code / table)
+        toggle <line>   — toggle the fold whose region starts at <line>
+                          (integer; non-integer arg returns None)
+        preset <name>   — apply a named ruleset (outline / code /
+                          data-only / prose) — see `fold_preset_names()`
     """
+    # Late import: keep the module-level import block stable while still
+    # exposing the preset machinery to the hook.
+    from llove.views.folding import apply_preset, fold_preset_names
 
     def hook(verb: str, args: list[str]) -> tuple[str, ...] | None:
         if verb == "close-all":
@@ -291,6 +296,7 @@ def make_markdown_fold_hook(view: MarkdownView):
             regions = view.fold_regions()
             view.fold_state.close_by_kind(regions, kind)
             view._render()
+            view._persist_fold_state()
             count = sum(1 for r in regions if r.kind == kind)
             return (f"closed {count} {kind} fold(s)",)
         if verb == "toggle":
@@ -303,6 +309,20 @@ def make_markdown_fold_hook(view: MarkdownView):
             view.toggle_fold(line)
             state = "closed" if view.fold_state.is_closed(line) else "open"
             return (f"fold at line {line} now {state}",)
+        if verb == "preset":
+            if not args:
+                return None
+            name = args[0]
+            if name not in fold_preset_names():
+                return None
+            regions = view.fold_regions()
+            view.fold_state = apply_preset(view.fold_state, regions, name)
+            view._render()
+            view._persist_fold_state()
+            return (
+                f"applied preset {name!r} "
+                f"({len(view.fold_state.closed_starts)} fold(s) closed)",
+            )
         return None
 
     return hook
