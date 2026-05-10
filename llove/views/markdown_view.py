@@ -23,6 +23,7 @@ from textual.widgets import Static
 from llove.events import Event, EventKind
 from llove.i18n import t
 from llove.views.base import View
+from llove.views.folding import FoldRegion, FoldState, apply_folds, find_heading_regions
 
 
 def _markdown_to_text(source: str, *, width: int = 100) -> str:
