@@ -5,6 +5,29 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Changed — F15 (t2/t3) MermaidImagePane → ImageRenderPane リネーム (2026-05-10)
+
+- **モジュール rename**: `llove/views/mermaid_pane.py` を削除し、新規に
+  `llove/views/image_render_pane.py` を新設。alpha 段階のため後方互換 shim
+  なしのハードリネーム。
+- **クラス / 関数 rename**:
+  - `MermaidImagePane` → `ImageRenderPane`
+  - `make_mermaid_image_callback` → `make_image_render_callback`
+  - `WorkerDispatcher` 型は変更なし (再公開先のみ更新)
+- **Protocol で構造的型付け**: 新規 `DiagramRenderResult` Protocol
+  (kind / argv / ascii_text のみ) を定義。`MermaidRender` / `SVGRender`
+  の両方が満たすので、pane は specific render module に依存せず
+  どちらも受けられる (将来の PlantUML / dot / ditaa 等も自動対応)。
+- **テストファイル rename**: `test_mermaid_pane.py` /
+  `test_mermaid_pane_async.py` を削除し、新規に
+  `test_image_render_pane.py` (12 件、SVGRender Protocol テスト 1 件追加) /
+  `test_image_render_pane_async.py` (9 件) を新設。
+- **公開 API 更新** (`llove.views.__init__`): `MermaidImagePane` /
+  `make_mermaid_image_callback` を removed、`ImageRenderPane` /
+  `make_image_render_callback` / `DiagramRenderResult` を追加。
+- フルスイート **442 PASS + 3 skipped** (441 → +1)、新ファイルは
+  ruff クリーン、回帰ゼロ。
+
 ### Changed — F15 (t2/t3) MarkdownView を mermaid + svg 統一処理に汎化 (2026-05-10)
 
 - **MarkdownView パラメータ rename (非互換、alpha 段階)**:
