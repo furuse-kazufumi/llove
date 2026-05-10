@@ -23,6 +23,7 @@ import difflib
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 from os import path as _ospath
+from pathlib import Path
 
 # ---------------------------------------------------------------------------
 # Suggestion filter
