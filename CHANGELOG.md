@@ -5,6 +5,42 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — F15 (u) Foldable Blocks 見出しセクション折り畳み (2026-05-10)
+
+- **F15 (u) Foldable Blocks**: UI 非依存の純粋データ層
+  `llove/views/folding.py` を新設し、MarkdownView に統合。
+  - `FoldRegion(kind, level, label, start_line, end_line)` —
+    1 つの折り畳み可能な範囲を行番号で指す不変データクラス。
+  - `FoldState` — 開閉状態を `closed_starts: set[int]` で管理する
+    可変クラス。`toggle / close / open / close_all / open_all /
+    close_by_kind` で操作。Vim の `za / zc / zo / zM / zR` 動詞対応。
+  - `find_heading_regions(source)` — Markdown ATX 見出し
+    (`#`〜`######`) を抽出。**ネスト対応 (u5)**: 外側の見出し範囲は
+    同レベル以下の次見出しまで、内側は親に内包される計算。
+    code fence (` ``` ` / `~~~`) 内の `#` は誤認しない。
+  - `apply_folds(source, regions, state)` — 閉じた範囲を
+    `▶ ## 見出し (N lines)` の 1 行サマリに置換 (**u4 spec 準拠**)。
+    外側を閉じれば内側ごと吸収、内側だけ閉じれば外側はそのまま。
+    fail-closed (u10): 不正入力でも raise せず元文字列返却。
+  - **MarkdownView 統合**: `fold_state` プロパティ +
+    `fold_regions() / toggle_fold(line) / close_all_folds() /
+    open_all_folds()` API を公開。折り畳みは **最新エントリのユーザ
+    テキストのみ** に作用し、履歴上の旧エントリは常に展開状態を維持
+    (スクロールバック時の文脈喪失を回避)。
+    line-number ベースで状態保持しているので、同一ドキュメントの
+    再 feed (テーマ切替・幅変更等) でも折り畳みは閉じたまま。
+  - `llove.views` から `FoldRegion / FoldState / find_heading_regions /
+    apply_folds` を再エクスポート。
+  - **テスト 19 件全 PASS** (`test_folding.py` 14件 +
+    `test_markdown_view_folding.py` 5件):
+    単一/兄弟/ネスト/空/code fence 内、FoldState 開閉、apply_folds
+    閉じ動作 / passthrough / 内外ネスト / 不正入力, MarkdownView
+    fold API / close_all+open_all / 再 feed 永続性 / 平文段落.
+    フルスイート 287 PASS + 3 skipped、ruff クリーン。
+  - 次段階: コードブロック / Mermaid / 表 fold (MarkdownView 内拡張) →
+    JSON ツリー / ログペイン / Notebook セル fold (F19 / F17 連携) →
+    キーバインド (Vim/VSCode 系) → 状態永続化 (~/.config/llove/folds/).
+
 ### Added — F15 (t1) MarkdownView 骨組み (2026-05-10)
 
 - **F15 (t1) MarkdownView** (`llove/views/markdown_view.py`):
