@@ -5,6 +5,32 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — F15 (u8) `:fold` コマンドパレット連携 (2026-05-10)
+
+- **F20 ビルトイン `:fold` コマンド** を追加 (`llove/term/builtins.py`):
+  - 動詞: `close-all` / `open-all` / `by-tag <kind>` / `toggle <line>`
+  - フックパターン: 実体は `ctx.hooks['fold']` の callable に委譲。
+    フック未設定時でも verb が正当なら **audit-warn 風通知** に留める
+    (F20(i) fail-closed)。フックが verb を扱えない (None 返却) 場合
+    のみ ok=False。
+  - 不正動詞 / 引数不足は usage エラー + valid 動詞列挙。
+  - `:help` 一覧 / `:help fold` 個別ヘルプから探索可能。
+  - ビルトイン総数 11 → **12 件**へ。
+- **`make_markdown_fold_hook(view)`** factory を追加
+  (`llove/views/markdown_view.py`):
+  - 1 行で `ctx.hooks["fold"] = make_markdown_fold_hook(my_view)` と
+    bind 可能。
+  - close-all / open-all / by-tag (`heading|code|table`) /
+    toggle <line> をネイティブ実装。整数化失敗時は None 返却で
+    ディスパッチャに「動詞非対応」として委ねる。
+- **テスト 18 件追加** (`test_fold_command.py` 11件 +
+  `test_markdown_fold_hook.py` 7件):
+  ビルトイン登録 / usage エラー / 動詞検証 / フック未設定時の挙動 /
+  hook の verb 別 dispatch / by-tag 引数 / toggle 整数検証 / 不明 verb /
+  E2E (`:fold close-all` → MarkdownView 経由で実 fold 適用).
+  既存 `test_builtin_count` を 11→12 へ更新。
+  フルスイート **323 PASS** + 3 skipped、ruff クリーン。
+
 ### Added — F15 (u) Foldable Blocks コードブロック / 表 fold 拡張 (2026-05-10)
 
 - **コードブロック fold + 表 fold** を folding.py に追加:
