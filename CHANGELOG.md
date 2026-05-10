@@ -5,6 +5,27 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — F15 (t3 prep / u) Mermaid ブロック識別 (2026-05-10)
+
+- ` ```mermaid ... ``` ` フェンスを **`kind="mermaid"` として特別認識**:
+  - `find_code_block_regions` 内で info-string が `mermaid` (case-insensitive)
+    の場合のみ `kind="mermaid"` でリラベル。それ以外の言語は従来通り
+    `kind="code"`。Mermaid と通常 code は同一文書内で共存可能。
+  - `apply_folds` summary を kind 別に拡張: mermaid →
+    `▶ ◇ mermaid: <label> (N lines)` (◇ で diagram と視覚区別)。
+  - `:fold by-tag mermaid` が動作 (hook の valid kind に "mermaid" を追加)。
+  - `_preset_prose` を `(code, table, mermaid)` を畳むよう拡張。
+    `outline` / `data-only` は predicate 構造上自動的に mermaid も畳む
+    (heading 以外 / table 以外を畳むため)。
+- 後段で予定する `mmdc` 連携 (要件 t3 の SVG → image チェイン) は
+  この識別レイヤを起点にレンダラを差し込めば良い構造。
+- **テスト 9 件追加** (`test_folding_mermaid.py`):
+  Mermaid 単独 / 通常 code 維持 / 共存 / `close_by_kind mermaid` 限定 /
+  summary 書式 / `prose` preset で mermaid 畳み / `data-only` で mermaid
+  畳み / MarkdownView.fold_regions に mermaid 含む / `:fold by-tag mermaid`
+  ルーティング。
+  フルスイート **362 PASS** + 3 skipped、ruff クリーン。
+
 ### Added — F15 (u8) `:fold preset` 4 種ルールセット (2026-05-10)
 
 - **プリセット 4 種を folding.py に追加**:
