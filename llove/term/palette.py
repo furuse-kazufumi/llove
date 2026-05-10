@@ -119,7 +119,7 @@ class CommandPaletteWidget(Vertical):
     def compose(self) -> ComposeResult:
         yield Input(placeholder=self._placeholder, id="cp-input")
         yield Static("", id="cp-suggest")
-        yield Static("", id="cp-output")
+        yield RichLog(id="cp-output", highlight=False, max_lines=_OUTPUT_LIMIT)
 
     def on_mount(self) -> None:
         self.history.load()
@@ -140,12 +140,14 @@ class CommandPaletteWidget(Vertical):
         self.history.push(line)
         self.history.save()
         result = dispatch(line, self.ctx, self.registry)
-        for row in _format_result(result):
-            self._output_lines.append(row)
+        rows = _format_result(result)
+        log = self.query_one("#cp-output", RichLog)
+        for row in rows:
+            log.write(row)
+            self._output_lines.append(row.plain)
         if len(self._output_lines) > _OUTPUT_LIMIT:
             self._output_lines = self._output_lines[-_OUTPUT_LIMIT:]
         self.last_output_text = "\n".join(self._output_lines)
-        self.query_one("#cp-output", Static).update(self.last_output_text)
         event.input.value = ""
         self._refresh_suggestions("")
 
