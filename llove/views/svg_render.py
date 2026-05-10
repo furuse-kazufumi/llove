@@ -154,7 +154,6 @@ def render_svg_to_png(
 
 
 _FALLBACK_HEADER = "◇ svg (ASCII fallback — install rsvg-convert + chafa for image render)"
-_FALLBACK_RULE = "─" * 60
 _EXCERPT_MAX = 240  # XML 全文を流すと大爆発する → 先頭 240 文字に切る
 
 
@@ -163,6 +162,10 @@ def ascii_fallback_for_svg(source: str) -> str:
 
     SVG は人間可読な DSL ではないので XML 全文ではなく **先頭の抜粋** を
     出す。これでも「何の SVG か (root tag や属性) 」は分かる。
+
+    Markdown レンダラ (Rich) は素の ``<svg>`` を生 HTML として処理しがちで、
+    タグが消えてしまう。これを防ぐため抜粋部を ```` ```text ```` フェンスで
+    囲み、コードブロックとしてリテラル表示させる。
     """
     src = source if isinstance(source, str) else ""
     excerpt = src.strip()[:_EXCERPT_MAX]
@@ -170,7 +173,7 @@ def ascii_fallback_for_svg(source: str) -> str:
         excerpt = excerpt + " ..."
     if not excerpt:
         excerpt = "(empty svg source)"
-    return f"{_FALLBACK_HEADER}\n{_FALLBACK_RULE}\n{excerpt}\n{_FALLBACK_RULE}\n"
+    return f"{_FALLBACK_HEADER}\n```text\n{excerpt}\n```\n"
 
 
 # ---------------------------------------------------------------------------
