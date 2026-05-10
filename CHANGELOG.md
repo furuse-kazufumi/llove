@@ -5,6 +5,34 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — F15 (t2) SVG → PNG → ターミナル画像チェイン (2026-05-10)
+
+- **新モジュール `llove/views/svg_render.py`**: mermaid_render と並行する
+  構造で、SVG XML を `rsvg-convert -o output.png input.svg` で PNG 化 →
+  既存 image renderer chain (`chafa` / `viu` / `timg` / `kitty +kitten icat` /
+  `wezterm imgcat`) に流す。
+- 公開 API (mermaid_render と一対一対応):
+  - `SVGRender` (kind/argv/png_path/ascii_text dataclass)
+  - `rsvg_convert_available()` / `find_image_tool()`
+  - `render_svg_to_png(source, output, *, rsvg_path, runner)`
+  - `render_svg(source, *, output_dir, rsvg_path, image_tool, runner)`
+  - `ascii_fallback_for_svg(source)` — XML 先頭 240 文字に切って表示
+    (mermaid と異なり SVG は人間可読 DSL ではないため抜粋方式)
+- **依存性注入**: `rsvg_path` / `image_tool` / `runner` を全部差し替え可能。
+  rsvg-convert / chafa 未インストールの CI でも 14 件全機能テスト可能。
+- **Fail-closed**: rsvg-convert の異常終了・出力 PNG 欠損・OSError は全て
+  ASCII フォールバック (XML 抜粋のマーカー付き表示) に降りる。
+- **セキュリティ**: subprocess は list-based argv のみ (shell=True 禁止)。
+  入力 SVG XML は temp `.svg` に書き出し、引数経由の長文流入を回避。
+- **MermaidImagePane との互換**: `SVGRender` は `MermaidRender` と同じ
+  shape (kind/argv/ascii_text を共有) なので、既存の MermaidImagePane に
+  そのまま渡してターミナル画像表示できる (duck typing)。
+- **テスト 14 件追加** (`test_svg_render.py`):
+  検出 2 件 / `render_svg_to_png` argv + 失敗パス 5 件 / ASCII fallback 2 件 /
+  統合 `render_svg` 5 件 (image 成功 / rsvg 欠 / image 欠 / rsvg 失敗 /
+  自動検出)。フルスイート **429 PASS + 3 skipped** (415 → +14)、
+  ruff クリーン、回帰ゼロ。
+
 ### Changed — F15 (t3) MermaidImagePane 非同期化 (2026-05-10)
 
 - **`set_render_async(mr)` 新設**: `Textual run_worker(thread=True)` を
