@@ -299,9 +299,15 @@
         `▶ ◇ mermaid: <label> (N lines)` で diagram を視覚区別。
         `:fold by-tag mermaid` が動作 (hook の valid kind に追加)。
         `prose` preset を mermaid 畳みに拡張。テスト 9 件追加、
-        フルスイート 362 PASS。次段階: mmdc 連携 (Mermaid → SVG → image
-        チェイン), キーバインド (Textual binding システム),
-        JSONTreeView / NotebookView 連携。
+        フルスイート 362 PASS。
+      - **(u 段階 8 = u6) Fold ステータス表示 完了 (2026-05-10)**:
+        `MarkdownView.fold_metrics() -> (closed, total)` と
+        `fold_status() -> "fold: 3 closed / 12 total"` を公開。
+        `_render()` 末尾で `border_subtitle` を自動更新するため、
+        ホスト側で何もしなくても Textual ボーダーに常に最新メトリクス
+        が表示される (要件 u6 ステータスバー連携)。テスト 7 件追加、
+        フルスイート 369 PASS。次段階: mmdc 連携 (Mermaid → SVG → image),
+        キーバインド (Vim/VSCode), JSONTreeView / NotebookView 連携。
       - 対象: 見出しセクション / コードブロック / Mermaid / SVG / 画像 /
         表 / 引用 / コールアウト / JSON ツリー / ログペイン / Notebook セル /
         Command Palette 出力履歴
