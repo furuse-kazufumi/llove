@@ -5,6 +5,31 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — F15 (t1) MarkdownView 骨組み (2026-05-10)
+
+- **F15 (t1) MarkdownView** (`llove/views/markdown_view.py`):
+  - NarrationView (軽量 markdown のみ) の上位互換として `MarkdownView` を新設。
+    Rich の `Markdown` バックエンド (markdown-it-py) を経由する **フル GFM**
+    レンダラ。見出し / 段落 / 箇条書き / 引用 / fenced code / inline code /
+    太字をネイティブにレンダリング。
+  - `feed(event)` / `last_render` / NARRATION 専用フィルタ / latest-first 履歴 /
+    `limit` 指定など NarrationView と同じ呼び出し契約。
+    追加で `last_source` を持ち、最後に渡された生 Markdown を保持
+    (テスト・SVG エクスポート・自動 review 用途).
+  - 内部で Rich `Console` を文字列バッファに食わせて
+    色なしテキストスナップショットを `last_render` に保存
+    (ヘッドレス検査と Textual 内ライブ表示の両立).
+  - i18n: `ui.pane.markdown.title` / `ui.pane.markdown.empty` を
+    ja.toml / en.toml に追加。
+  - `llove.views` から `MarkdownView` を再エクスポート。
+  - **テスト 12 件 PASS**: 初期状態 / 見出し+段落 / fenced code /
+    箇条書き / blockquote / 太字+inline / 非 NARRATION 無視 /
+    空文字列無視 / 履歴順序 / limit / title 表示 / 不正 payload。
+    フルスイート無回帰。
+  - 次段階: コールアウト / 数式 / フットノート / タスクリスト / 絵文字短縮形は
+    markdown-it-py プラグイン (mdit-py-plugins) 経由で拡張予定。
+    (t2) SVG / (t3) Mermaid / (t4) テーマ / (u) Foldable は順次着手。
+
 ### Added — F20 Command Palette UI 骨組み (推奨順 D' 完了, 2026-05-10)
 
 - **D'. F20 Command Palette UI 骨組み** (`llove/term/`):
