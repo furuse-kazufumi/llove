@@ -1,4 +1,4 @@
-"""F20(c)③ Command Palette UI — Textual ``Input`` widget 骨組み.
+"""F20 Command Palette UI — Textual ``Input`` widget.
 
 責務:
 
@@ -13,8 +13,9 @@
     Up/Down 履歴を遡る / 戻す
     Escape  Modal を閉じる (CommandPaletteScreen のみ)
 
-骨組みなので最小限. fuzzy 検索 UI / ハイライト / カラーパレット切替は
-段階的に追加する (memory `feedback_small_units.md` に従い 1 ファイル単位).
+F20 仕上げ:
+- fuzzy ハイライト: 候補表示で入力文字を [bold] 強調
+- 大入力時スクロール: 出力欄に RichLog を使い auto-scroll
 """
 
 from __future__ import annotations
@@ -24,7 +25,7 @@ from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Vertical
 from textual.screen import ModalScreen
-from textual.widgets import Input, Static
+from textual.widgets import Input, RichLog, Static
 
 from llove.term.command import (
     DEFAULT_REGISTRY,
@@ -37,9 +38,10 @@ from llove.term.completion import (
     HistoryRing,
     complete_prefix,
     filter_suggestions,
+    highlight_match,
 )
 
-_OUTPUT_LIMIT = 12  # Static に並べる出力行の最大件数 (古い順に切り捨て)
+_OUTPUT_LIMIT = 200  # RichLog に保持する最大行数
 
 
 def _format_result(result: CommandResult) -> list[str]:
