@@ -142,21 +142,25 @@ class MarkdownView(Static, View):
         # back through narration. State is keyed on line numbers (in
         # `last_source`), so a re-feed of the same document keeps folds shut.
         self.fold_state: FoldState = self._load_fold_state_or_empty()
-        # F15 (t3) Mermaid 描画統合. デフォルト無効 (既存呼び出し側を破壊しない)。
-        # mermaid_render=True にすると _render() の最後で kind="mermaid" の
-        # フェンスを renderer に流して、ASCII フォールバック文字列の差込 or
-        # image callback への通知のいずれかに分岐する。
-        self._mermaid_render: bool = mermaid_render
-        self._mermaid_renderer: MermaidRendererFn = (
-            mermaid_renderer or _default_mermaid_renderer
+        # F15 (t2/t3) Diagram 描画統合 (mermaid + svg を統一処理).
+        # デフォルト無効 (既存呼び出し側を破壊しない)。diagram_render=True に
+        # すると _render() で kind ∈ {mermaid, svg, ...} のフェンスを
+        # `diagram_renderers[kind]` に流して、ASCII フォールバック文字列の
+        # 差込 or image callback への通知に分岐する。
+        self._diagram_render: bool = diagram_render
+        # 注入された renderers を既定マップにマージ。ユーザは kind 単位で
+        # 上書きでき、未指定 kind は既定 renderer に落ちる。
+        merged: dict[str, DiagramRendererFn] = _default_diagram_renderers()
+        if diagram_renderers:
+            merged.update(diagram_renderers)
+        self._diagram_renderers: dict[str, DiagramRendererFn] = merged
+        self._diagram_image_callback: DiagramImageCallback | None = (
+            diagram_image_callback
         )
-        self._mermaid_image_callback: MermaidImageCallback | None = (
-            mermaid_image_callback
-        )
-        self._mermaid_cache_dir: Path = (
-            mermaid_cache_dir
-            if mermaid_cache_dir is not None
-            else Path(tempfile.gettempdir()) / "llove-mermaid-cache"
+        self._diagram_cache_dir: Path = (
+            diagram_cache_dir
+            if diagram_cache_dir is not None
+            else Path(tempfile.gettempdir()) / "llove-diagram-cache"
         )
         try:
             self.border_title = t("ui.pane.markdown.title")
