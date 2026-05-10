@@ -51,6 +51,11 @@ if TYPE_CHECKING:
 # テストはこれを差し替えて subprocess を実行せずに argv 検証ができる。
 SubprocessRunner = Callable[..., tuple[int, bytes, bytes]]
 
+# `set_render_async` が work 関数を渡す dispatcher。Textual の
+# ``self.run_worker`` と互換 (引数 1 つの callable を受ける)。テストでは
+# 同期実行する fake に差し替えて、subprocess + widget 更新を検証する。
+WorkerDispatcher = Callable[[Callable[[], None]], None]
+
 
 def _default_runner(argv: list[str], *, timeout: int) -> tuple[int, bytes, bytes]:
     """``subprocess.run`` のデフォルト実装. capture_output で stdout/stderr 捕捉."""
