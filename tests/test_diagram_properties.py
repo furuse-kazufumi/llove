@@ -166,25 +166,29 @@ def test_run_image_render_decodes_arbitrary_stdout(stdout: bytes) -> None:
 
 @given(st.text(max_size=300))
 @settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
-def test_render_mermaid_to_svg_returns_none_without_mmdc_path(
-    text: str, tmp_path_factory
-) -> None:
+def test_render_mermaid_to_svg_returns_none_without_mmdc_path(text: str) -> None:
+    import tempfile
+    from pathlib import Path
+
     from llove.views.mermaid_render import render_mermaid_to_svg
 
-    out = tmp_path_factory.mktemp("m") / "x.svg"
-    result = render_mermaid_to_svg(text, out, mmdc_path=None)
-    assert result is None
-    assert not out.exists()
+    with tempfile.TemporaryDirectory() as d:
+        out = Path(d) / "x.svg"
+        result = render_mermaid_to_svg(text, out, mmdc_path=None)
+        assert result is None
+        assert not out.exists()
 
 
 @given(st.text(max_size=300))
 @settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
-def test_render_svg_to_png_returns_none_without_rsvg_path(
-    text: str, tmp_path_factory
-) -> None:
+def test_render_svg_to_png_returns_none_without_rsvg_path(text: str) -> None:
+    import tempfile
+    from pathlib import Path
+
     from llove.views.svg_render import render_svg_to_png
 
-    out = tmp_path_factory.mktemp("s") / "x.png"
-    result = render_svg_to_png(text, out, rsvg_path=None)
-    assert result is None
-    assert not out.exists()
+    with tempfile.TemporaryDirectory() as d:
+        out = Path(d) / "x.png"
+        result = render_svg_to_png(text, out, rsvg_path=None)
+        assert result is None
+        assert not out.exists()
