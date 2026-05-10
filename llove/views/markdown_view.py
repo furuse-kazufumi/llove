@@ -42,14 +42,32 @@ from llove.views.folding_persistence import (
     save_fold_state,
 )
 from llove.views.mermaid_render import MermaidRender, render_mermaid
+from llove.views.svg_render import SVGRender, render_svg
 
-MermaidRendererFn = Callable[[str, Path], MermaidRender]
-MermaidImageCallback = Callable[[MermaidRender], None]
+# F15 (t2/t3) 汎化版の型. `MermaidRender` と `SVGRender` は kind / argv /
+# ascii_text を共有しているので、callback / 戻り値はどちらも受けられる
+# Union で表現する。後続フォーマットを追加するときはここに足すだけ。
+DiagramRender = MermaidRender | SVGRender
+DiagramRendererFn = Callable[[str, Path], DiagramRender]
+DiagramImageCallback = Callable[[DiagramRender], None]
 
 
 def _default_mermaid_renderer(source: str, output_dir: Path) -> MermaidRender:
     """Wrap `render_mermaid` so the default path auto-detects mmdc + image tool."""
     return render_mermaid(source, output_dir=output_dir)
+
+
+def _default_svg_renderer(source: str, output_dir: Path) -> SVGRender:
+    """Wrap `render_svg` so the default path auto-detects rsvg-convert + image tool."""
+    return render_svg(source, output_dir=output_dir)
+
+
+def _default_diagram_renderers() -> dict[str, DiagramRendererFn]:
+    """kind → renderer の既定マップ. 新フォーマットを追加するときはここに 1 行."""
+    return {
+        "mermaid": _default_mermaid_renderer,
+        "svg": _default_svg_renderer,
+    }
 
 
 def _markdown_to_text(source: str, *, width: int = 100) -> str:
