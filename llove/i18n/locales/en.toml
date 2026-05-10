@@ -78,6 +78,10 @@ subtitle_init = "(scenario commentary)"
 subtitle_active = "beat {beat} · {latest}"
 empty = "[dim](no narration yet — waiting for the scenario to begin)[/dim]"
 
+[ui.pane.markdown]
+title = "📝 Markdown — full GFM rendering  · 📖 read-only"
+empty = "_(no markdown yet)_"
+
 [scenario.firewall]
 title = "Firewall — 4-layer prompt screening"
 description = "Replay 12 prompts and watch L0/L1/L1.5/L2 layers route them to ALLOW / BLOCK / SUMMARIZE."
