@@ -32,17 +32,42 @@ from llove.term.command import (
     parse_line,
     register_command,
 )
+from llove.term.completion import (
+    HistoryRing,
+    complete_prefix,
+    filter_suggestions,
+)
+
+
+def __getattr__(name: str):  # noqa: ANN202 -- PEP 562 lazy import
+    """UI widget は Textual を import するため遅延ロード.
+
+    UI 非依存層 (command / completion / builtins) をテストする時に
+    Textual を巻き込まないために, ``CommandPaletteWidget`` /
+    ``CommandPaletteScreen`` は最初の参照時に遅延 import する.
+    """
+    if name in {"CommandPaletteWidget", "CommandPaletteScreen"}:
+        from llove.term import palette as _palette
+
+        return getattr(_palette, name)
+    raise AttributeError(f"module 'llove.term' has no attribute {name!r}")
+
 
 __all__ = [
     "DEFAULT_REGISTRY",
     "Command",
     "CommandContext",
     "CommandHandler",
+    "CommandPaletteScreen",
+    "CommandPaletteWidget",
     "CommandRegistry",
     "CommandResult",
+    "HistoryRing",
     "ParsedLine",
     "builtin_commands",
+    "complete_prefix",
     "dispatch",
+    "filter_suggestions",
     "make_default_context",
     "parse_line",
     "register_builtins",
