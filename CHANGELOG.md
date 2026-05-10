@@ -5,6 +5,34 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — F15 (u3) Fold 状態永続化 (TOML) (2026-05-10)
+
+- **`llove/views/folding_persistence.py`** を新設:
+  - `save_fold_state(state, path, *, doc_id)` — 一時ファイル → rename の
+    擬似アトミック書込。親ディレクトリは自動作成。
+  - `load_fold_state(path) -> FoldState` — 不在 / 読込不能 / 不正 TOML /
+    バージョン不一致のいずれでも空 FoldState 返却 (fail-closed u10)。
+  - `default_fold_state_path(doc_id, *, base_dir=None)` — XDG_CONFIG_HOME
+    or `~/.config/llove/folds/<sanitised>.toml` を解決。
+  - **doc_id サニタイズ**: `[A-Za-z0-9._-]` 以外を `_` に置換し、
+    `..` / `/` / `\` 等のパス traversal は単一ファイル名に折り畳む。
+    空文字列 / セパレータのみは ValueError。
+  - **バージョン管理**: `FOLD_STATE_VERSION = 1`。先方互換不可な変更は
+    bump して旧ファイルは無視 (空状態で起動)。
+- TOML フォーマット (シンプル, 手書きシリアライザ — 追加依存なし):
+  ```toml
+  version = 1
+  doc_id = "abc-123"
+  closed_starts = [0, 5, 12]
+  ```
+- `llove.views` から `FOLD_STATE_VERSION / default_fold_state_path /
+  load_fold_state / save_fold_state` を再エクスポート。
+- **テスト 14 件追加** (`test_folding_persistence.py`):
+  round-trip / 親 dir 自動作成 / 不在ファイル / 不正 TOML /
+  異バージョン無視 / 整数フィルタ / base_dir override /
+  doc_id サニタイズ + traversal 防止 / 空 doc_id / 空状態保存。
+  フルスイート **337 PASS** + 3 skipped、ruff クリーン。
+
 ### Added — F15 (u8) `:fold` コマンドパレット連携 (2026-05-10)
 
 - **F20 ビルトイン `:fold` コマンド** を追加 (`llove/term/builtins.py`):
