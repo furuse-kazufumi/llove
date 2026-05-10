@@ -6,6 +6,62 @@
 
 ---
 
+## 2026-05-10 (続き 7) — F15 (t2/t3) MermaidImagePane → ImageRenderPane リネーム
+
+### 完成したもの
+
+mermaid_pane.py を削除し、image_render_pane.py を新設。`DiagramRenderResult`
+Protocol で pane の入力型を構造的に縛り、mermaid_render / svg_render を
+import せずに両方を受けられる構造にした。
+
+- ファイル: `llove/views/mermaid_pane.py` → `llove/views/image_render_pane.py`
+- クラス: `MermaidImagePane` → `ImageRenderPane`
+- 関数: `make_mermaid_image_callback` → `make_image_render_callback`
+- 新規 Protocol: `DiagramRenderResult` (kind / argv / ascii_text を要求)
+- テスト: `test_mermaid_pane.py` + `test_mermaid_pane_async.py` 削除 →
+  `test_image_render_pane.py` (12 件、SVGRender 互換 1 件追加) +
+  `test_image_render_pane_async.py` (9 件) 新設
+
+### Protocol で抽象化した利点
+
+Pane は `result.kind` / `result.argv` / `result.ascii_text` の 3 つしか
+触らない。`MermaidRender` の `svg_path` も `SVGRender` の `png_path` も
+pane の関心事ではないので、構造的型 Protocol で十分。後続フォーマット
+(`PlantUMLRender` / `DotRender` / `DitaaRender`) も同じ shape で書けば
+pane を触らず動く。
+
+### テスト
+
+- 21 件 (前回 20 + Protocol 互換 1) を新ファイル名で全 PASS
+- フルスイート **442 PASS + 3 skipped** (441 → +1)、新ファイル ruff クリーン
+
+### 次セッションで着手する候補 (重要度順)
+
+1. **PlantUML / Graphviz dot / ditaa 等の追加 renderer** — 既存
+   `mermaid_render.py` / `svg_render.py` をテンプレに新規モジュールを追加し、
+   `MarkdownView(diagram_renderers={"plantuml": fn, "dot": fn})` で登録できる
+   ことを E2E 検証。
+2. **実 chafa + mmdc + rsvg-convert での E2E 検証** — dev 環境で
+   `llove demo` 経由で動作確認。CI ではスキップ (binary 依存)。
+3. **既存テストの ruff cleanup** — `tests/test_browser.py` 等に残る
+   import 順 / blind exception 等の 22 件を別パスでクリーンアップ。
+4. **キーバインド (Vim/VSCode)** — `za` / `zM` / `zR` / `Ctrl+Shift+[`。
+5. **JSON ツリービュー / ログペイン fold** — folding.py の純粋関数を
+   別ビューに展開。
+
+### 設計メモ (将来参照)
+
+- `DiagramRenderResult` を独立 Protocol にしたのは、image_render_pane が
+  mermaid_render / svg_render に **import 依存しない** ようにするため。
+  これで他のフォーマットを追加するときに循環参照のリスクがない。
+- `name = "diagram_image"` / `border_title = "Diagram"` / placeholder
+  `_(no diagram render yet)_` も全部「mermaid 固有」を消し、汎用化。
+- 既存の `Mermaid` を使うコードは無いか? grep で確認 — `mermaid_pane`
+  への参照は `__init__.py` と 2 つのテストファイルだけだった。リネームは
+  3 ファイルの編集で完了。
+
+---
+
 ## 2026-05-10 (続き 6) — F15 (t2/t3) MarkdownView を mermaid + svg 統一処理に汎化
 
 ### 完成したもの
