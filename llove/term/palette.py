@@ -183,8 +183,11 @@ class CommandPaletteWidget(Vertical):
             self.last_suggest_text = ""
             suggest.update("")
             return
+        # last_suggest_text はプレーンテキスト (テスト・デバッグ用)
         self.last_suggest_text = "候補: " + "  ".join(f":{c}" for c in candidates)
-        suggest.update(self.last_suggest_text)
+        # 表示は fuzzy ハイライト付き markup
+        markup = "候補: " + "  ".join(f":{highlight_match(text, c)}" for c in candidates)
+        suggest.update(markup)
 
 
 class CommandPaletteScreen(ModalScreen[None]):
