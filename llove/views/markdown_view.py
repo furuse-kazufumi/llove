@@ -169,6 +169,50 @@ class MarkdownView(Static, View):
         """Open every fold (Vim `zR`)."""
         self.fold_state.open_all()
         self._render()
+        self._persist_fold_state()
+
+    def save_folds(self) -> None:
+        """Public hook to flush the current fold state to disk.
+
+        Useful when the caller mutates `fold_state` directly (bypassing the
+        normal toggle / close-all path) or wants to force a write at app
+        shutdown. No-op when persistence is disabled (no `doc_id`).
+        """
+        self._persist_fold_state()
+
+    # ------------------------------------------------------------------
+    # F15 (u3) persistence helpers
+    # ------------------------------------------------------------------
+    def _fold_state_path(self) -> Path | None:
+        """Resolve the on-disk path for our doc_id, or None if disabled."""
+        if not self._doc_id:
+            return None
+        try:
+            return default_fold_state_path(
+                self._doc_id, base_dir=self._fold_persist_dir
+            )
+        except ValueError:
+            # An invalid doc_id (path traversal, empty, etc.) silently
+            # disables persistence rather than crashing the view.
+            return None
+
+    def _load_fold_state_or_empty(self) -> FoldState:
+        path = self._fold_state_path()
+        if path is None:
+            return FoldState()
+        try:
+            return load_fold_state(path)
+        except Exception:  # nosec B110 — fail-closed: never crash the view.
+            return FoldState()
+
+    def _persist_fold_state(self) -> None:
+        path = self._fold_state_path()
+        if path is None or not self._doc_id:
+            return
+        try:
+            save_fold_state(self.fold_state, path, doc_id=self._doc_id)
+        except Exception:  # nosec B110 — fail-closed: I/O hiccups don't crash UI.
+            return
 
     # ------------------------------------------------------------------
     # Internal rendering

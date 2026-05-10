@@ -45,8 +45,8 @@ def test_view_with_doc_id_writes_state_on_close_all(tmp_path: Path) -> None:
 
 def test_view_with_doc_id_loads_state_on_construction(tmp_path: Path) -> None:
     """A second view with the same doc_id picks up where the first left off."""
-    from llove.views.folding_persistence import save_fold_state
     from llove.views.folding import FoldState
+    from llove.views.folding_persistence import save_fold_state
     from llove.views.markdown_view import MarkdownView
 
     # Pre-seed a state file with line 0 closed.
