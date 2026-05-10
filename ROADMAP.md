@@ -310,7 +310,15 @@ LSP/lint/シンタックスハイライト + Notebook 風セル UI + Command Pal
 ### 入る機能
 
 - [ ] **F19 (a) Python REPL** (`code.InteractiveConsole`、デフォ同梱)
-- [ ] **F20 Command Palette** (`llove/term/`、`:open` `:play` `:layout` 等)
+- [x] **F20 Command Palette dispatch core** (`llove/term/command.py`,
+      `builtins.py` — `:help` `:identity` `:layout` `:demo` `:play`
+      `:open` `:peer` `:set` `:get` `:alias` `:macro` 11 種, alias / macro
+      入れ子 5 段防止 — 2026-05-10 完了)
+- [x] **F20 Command Palette UI 骨組み** (`llove/term/completion.py`,
+      `palette.py` — Textual `CommandPaletteWidget` / `CommandPaletteScreen`,
+      Tab 補完, Up/Down 履歴, 候補表示 — 2026-05-10 完了)
+- [ ] **F20 Command Palette UI 仕上げ** (履歴永続化 / fuzzy ハイライト /
+      テーマ切替 / カラーアウトプット / 大入力時のスクロール)
 - [ ] **F19 Editor モード** (Textual TextArea + DirectoryTree + tabs)
 - [ ] **F19 (b) Lua** (`lupa`)
 - [ ] **F19 (c) Starlark** (`pystarlark`)
