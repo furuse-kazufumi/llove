@@ -181,6 +181,28 @@ class MarkdownView(Static, View):
         self._persist_fold_state()
 
     # ------------------------------------------------------------------
+    # F15 (u6) Status — metrics for the host status bar
+    # ------------------------------------------------------------------
+    def fold_metrics(self) -> tuple[int, int]:
+        """Return ``(closed, total)`` over the latest entry's foldable regions.
+
+        ``total`` ignores the current fold state — it counts every region
+        present in `last_source`. ``closed`` is the subset of those regions
+        whose `start_line` is currently closed in `fold_state`. The metric
+        always returns a value (zero when the view hasn't been fed yet);
+        callers don't need to handle exceptions.
+        """
+        regions = self.fold_regions()
+        total = len(regions)
+        closed = sum(1 for r in regions if self.fold_state.is_closed(r.start_line))
+        return closed, total
+
+    def fold_status(self) -> str:
+        """Render a one-line status string for use in a status bar / subtitle."""
+        closed, total = self.fold_metrics()
+        return f"fold: {closed} closed / {total} total"
+
+    # ------------------------------------------------------------------
     # F15 (u3) persistence helpers
     # ------------------------------------------------------------------
     def _fold_state_path(self) -> Path | None:
