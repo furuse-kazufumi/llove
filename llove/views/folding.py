@@ -76,7 +76,9 @@ class FoldState:
     def close(self, start_line: int) -> None:
         self.closed_starts.add(start_line)
 
-    def open(self, start_line: int) -> None:  # noqa: A003 — mirrors zo/zc verb pair.
+    def open(self, start_line: int) -> None:
+        # Method name shadows the builtin on purpose — it mirrors the zo/zc
+        # verb pair the spec leans on (Vim foldopen / foldclose).
         self.closed_starts.discard(start_line)
 
     def close_all(self, regions: Iterable[FoldRegion]) -> None:
