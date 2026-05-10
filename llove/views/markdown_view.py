@@ -418,7 +418,7 @@ def make_markdown_fold_hook(view: MarkdownView):
             if not args:
                 return None
             kind = args[0]
-            valid = {"heading", "code", "table", "mermaid"}
+            valid = {"heading", "code", "table", "mermaid", "svg"}
             if kind not in valid:
                 return None
             regions = view.fold_regions()
