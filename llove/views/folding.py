@@ -265,11 +265,18 @@ def find_code_block_regions(source: str) -> list[FoldRegion]:
         if close_idx == -1:
             # No closing fence — bail out (fail-closed).
             break
+        # Mermaid blocks are technically code fences but downstream tooling
+        # (and the user) treat diagrams as a distinct concept — :fold by-tag
+        # mermaid, the prose preset, and (in future) mmdc-based rendering
+        # all key off this. Special-case the info-string here so the rest of
+        # the pipeline gets the right `kind` for free.
+        info_label = info.strip()
+        kind = "mermaid" if info_label.lower() == "mermaid" else "code"
         regions.append(
             FoldRegion(
-                kind="code",
+                kind=kind,
                 level=0,
-                label=info.strip() or "code",
+                label=info_label or "code",
                 start_line=i,
                 end_line=close_idx,
             )
