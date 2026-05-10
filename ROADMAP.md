@@ -213,6 +213,38 @@
 - [ ] **llmesh 統合**: `llove view --source llmesh+...` で LLMesh の
       多モーダルストリームを **識別子・署名つき**で見られる
       （Telnet を NetSurf / Firefox に育てるイメージ）
+- [ ] **F15 (t) Markdown + SVG + Mermaid 視認性ターミナル** (2026-05-10 追加):
+      - GitHub-flavored Markdown 全機能 (見出し / 表 / コードブロック /
+        コールアウト / 数式 / フットノート / タスクリスト / 絵文字短縮形)
+      - SVG ターミナル表示 (`rsvg-convert` / `cairosvg` → Pillow → 既存 image
+        チェイン), `[browser-svg]` extras
+      - Mermaid 図インライン表示 (`mmdc` 経由で SVG → image チェイン),
+        `[browser-mermaid]` extras。flowchart / sequence / class / state /
+        ER / gantt / pie / mindmap / gitGraph / journey 等 13 種以上
+      - テーマシステム (light / dark / high-contrast / dyslexia-friendly /
+        solarized / nord / dracula) + `~/.config/llove/theme.toml`
+      - 行間 / 余白の compact / comfortable / spacious 切替
+      - CJK / 絵文字 / Nerd Font の 3 段フォントフォールバック (F17(s) 連携)
+      - 見出しレベルの色 + 罫線 + 番号化、コードブロックの行番号 + diff
+        ハイライト、表セルのゼブラストライプ、コールアウト種別アイコン
+      - スクリーンリーダー連携 (espeak / festival / say) — オプション
+      - 統合 URI: `md://`, `svg://`, `mermaid://`
+- [ ] **F15 (u) Foldable Blocks (ブロック折り畳み)** (2026-05-10 ユーザ要望):
+      - 対象: 見出しセクション / コードブロック / Mermaid / SVG / 画像 /
+        表 / 引用 / コールアウト / JSON ツリー / ログペイン / Notebook セル /
+        Command Palette 出力履歴
+      - キーバインド 2 系統: Vim (`za` `zc` `zo` `zM` `zR` `zj` `zk`) と
+        VSCode (`Ctrl+Shift+[` `]`, `Ctrl+K Ctrl+0/J`), マウスクリック
+      - コマンドパレット連携: `:fold close-all` `:fold by-tag mermaid`
+        `:fold preset outline|code|data-only|prose`
+      - 検索時の自動展開、ホバープレビュー (先頭 3 行 tooltip)
+      - 折り畳み行: `▶ ## 設計詳細 (16 行)` `▶ ```python (42 行)` 等のメタ表示
+      - ネスト対応 (外側を畳んでも内側状態保持)
+      - 文書ごとの fold 状態を `~/.config/llove/folds/<doc-id>.toml` に永続化
+      - F17 ウィンドウ種に `Foldable` mixin、ステータスバーに
+        `[fold: 12 closed / 47 total]`
+      - tree-sitter `folding` query / Vim foldmethod / Helix の fold UI を参考
+      - fail-closed: 未対応ビューは fold 命令を audit warn して無視
 
 ### 受け入れ基準
 
