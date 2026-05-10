@@ -157,11 +157,13 @@ class MarkdownView(Static, View):
         """Toggle the fold whose region starts at `start_line` (0-indexed)."""
         self.fold_state.toggle(start_line)
         self._render()
+        self._persist_fold_state()
 
     def close_all_folds(self) -> None:
         """Close every foldable region in the latest entry (Vim `zM`)."""
         self.fold_state.close_all(self.fold_regions())
         self._render()
+        self._persist_fold_state()
 
     def open_all_folds(self) -> None:
         """Open every fold (Vim `zR`)."""
