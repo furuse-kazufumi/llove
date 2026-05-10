@@ -5,6 +5,33 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — F15 (u8) `:fold preset` 4 種ルールセット (2026-05-10)
+
+- **プリセット 4 種を folding.py に追加**:
+  - `outline` — h1/h2 のみ展開、それ以外 (h3+ / code / table) を畳む
+    (文書スケルトンビュー)。
+  - `code` — コードブロックのみ展開、それ以外を畳む
+    (コードに集中)。
+  - `data-only` — テーブルのみ展開、それ以外を畳む
+    (データ閲覧)。
+  - `prose` — code / table を畳み、見出しは展開のまま
+    (プロース読書モード)。
+- **`apply_preset(state, regions, name) -> FoldState`** — 純粋関数で
+  新しい FoldState を返却。冪等 (二度かけても同じ)。未知名は入力を
+  defensive copy して返す (raise しない fail-closed)。
+- **`fold_preset_names()`** で正準名一覧 (sorted) を提供。
+- **`:fold preset <name>` 動詞** を `_cmd_fold` に追加。引数欠落は
+  usage エラー、不正動詞 / 不正名は valid 名列挙でエラー。
+- **`make_markdown_fold_hook` に `preset` verb 実装** — 適用後に
+  `_render` + `_persist_fold_state` を呼び、永続化と再描画を一括完了。
+  `by-tag` も `_persist_fold_state` を呼ぶよう同時修正
+  (永続化漏れ修正)。
+- **テスト 10 件追加** (`test_fold_presets.py`):
+  各プリセットの open/closed 期待 / 不明名 fail-safe / 冪等性 /
+  `:fold preset outline` ルーティング / 引数欠落エラー /
+  hook 経由の preset 適用 (本物の MarkdownView で last_render 確認).
+  フルスイート **353 PASS** + 3 skipped、ruff クリーン。
+
 ### Added — F15 (u3) MarkdownView 永続化統合 (2026-05-10)
 
 - **MarkdownView を folding_persistence と統合**:
