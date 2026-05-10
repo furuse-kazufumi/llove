@@ -227,9 +227,22 @@
         絵文字短縮形は次段階で markdown-it-py プラグイン経由で拡張予定。
       - SVG ターミナル表示 (`rsvg-convert` / `cairosvg` → Pillow → 既存 image
         チェイン), `[browser-svg]` extras
-      - Mermaid 図インライン表示 (`mmdc` 経由で SVG → image チェイン),
-        `[browser-mermaid]` extras。flowchart / sequence / class / state /
-        ER / gantt / pie / mindmap / gitGraph / journey 等 13 種以上
+      - **Mermaid 図インライン表示 (mmdc → SVG → image チェイン) 基盤完了
+        (2026-05-10, F15 (t3))**: `llove/views/mermaid_render.py` に
+        `MermaidRender` (kind/argv/svg_path/ascii_text) と
+        `mmdc_available` / `find_image_tool` / `render_mermaid_to_svg` /
+        `render_mermaid` / `ascii_fallback` を新設。mmdc を呼んで `.mmd` →
+        `.svg` を生成し、既存 image catalog (chafa / viu / timg / kitty /
+        wezterm) の最優先ツールで argv 構築。両ツールが揃わない / mmdc が
+        失敗した場合は ASCII フォールバック (マーカー付き source 表示) に
+        降りる fail-closed 設計。subprocess は list-based argv のみ
+        (shell=True 禁止)、source は temp `.mmd` 経由。依存性注入で
+        mmdc/chafa 未インストールの環境でもフルテスト可能 (16 件、
+        フルスイート 385 PASS)。`[browser-mermaid]` extras + flowchart /
+        sequence / class / state / ER / gantt / pie / mindmap / gitGraph /
+        journey 等 13 種は mmdc が対応する図種をそのまま継承。
+        次段階: MarkdownView 内での mermaid ブロック → image 自動描画統合
+        (現状はモジュール公開のみ)。
       - テーマシステム (light / dark / high-contrast / dyslexia-friendly /
         solarized / nord / dracula) + `~/.config/llove/theme.toml`
       - 行間 / 余白の compact / comfortable / spacious 切替
