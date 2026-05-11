@@ -45,6 +45,10 @@ from .svg_render import (
     render_svg_to_png,
     rsvg_convert_available,
 )
+from .diff_viewer import DiffViewerView, compute_diff_lines
+from .hypothesis_board import HypothesisBoardView
+from .memo import QualitativeMemoView
+from .metric_dashboard import MetricDashboardView
 from .task_graph import TaskGraphView
 from .timeline import TimelineView
 
