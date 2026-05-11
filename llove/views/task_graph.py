@@ -77,7 +77,7 @@ class TaskGraphView(Static, View):
             seen.add(nid)
         self._task_nodes = list(nodes)
         self._status = {n["id"]: "pending" for n in self._task_nodes}
-        self._render()
+        self._redraw()
 
     def update_status(self, node_id: str, status: str) -> None:
         """Set ``status`` on the named node. Unknown nodes are ignored
@@ -87,7 +87,7 @@ class TaskGraphView(Static, View):
         if node_id not in self._status:
             return
         self._status[node_id] = status
-        self._render()
+        self._redraw()
 
     def feed(self, event: Event) -> None:
         if event.kind != EventKind.TRACE_SPAN:
