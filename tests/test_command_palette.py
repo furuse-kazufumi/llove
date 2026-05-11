@@ -258,6 +258,80 @@ class TestBuiltins:
         result = dispatch(":layout", ctx, reg)
         assert result.ok is False
 
+    # ------------------------------------------------------------------ theme
+    def test_theme_no_args_no_hook(
+        self, reg_ctx: tuple[CommandRegistry, CommandContext]
+    ) -> None:
+        reg, ctx = reg_ctx
+        result = dispatch(":theme", ctx, reg)
+        assert result.ok is True
+        joined = "\n".join(result.output)
+        assert "current theme" in joined
+        assert "hook 未配線" in joined
+
+    def test_theme_no_args_uses_get_hook(
+        self, reg_ctx: tuple[CommandRegistry, CommandContext]
+    ) -> None:
+        reg, ctx = reg_ctx
+        ctx.hooks["get_theme"] = lambda: "textual-dark"
+        result = dispatch(":theme", ctx, reg)
+        assert result.ok is True
+        assert any("textual-dark" in line for line in result.output)
+
+    def test_theme_list_calls_hook(
+        self, reg_ctx: tuple[CommandRegistry, CommandContext]
+    ) -> None:
+        reg, ctx = reg_ctx
+        ctx.hooks["list_themes"] = lambda: ("textual-dark", "textual-light", "monokai")
+        result = dispatch(":theme list", ctx, reg)
+        assert result.ok is True
+        joined = "\n".join(result.output)
+        assert "textual-dark" in joined
+        assert "textual-light" in joined
+        assert "monokai" in joined
+
+    def test_theme_list_without_hook_is_advisory(
+        self, reg_ctx: tuple[CommandRegistry, CommandContext]
+    ) -> None:
+        reg, ctx = reg_ctx
+        result = dispatch(":theme list", ctx, reg)
+        assert result.ok is True
+        assert any("list_themes" in line for line in result.output)
+
+    def test_theme_set_calls_hook(
+        self, reg_ctx: tuple[CommandRegistry, CommandContext]
+    ) -> None:
+        reg, ctx = reg_ctx
+        called: list[str] = []
+        ctx.hooks["set_theme"] = lambda name: called.append(name)
+        result = dispatch(":theme textual-light", ctx, reg)
+        assert result.ok is True
+        assert called == ["textual-light"]
+        assert any("textual-light" in line for line in result.output)
+
+    def test_theme_set_hook_failure_propagates(
+        self, reg_ctx: tuple[CommandRegistry, CommandContext]
+    ) -> None:
+        reg, ctx = reg_ctx
+
+        def boom(name: str) -> None:
+            raise ValueError(f"unknown theme: {name}")
+
+        ctx.hooks["set_theme"] = boom
+        result = dispatch(":theme xyzzy", ctx, reg)
+        assert result.ok is False
+        assert "unknown theme: xyzzy" in (result.error or "")
+
+    def test_theme_set_without_hook_is_advisory(
+        self, reg_ctx: tuple[CommandRegistry, CommandContext]
+    ) -> None:
+        reg, ctx = reg_ctx
+        result = dispatch(":theme some-theme", ctx, reg)
+        assert result.ok is True
+        # hook が無い場合は副作用なし・案内のみ
+        assert any("hook 未配線" in line for line in result.output)
+        assert any("some-theme" in line for line in result.output)
+
     def test_demo_calls_hook(self, reg_ctx: tuple[CommandRegistry, CommandContext]) -> None:
         reg, ctx = reg_ctx
         called: list[str] = []
