@@ -402,6 +402,13 @@ def builtin_commands() -> tuple[Command, ...]:
             category="window",
         ),
         Command(
+            name="theme",
+            handler=_cmd_theme,
+            summary="Textual テーマ表示 / 切替 (`:theme list` で一覧)",
+            args_hint="[list|<name>]",
+            category="ui",
+        ),
+        Command(
             name="demo",
             handler=_cmd_demo,
             summary="シナリオ起動 (`llove demo --scenario` の内部口)",
