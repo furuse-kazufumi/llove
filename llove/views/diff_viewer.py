@@ -127,7 +127,7 @@ class DiffViewerView(Static, View):
                 else:
                     block_lines.append(f"[dim]  {body}[/dim]")
             blocks.append("\n".join(block_lines))
-        self.border_subtitle = f"+{total_added} −{total_removed}"
+        self.border_subtitle = f"+{total_added} -{total_removed}"
         self.update("\n\n".join(blocks))
 
 
