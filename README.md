@@ -11,6 +11,15 @@
 
 > A cute, terminal-first **Artifact** for inspecting LLMesh data — with **llove**.
 
+> **Family / 同系プロジェクト:** TUI ダッシュボード (本リポ) / バックエンド →
+> **[llmesh](https://github.com/furuse-kazufumi/llmesh)** / 一括インストール →
+> `pip install llmesh-suite` (準備中)。**llove** は llmesh のデータ
+> (SensorEvent / SPC / RAG / Audit / Trace) を可視化するフロントエンドです。
+>
+> **不混同 (Disambiguation):** GPU を持ち寄り **1 つの LLM を分散推論** する
+> [`mesh-llm`](https://github.com/michaelneale/mesh-llm) とは別物です — llove
+> は表示側、llmesh は I/O・プロトコル側です。
+
 ```
        .--.
       /    \         llove
