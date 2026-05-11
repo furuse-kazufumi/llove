@@ -54,6 +54,22 @@ pip install llmesh-llove        # PyPI 配布名 (llmesh-mcp と統一)
 llove demo                       # 30 秒で動くフル機能デモ
 ```
 
+## Screenshots / 画面イメージ
+
+> 既存スクショは [`docs/snapshots/ja/`](docs/snapshots/ja/) に格納されています。クリックで原寸 SVG を開きます。
+
+| 画面 | 用途 |
+|------|------|
+| ![SCADA TUI](docs/snapshots/ja/scada-tui.svg) | 産業 IoT / SCADA |
+| ![Firewall TUI](docs/snapshots/ja/firewall-tui.svg) | PromptFirewall / プライバシーパイプライン |
+| ![RAG TUI](docs/snapshots/ja/rag-tui.svg) | RAG 検索結果 |
+| ![Audit TUI](docs/snapshots/ja/audit-tui.svg) | AuditTrail (ハッシュチェーン) |
+| ![Backends TUI](docs/snapshots/ja/backends-tui.svg) | LLM バックエンド切替 (Ollama / Anthropic / OpenAI) |
+| ![Reliability TUI](docs/snapshots/ja/reliability-tui.svg) | Reliability Protocol |
+| ![Multimodal TUI](docs/snapshots/ja/multimodal-tui.svg) | 画像 + 音声マルチモーダル |
+
+レイアウト凡例は [`docs/snapshots/legend.md`](docs/snapshots/legend.md) 参照。スクショは `pytest tests/test_*_snapshot.py` で再生成できます。
+
 ---
 
 ## なぜ llove か
