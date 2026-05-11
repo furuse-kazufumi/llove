@@ -267,7 +267,7 @@ class TestQualitativeMemo:
     def test_blank_memo_ignored(self) -> None:
         v = QualitativeMemoView()
         v.add_memo("   ")
-        assert v._entries == []
+        assert len(v._entries) == 0
 
     def test_limit_evicts_oldest(self) -> None:
         v = QualitativeMemoView(limit=2)
@@ -310,10 +310,10 @@ class TestQualitativeMemo:
     def test_feed_ignores_non_memo_narration(self) -> None:
         v = QualitativeMemoView()
         v.feed(Event(kind=EventKind.NARRATION, payload={"text": "plain narration"}))
-        assert v._entries == []
+        assert len(v._entries) == 0
 
     def test_feed_garbage_memo_no_crash(self) -> None:
         v = QualitativeMemoView()
         v.feed(Event(kind=EventKind.NARRATION, payload={"memo": "not-a-dict"}))
         v.feed(Event(kind=EventKind.NARRATION, payload={"memo": {"text": 123}}))
-        assert v._entries == []
+        assert len(v._entries) == 0
