@@ -54,6 +54,30 @@ pip install llmesh-llove        # PyPI 配布名 (llmesh-mcp と統一)
 llove demo                       # 30 秒で動くフル機能デモ
 ```
 
+## llove でできること
+
+llove は **「ターミナル上でリッチに動かせる土台」** で、用途は LLMesh の可視化に
+留まりません。同じ Textual + Rich 基盤の上で **観測・対局・学習・遊び** を 1 本の
+CLI で切り替えて動かせます。
+
+| カテゴリ | できること | コマンド例 |
+|---------|-----------|------------|
+| 📡 観測 (Dashboard) | SensorEvent / SPC / RAG / Audit / Trace を 1 画面でストリーム表示 | `llove demo` / `llove view --source ...` |
+| 🎮 対局 (Games) | shogi (Ed25519 署名つき per-move log) / chess / 多人数アリーナ拡張中 | `llove play shogi mock:a mock:b` / `llove play chess ...` |
+| ⌨️ 学習デモ | タイピング (8 ジャンル辞書 × LLM 生成単語、色付き入力) | `llove demo --scenario typing` |
+| 🧱 シミュ | テトリス (LLM × リアルタイム 1-player、F16 抽象の試金石) | `llove demo --scenario tetris` *(roadmap)* |
+| 📜 文書 | Markdown + Mermaid + SVG + 折り畳み + コマンドパレット (`:` で起動) | `llove view --source file://README.md` |
+| 🌐 ブラウザ風 | URI で画像 / Camera / Audio / Markdown / Code を統一表示 | `llove view --source image:///path/to.png` |
+| 📤 共有 | 任意の TUI セッションを **1 ファイル HTML** にエクスポート | `llove export <source> --html out.html` |
+| 🧩 拡張 (進行中) | 埋込スクリプト (Python/Lua/Starlark/Janet/JS) + Editor/IDE モード | F19 (v0.9 roadmap) |
+
+> **「Claude HTML Artifacts のターミナル版」** という発想からスタートし、いまは
+> **LLM と対話する全てのインタフェース** をターミナルで遊べる土台に育てる方向で
+> 進んでいます。**ゲームやデモは「LLM × UX 表現の試行錯誤の場」** として位置づけ、
+> 同じ抽象 (`games/base`, `views/`, `term/`) を使い回しています。
+
+---
+
 ## Screenshots / 画面イメージ
 
 > 既存スクショは [`docs/snapshots/ja/`](docs/snapshots/ja/) に格納されています。クリックで原寸 SVG を開きます。
