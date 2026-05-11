@@ -140,7 +140,7 @@ class TaskGraphView(Static, View):
             layers.append(cycle)
         return layers
 
-    def _render(self) -> None:
+    def _redraw(self) -> None:
         if not self._task_nodes:
             self.update("(no tasks)")
             self.border_subtitle = ""
