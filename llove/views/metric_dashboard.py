@@ -46,7 +46,7 @@ def _sparkline(samples: list[float]) -> str:
     out: list[str] = []
     for s in samples:
         frac = (s - lo) / span
-        idx = min(len(_SPARK) - 1, max(0, int(round(frac * (len(_SPARK) - 1)))))
+        idx = min(len(_SPARK) - 1, max(0, round(frac * (len(_SPARK) - 1))))
         out.append(_SPARK[idx])
     return "".join(out)
 
