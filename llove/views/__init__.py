@@ -38,6 +38,8 @@ from .mermaid_render import (
 from .narration import NarrationView
 from .sensor_stream import SensorStreamView
 from .spc_chart import SPCChartView
+from .task_graph import TaskGraphView
+from .timeline import TimelineView
 from .svg_render import (
     SVGRender,
     ascii_fallback_for_svg,
