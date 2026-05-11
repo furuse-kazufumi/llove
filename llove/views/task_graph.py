@@ -51,7 +51,7 @@ class TaskGraphView(Static, View):
     def __init__(self) -> None:
         super().__init__("(no tasks)")
         # nodes: list of dicts with id / target / depends_on (tuple|list)
-        self._nodes: list[dict] = []
+        self._task_nodes: list[dict] = []
         self._status: dict[str, str] = {}
         self.border_title = "Task graph"
         self.border_subtitle = ""
@@ -75,8 +75,8 @@ class TaskGraphView(Static, View):
             if nid in seen:
                 raise ValueError(f"duplicate task id: {nid!r}")
             seen.add(nid)
-        self._nodes = list(nodes)
-        self._status = {n["id"]: "pending" for n in self._nodes}
+        self._task_nodes = list(nodes)
+        self._status = {n["id"]: "pending" for n in self._task_nodes}
         self._render()
 
     def update_status(self, node_id: str, status: str) -> None:
@@ -109,7 +109,7 @@ class TaskGraphView(Static, View):
         nodes are appended to a final ``"(cycle)"`` layer so the view
         stays informative even on a malformed graph.
         """
-        by_id = {n["id"]: n for n in self._nodes}
+        by_id = {n["id"]: n for n in self._task_nodes}
         depth: dict[str, int] = {}
         remaining: deque[str] = deque(by_id)
         # bounded iteration so a cycle can't spin forever
@@ -141,11 +141,11 @@ class TaskGraphView(Static, View):
         return layers
 
     def _render(self) -> None:
-        if not self._nodes:
+        if not self._task_nodes:
             self.update("(no tasks)")
             self.border_subtitle = ""
             return
-        by_id = {n["id"]: n for n in self._nodes}
+        by_id = {n["id"]: n for n in self._task_nodes}
         lines: list[str] = []
         for layer in self._layers():
             for nid in layer:
