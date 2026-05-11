@@ -97,6 +97,65 @@ def _cmd_layout(args: list[str], ctx: CommandContext) -> CommandResult:
     )
 
 
+def _cmd_theme(args: list[str], ctx: CommandContext) -> CommandResult:
+    """`:theme [list|<name>]` — Textual テーマ表示 / 切替.
+
+    F20 (d4) UI 仕上げの 1 件. CommandContext は App への直接参照を持たない
+    ため, 3 つの hook で App との結線を完全に切り離す:
+
+    - ``get_theme``   ``() -> str``         — 現在のテーマ名を返す
+    - ``list_themes`` ``() -> Iterable[str]``— 利用可能テーマ名を返す
+    - ``set_theme``   ``(name: str) -> None`` — テーマを切替える (失敗時は例外)
+
+    引数:
+        - 無し          現在のテーマ名を出力 (hook 未設定なら案内)
+        - ``list``      利用可能テーマ一覧 (hook 未設定なら案内)
+        - ``<name>``    指定テーマに切替 (hook 未設定なら案内のみ)
+    """
+    if not args:
+        get = ctx.hooks.get("get_theme")
+        if callable(get):
+            try:
+                current = get()
+            except Exception as e:  # noqa: BLE001
+                return CommandResult(ok=False, error=f"テーマ取得失敗: {e}")
+            return CommandResult(ok=True, output=(f"current theme: {current}",))
+        return CommandResult(
+            ok=True,
+            output=("current theme: (hook 未配線)",),
+        )
+
+    sub = args[0]
+    if sub == "list":
+        lister = ctx.hooks.get("list_themes")
+        if not callable(lister):
+            return CommandResult(
+                ok=True,
+                output=("テーマ列挙 hook 未配線 (list_themes)",),
+            )
+        try:
+            themes = tuple(lister())
+        except Exception as e:  # noqa: BLE001
+            return CommandResult(ok=False, error=f"テーマ列挙失敗: {e}")
+        if not themes:
+            return CommandResult(ok=True, output=("(利用可能なテーマがありません)",))
+        return CommandResult(ok=True, output=tuple(f"- {t}" for t in themes))
+
+    # それ以外は theme 名として扱う
+    name = sub
+    setter = ctx.hooks.get("set_theme")
+    if not callable(setter):
+        return CommandResult(
+            ok=True,
+            output=(f"theme '{name}' を適用 (hook 未配線, 表示のみ)",),
+        )
+    try:
+        setter(name)
+    except Exception as e:  # noqa: BLE001
+        return CommandResult(ok=False, error=f"テーマ切替失敗: {e}")
+    return CommandResult(ok=True, output=(f"theme 切替: {name}",))
+
+
 def _cmd_demo(args: list[str], ctx: CommandContext) -> CommandResult:
     """`:demo <name>` — シナリオ起動 (CLI ``llove demo`` の内部口)."""
     if not args:
