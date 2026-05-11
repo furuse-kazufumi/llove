@@ -21,7 +21,7 @@ class TestTaskGraphView:
     def test_empty_by_default(self) -> None:
         v = TaskGraphView()
         assert v._status == {}
-        assert v._nodes == []
+        assert v._task_nodes == []
 
     def test_set_graph_initialises_all_pending(self) -> None:
         v = TaskGraphView()
