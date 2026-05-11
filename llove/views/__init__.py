@@ -62,6 +62,8 @@ __all__ = [
     "SVGRender",
     "SensorStreamView",
     "SubprocessRunner",
+    "TaskGraphView",
+    "TimelineView",
     "View",
     "WorkerDispatcher",
     "apply_folds",
