@@ -138,19 +138,15 @@ def _preset_data_only(kind: str, level: int) -> bool:
     return kind != "table"
 
 
+_PROSE_FOLD_KINDS: frozenset[str] = frozenset({"code", "table"}) | DIAGRAM_KIND_NAMES
+
+
 def _preset_prose(kind: str, level: int) -> bool:
-    # Reading mode: collapse code, tables, and diagrams
-    # (mermaid / svg / plantuml / dot / svgbob); leave headings (and any
-    # future "prose-friendly" kinds) open.
-    return kind in (
-        "code",
-        "table",
-        "mermaid",
-        "svg",
-        "plantuml",
-        "dot",
-        "svgbob",
-    )
+    # Reading mode: collapse code, tables, and every registered diagram kind;
+    # leave headings (and any future "prose-friendly" kinds) open. The diagram
+    # half is derived from llove.views.diagram_kinds so adding a new renderer
+    # automatically extends the prose preset.
+    return kind in _PROSE_FOLD_KINDS
 
 
 _FOLD_PRESETS = {
