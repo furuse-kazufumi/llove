@@ -5,6 +5,37 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — F15 (t2/t3) svgbob → SVG → 画像チェイン + folding 識別 (2026-05-14)
+
+- **新モジュール** `llove/views/svgbob_render.py`: ASCII art (罫線・矢印・箱)
+  → SVG 変換の Rust 製 CLI `svgbob` を呼ぶ薄い shim。`SvgbobRender`
+  (kind/argv/svg_path/ascii_text/image_tool) は `DiagramRenderResult`
+  Protocol を満たすので `MarkdownView` の `diagram_renderers=
+  {"svgbob": render_svgbob}` の 1 行で組み込める。
+- **チェイン**: `svgbob input.bob -o output.svg` → image catalog 経由で
+  chafa / viu / timg / kitty / wezterm の最優先ツールで描画。dot CLI に
+  近い shape (`-o` で出力ファイル名直接指定可)。
+- **特徴**: mermaid/dot/plantuml が DSL ベースなのに対し、svgbob は
+  「コメントの ASCII art をそのまま絵にできる」のが特徴で、Markdown
+  コードドキュメントでよく使われる (rust-lang / bevy / servo 等)。
+- **folding.py**: ` ```svgbob ` / ` ```bob ` フェンスを ``kind="svgbob"``
+  にリラベル (bob は短縮 alias、normalise して "svgbob" に統一)。
+  `_summary_line` ``▶ ◇ svgbob: <label> (N lines)``。`_preset_prose`
+  に "svgbob" 追加。
+- **`make_markdown_fold_hook` valid kind** に "svgbob" 追加 →
+  `:fold by-tag svgbob` が動作。
+- **テスト 24 件追加**:
+  - `tests/test_svgbob_render.py` 16 件 (検出 4 + render_to_svg 5 +
+    ASCII fallback 2 + 統合 5)
+  - `tests/test_folding_svgbob.py` 8 件 (fence 識別 / case-insensitive /
+    bob alias / 他 diagram kind との共存 / close_by_kind / summary marker /
+    prose preset / `:fold by-tag svgbob` 動詞ルーティング)
+- フルスイート **600 PASS + 1 skipped** (576 → +24)、ruff クリーン、回帰ゼロ。
+- これで diagram renderer は **5 種類** (mermaid / svg / plantuml / dot /
+  svgbob) が同一 Protocol で揃った。MarkdownView に 1 dict 渡すだけで全
+  サポートが有効化される拡張点を実証。次は ditaa / blockdiag / nomnoml の
+  追加または kind マッピングの抽象化リファクタを検討。
+
 ### Added — F15 (t2/t3) Graphviz dot → SVG → 画像チェイン + folding 識別 (2026-05-14)
 
 - **新モジュール** `llove/views/dot_render.py`: `mermaid_render` /
