@@ -289,8 +289,22 @@
         folding 8)、フルスイート 600 PASS (576 → +24)、回帰ゼロ。これで
         diagram renderer は **5 種類** (mermaid / svg / plantuml / dot /
         svgbob) が同一 Protocol で揃い、MarkdownView に 1 dict 渡すだけで
-        全サポートが有効化される拡張点を実証。次: ditaa / blockdiag /
-        nomnoml 追加 or kind マッピングの抽象化リファクタ、実 binary E2E。
+        全サポートが有効化される拡張点を実証。続いて kind マッピングの
+        抽象化リファクタも完了 (下記)。
+      - **diagram kind registry 抽象化リファクタ完了
+        (2026-05-14, F15 (t2/t3))**: `llove/views/diagram_kinds.py` 新設し、
+        4 箇所に分散していた diagram kind 情報を 1 ヶ所に集約:
+        `find_code_block_regions` の正規化分岐 / `_summary_line` の 5 種
+        分岐 / `_preset_prose` の長い tuple / `make_markdown_fold_hook` の
+        valid set。`DIAGRAM_KINDS` タプルに 1 行追加するだけで全箇所が
+        連動するようになり、新規 diagram kind 追加コストが renderer 本体
+        作成 + registry 1 行 + MarkdownView 登録に下がった。テスト 11 件
+        追加 (registry 形状 / immutability / normalise_info_string /
+        summary_marker / 統合 — 全 diagram kind ループ検証)、既存 53 件の
+        folding テストは無修正で全 PASS = 「内部実装置換のみで動作不変」を
+        担保。フルスイート 611 PASS (600 → +11)、回帰ゼロ。これで diagram
+        系の拡張は ditaa / blockdiag / nomnoml も 1 ファイル + 1 dict 行で
+        書ける状態。
       - **SVG ターミナル表示 (rsvg-convert → PNG → image チェイン) 基盤完了
         (2026-05-10, F15 (t2))**: `llove/views/svg_render.py` を新設。
         mermaid_render と一対一対応する構造で、SVG XML → temp `.svg` →
