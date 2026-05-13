@@ -248,6 +248,22 @@
         既存 9 テスト移行 + svg 統合 5 件 + folding-svg 7 件追加、フル
         スイート 441 PASS、回帰ゼロ。**残課題**: `MermaidImagePane` →
         `ImageRenderPane` リネーム / 実 chafa での E2E。
+      - **PlantUML ターミナル表示 (plantuml → SVG → image チェイン) 基盤完了
+        (2026-05-14, F15 (t2/t3))**: `llove/views/plantuml_render.py` 新設。
+        mermaid_render / svg_render と一対一対応する構造で、PlantUML
+        DSL → temp `.puml` → `plantuml -tsvg input.puml` → 同ディレクトリ
+        `<stem>.svg` → image catalog 経由で chafa / viu / timg / kitty /
+        wezterm の最優先ツールに流す。`PlantUMLRender` (kind/argv/svg_path/
+        ascii_text/image_tool) は `DiagramRenderResult` Protocol を満たす
+        ので `ImageRenderPane` / `MarkdownView` の `diagram_renderers=
+        {"plantuml": render_plantuml}` 1 行で組み込める。plantuml の
+        `-o` 仕様 (出力ファイル名を直接指定できず同ディレクトリ命名規則)
+        には入力 `.puml` のステムを出力 `.svg` のステムに合わせて吸収。
+        subprocess は list-based argv + temp file (shell=True 禁止)。
+        テスト 16 件、フルスイート 545 PASS、回帰ゼロ。次段階: folding.py
+        で ` ```plantuml ` フェンス → `kind="plantuml"` ラベリング +
+        prose preset 連携 + `:fold by-tag plantuml`。Graphviz dot 系は
+        同パターンで `dot_render.py` を追加。
       - **SVG ターミナル表示 (rsvg-convert → PNG → image チェイン) 基盤完了
         (2026-05-10, F15 (t2))**: `llove/views/svg_render.py` を新設。
         mermaid_render と一対一対応する構造で、SVG XML → temp `.svg` →
