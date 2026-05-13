@@ -6,6 +6,63 @@
 
 ---
 
+## 2026-05-14 (続き) — F15 (t2/t3) folding.py で PlantUML 識別 + prose preset 連携
+
+### 完成したもの
+
+folding.py の 3 箇所と markdown_view.py の 1 箇所を更新し、PlantUML フェンス
+を mermaid / svg と同等の diagram kind として扱えるように。これで前 commit
+の plantuml_render を MarkdownView と組み合わせると、` ```plantuml ` →
+画像化までフルパイプラインが繋がる。
+
+- **`find_code_block_regions`**: ` ```plantuml ` の info-string を
+  ``kind="plantuml"`` にリラベル。case-insensitive (`PlantUML` / `PLANTUML`
+  も同じ kind)。mermaid / svg と並行する 1 行追加。
+- **`_summary_line`**: ``▶ ◇ plantuml: <label> (N lines)`` の summary。
+  mermaid / svg と同じ diamond marker で diagram と一目で分かる表示。
+- **`_preset_prose`**: `("code", "table", "mermaid", "svg")` →
+  `("code", "table", "mermaid", "svg", "plantuml")`。`:fold preset prose`
+  で「コード / テーブル / 図 (mermaid + svg + plantuml)」を一括で畳む。
+- **`make_markdown_fold_hook` valid kind** (`markdown_view.py`):
+  `{"heading", "code", "table", "mermaid", "svg", "plantuml"}` に拡張。
+  `:fold by-tag plantuml` がそのまま動作。
+
+### テスト
+
+- 7 件追加 (`tests/test_folding_plantuml.py`): fence 識別 / case-insensitive /
+  他 kind との共存 / close_by_kind / summary marker / prose preset /
+  `:fold by-tag plantuml` 動詞ルーティング。
+- フルスイート **552 PASS + 1 skipped** (545 → +7)、ruff クリーン、回帰ゼロ。
+
+### 次セッションで着手する候補 (重要度順)
+
+1. **Graphviz dot 系の `dot_render.py`** — `dot -Tsvg -o out.svg in.dot`
+   で plantuml_render とほぼ同じ shape (むしろ mermaid_render に近い、
+   `-o` で出力ファイル名直接指定可)。folding.py の plantuml 拡張と同じ
+   パターンで dot kind ラベリングも入れる。
+2. **ditaa / blockdiag** — ASCII アート → SVG / PNG。ditaa は java + jar、
+   blockdiag は pip インストール可能で素直。
+3. **実 plantuml + chafa での E2E 検証** — dev 環境で `llove demo`
+   経由で動作確認 (CI ではスキップ、binary 依存)。
+4. **キーバインド (Vim/VSCode)** — `za` / `zM` / `zR` / `Ctrl+Shift+[`。
+5. **JSON ツリービュー / ログペイン fold** — folding.py の純粋関数を
+   別ビューに展開。
+
+### 設計メモ (将来参照)
+
+- 「renderer 追加」だけでなく「folding.py で kind ラベリング」「prose
+  preset 拡張」「make_markdown_fold_hook valid kind 拡張」の 3 つを同時
+  に入れないと、ユーザが ` ```plantuml ` フェンスを書いても fold UX に
+  反映されない (画像は出るがフェンス畳みができない)。テーブル化される
+  ようパターンは固まったので、Graphviz dot 追加時は 1 ファイル + 1 modify
+  でほぼ済む。
+- 1 つの info-string → 1 つの kind マッピングは 4 箇所 (`find_code_block_regions`
+  / `_summary_line` / `_preset_prose` / `make_markdown_fold_hook` valid set)
+  に分散しているが、これを 1 テーブルに引き出すリファクタは renderer が
+  あと 2〜3 種類増えてから検討する。早すぎる抽象化は柔軟性を奪う。
+
+---
+
 ## 2026-05-14 — F15 (t2/t3) PlantUML → SVG → 画像チェイン基盤
 
 ### 完成したもの
