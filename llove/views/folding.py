@@ -276,30 +276,17 @@ def find_code_block_regions(source: str) -> list[FoldRegion]:
         if close_idx == -1:
             # No closing fence — bail out (fail-closed).
             break
-        # Mermaid / SVG / PlantUML / dot blocks are technically code fences
-        # but downstream tooling (and the user) treat diagrams as a distinct
-        # concept — :fold by-tag mermaid|svg|plantuml|dot, the prose preset,
-        # and the mmdc / rsvg-convert / plantuml / graphviz dot based
-        # renderers all key off this. Special-case the info-string here so
-        # the rest of the pipeline gets the right `kind` for free.
+        # Diagram blocks are technically code fences but downstream tooling
+        # (and the user) treat diagrams as a distinct concept — :fold by-tag,
+        # the prose preset, and the per-diagram renderers all key off this.
+        # The set of recognised info-strings and their canonical kind name
+        # lives in llove.views.diagram_kinds; new diagram support requires
+        # adding one line there, not editing this branch.
         info_label = info.strip()
         info_lower = info_label.lower()
-        if info_lower == "mermaid":
-            kind = "mermaid"
-        elif info_lower == "svg":
-            kind = "svg"
-        elif info_lower == "plantuml":
-            kind = "plantuml"
-        elif info_lower in ("dot", "graphviz"):
-            # dot is the canonical Graphviz info-string; "graphviz" is a
-            # common alias users reach for, so we accept both and normalise
-            # to "dot" for the downstream pipeline.
-            kind = "dot"
-        elif info_lower in ("svgbob", "bob"):
-            # svgbob is the canonical info-string; "bob" is a short alias
-            # (its CLI uses .bob file extension) that users sometimes reach
-            # for. Normalise to "svgbob" for the downstream pipeline.
-            kind = "svgbob"
+        diagram_kind = normalise_info_string(info_lower)
+        if diagram_kind is not None:
+            kind = diagram_kind
         else:
             kind = "code"
         regions.append(
