@@ -456,16 +456,10 @@ def make_markdown_fold_hook(view: MarkdownView):
             if not args:
                 return None
             kind = args[0]
-            valid = {
-                "heading",
-                "code",
-                "table",
-                "mermaid",
-                "svg",
-                "plantuml",
-                "dot",
-                "svgbob",
-            }
+            # Non-diagram fold kinds are owned here; diagram kinds are
+            # derived from the central registry so adding a new diagram
+            # automatically gains `:fold by-tag <name>` support.
+            valid = {"heading", "code", "table"} | DIAGRAM_KIND_NAMES
             if kind not in valid:
                 return None
             regions = view.fold_regions()
