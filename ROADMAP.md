@@ -260,10 +260,12 @@
         `-o` 仕様 (出力ファイル名を直接指定できず同ディレクトリ命名規則)
         には入力 `.puml` のステムを出力 `.svg` のステムに合わせて吸収。
         subprocess は list-based argv + temp file (shell=True 禁止)。
-        テスト 16 件、フルスイート 545 PASS、回帰ゼロ。次段階: folding.py
-        で ` ```plantuml ` フェンス → `kind="plantuml"` ラベリング +
-        prose preset 連携 + `:fold by-tag plantuml`。Graphviz dot 系は
-        同パターンで `dot_render.py` を追加。
+        テスト 16 件、フルスイート 545 PASS、回帰ゼロ。続けて folding.py
+        で ` ```plantuml ` フェンス → `kind="plantuml"` ラベリング + prose
+        preset + `:fold by-tag plantuml` 連携も完了 (552 PASS, +7 件)。
+        これで PlantUML は識別 → renderer → 画像化までフルパイプライン
+        接続済。次の Graphviz dot 系は同パターンで `dot_render.py` を追加
+        (mermaid_render に近い shape, `-Tsvg -o` で出力ファイル名直接指定可)。
       - **SVG ターミナル表示 (rsvg-convert → PNG → image チェイン) 基盤完了
         (2026-05-10, F15 (t2))**: `llove/views/svg_render.py` を新設。
         mermaid_render と一対一対応する構造で、SVG XML → temp `.svg` →
