@@ -583,6 +583,57 @@ LSP/lint/シンタックスハイライト + Notebook 風セル UI + Command Pal
 
 ---
 
+## (横断機能) F25 — llove ↔ llmesh ↔ llive 連携基盤 *(2026-05-14 追加)*
+
+**ゴール:** llmesh の MCP HTTP server を中継 hub として、llive の観測
+データ (bwt_summary / route_trace / concept_update) を llove TUI で可視化。
+他データソース (llmesh-MQTT / SPC 等) も同じ `/timeline/ingest` 経由で
+集約可能なインフラとして整える。
+
+設計仕様は `docs/llove_llive_bridge.md` v1 で凍結。
+
+### 入る機能
+
+- [x] **F25 (a) MCP Timeline client** (`llove/mcp/client.py`) —
+      `TimelineClient` + `TimelineEvent` / `TaskTimeline` dataclass +
+      `UrllibTransport` (stdlib のみ) + Transport Protocol で DI。
+      fail-closed、`last_error` で UI に伝える。**完了 2026-05-14**
+      (テスト 18 件)
+- [x] **F25 (b) BWTDashboard** (`llove/views/llive/bwt_dashboard.py`) —
+      `BWTRun` 防御的パース、sparkline + per-task drop ASCII bar、
+      `event_id` dedup ingest、`make_mock_bwt_events` fixture。**完了
+      2026-05-14** (テスト 25 件)
+- [ ] **F25 (c) RouteTraceViewer** — `event_type="route_trace"` を消費。
+      subblock duration breakdown + memory access trace (folding 連携)
+- [ ] **F25 (d) MemoryLinkVizPanel** — `event_type="concept_update"` を
+      消費。concept graph (ASCII tree) + surprise 統計
+- [ ] **F25 (e) llmesh `/timeline/ingest` endpoint** (別リポジトリ作業) —
+      llmesh 本体に external ingest 経路を追加。schema validator + tests。
+      既存 auth / rate limit を継承
+- [ ] **F25 (f) llive writer 補完** (別リポジトリ作業) — route_trace /
+      memory_link writer + optional MCP push 経路
+- [ ] **F25 (g) E2E 統合検証** — 3 リポジトリ同時起動で BWTDashboard が
+      実 bwt データを可視化
+- [ ] **F25 (h) SSE / WebSocket push** (v2 候補) — 現状は polling
+
+### 設計判断
+
+- 既存 `TimelineStore` を流用 (新 router 作成しない)
+- llove は llmesh HTTP API のみに依存 (llive を import しない、単方向依存)
+- `node_id` で複数ソース分離 (llive 以外も同じ pipeline)
+- mock 駆動先行開発 (Phase a/b は llmesh / llive 接続無しで完結)
+- ingest endpoint 1 個追加の最小侵襲
+
+### 受け入れ基準
+
+- `BWTDashboard` が `make_mock_bwt_events(n=5)` で正しく描画される (mock テスト)
+- `TimelineClient` が `/timeline/recent` を叩いて events を取得・パースする
+  (transport 注入 fake テスト)
+- llmesh ingest endpoint なしで CI が通る (Phase a/b の独立性)
+- llmesh 公式 server に対する実 HTTP 接続テストは smoke レベル
+
+---
+
 ## v1.0.0 — Stable Release
 
 **ゴール:** SemVer 適用、API 公開契約、十分なドキュメント、安定運用。
