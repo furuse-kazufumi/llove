@@ -28,6 +28,7 @@ from textual.widgets import Static
 from llove.events import Event, EventKind
 from llove.i18n import t
 from llove.views.base import View
+from llove.views.diagram_kinds import DIAGRAM_KIND_NAMES
 from llove.views.folding import (
     FoldRegion,
     FoldState,
