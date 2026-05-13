@@ -293,6 +293,11 @@ def find_code_block_regions(source: str) -> list[FoldRegion]:
             # common alias users reach for, so we accept both and normalise
             # to "dot" for the downstream pipeline.
             kind = "dot"
+        elif info_lower in ("svgbob", "bob"):
+            # svgbob is the canonical info-string; "bob" is a short alias
+            # (its CLI uses .bob file extension) that users sometimes reach
+            # for. Normalise to "svgbob" for the downstream pipeline.
+            kind = "svgbob"
         else:
             kind = "code"
         regions.append(
