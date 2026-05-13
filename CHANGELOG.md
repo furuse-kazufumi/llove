@@ -5,6 +5,49 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — F25 (c/d) RouteTraceViewer + MemoryLinkVizPanel (2026-05-14)
+
+llive 3 種データに対する viewer を全て揃え、`llove/views/llive/`
+パッケージとして 3 種コンプリート (BWTDashboard / RouteTraceViewer /
+MemoryLinkVizPanel)。これで llmesh ingest endpoint が稼働した瞬間に
+3 viewer すべてが実データを受けて動く準備が完了。
+
+- **新モジュール** `llove/views/llive/route_trace_viewer.py` (F25 c):
+  - `SubBlock` / `MemoryAccess` / `RouteTrace` dataclass (frozen)
+  - `RouteTrace.from_event(TimelineEvent)` — 防御的パース (不正
+    subblock / 不正 hits をスキップ、metadata の型違いを許容)
+  - Pure render: `render_subblock_bars` (▓░ 比率バー + 経過 ms + %)、
+    `render_memory_access` (read=hits 数+最大スコア、write=surprise)、
+    `render_trace` (container + Request + Subblocks + Memory access の 4 部構成)
+  - `RouteTraceViewer(Static, View)` widget: `feed_events` で event_id
+    dedup + history deque、`border_subtitle` に traces 数自動更新
+  - `make_mock_route_trace_events(n=3)` fixture
+- **新モジュール** `llove/views/llive/memory_link_panel.py` (F25 d):
+  - `SurpriseStats` / `ConceptUpdate` dataclass
+  - `ConceptUpdate.from_event(TimelineEvent)` — `concept_id` 必須、
+    linked_*_ids が list でなければ空タプル、surprise_stats が壊れて
+    いれば SurpriseStats() デフォルト
+  - Pure render: `render_concept_card` (◆ title (page_type) + linked
+    concepts + surprise μ/n + summary 短縮 120 字)、`render_concept_list`
+    (latest 順 + overflow 表示)
+  - `MemoryLinkVizPanel(Static, View)` widget: **concept_id 単位で latest
+    を保持**、event の timestamp で同じ concept_id の古い update は
+    上書きしない (順序逆受信耐性)、`concepts_in_order()` で最新更新順
+  - `make_mock_concept_events(n=4)` fixture (生成 concept は隣接 concept
+    にリンク = 現実的なグラフトポロジ)
+- **`llove/views/llive/__init__.py`**: `BWTDashboard` /
+  `RouteTraceViewer` / `MemoryLinkVizPanel` を re-export
+- **テスト 48 件追加**:
+  - `tests/test_llive_route_trace_viewer.py` 26 件 (parse 7 / subblock
+    bars 3 / memory access 5 / render_trace 3 / widget API 6 / mock 2)
+  - `tests/test_llive_memory_link_panel.py` 22 件 (parse 6 / card 3 /
+    list 3 / widget API 7 / mock 2、特に「同じ concept_id の新しい
+    update が古いものを上書き」「順序逆受信でも latest が保たれる」を
+    別テストとしてカバー)
+- フルスイート **702 PASS + 1 skipped** (654 → +48)、ruff クリーン、回帰ゼロ。
+- これで F25 Phase a-d は完結。残る Phase 3 (llmesh ingest) / Phase 4
+  (llive writer) / Phase 6 (E2E) は別リポジトリ作業として将来セッションへ。
+
 ### Added — F25 (a/b) llove ↔ llmesh ↔ llive 連携インフラ (2026-05-14)
 
 llmesh の既存 MCP サーバー (`TimelineStore`) を中継 hub として、llive の
