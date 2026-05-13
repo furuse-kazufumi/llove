@@ -5,6 +5,34 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Changed — F15 (t2/t3) diagram kind registry に集約リファクタ (2026-05-14)
+
+- **新モジュール** `llove/views/diagram_kinds.py` を新設し、これまで
+  4 箇所に分散していた diagram kind 情報を 1 ヶ所に集約:
+  - `find_code_block_regions` の info-string → kind 正規化分岐 (5 elif)
+  - `_summary_line` の diagram 系 5 種類分岐 (5 if return)
+  - `_preset_prose` の長い tuple (`("code", "table", "mermaid", "svg", "plantuml", "dot", "svgbob")`)
+  - `make_markdown_fold_hook` の valid kind set (8 要素)
+- **API**:
+  - `DIAGRAM_KINDS` — 5 種の `DiagramKind` を順序保ち列挙
+  - `DIAGRAM_KIND_NAMES` — `frozenset` で頻繁にメンバーシップ判定
+  - `normalise_info_string(info_lower)` — alias → canonical 正規化
+    (graphviz → dot, bob → svgbob)
+  - `diagram_summary_marker(kind, label, hidden)` — `▶ ◇ <kind>: <label> (N lines)`
+- **新規 diagram kind 追加コスト**: `DIAGRAM_KINDS` タプルに 1 行追加
+  するだけで `find_code_block_regions` / `_summary_line` / `_preset_prose` /
+  `:fold by-tag` 全部に波及。renderer 本体 (例: `dot_render.py`) と
+  MarkdownView 側の `diagram_renderers={"<kind>": render_<kind>}` の登録
+  だけで新図形種のサポートが完成する。
+- **テスト 11 件追加** (`tests/test_diagram_kinds.py`):
+  registry 形状 / immutability / normalise_info_string 4 ケース /
+  summary_marker 2 ケース / 統合 (find_code_block_regions /
+  apply_folds summary / prose preset) を全 diagram kind でループ検証。
+- フルスイート **611 PASS + 1 skipped** (600 → +11)、ruff クリーン、
+  既存テスト 53 件 (mermaid/svg/plantuml/dot/svgbob folding) すべて
+  リファクタ後も無修正で全 PASS = 抽象化が「内部実装の置き換えのみで
+  動作不変」を担保。
+
 ### Added — F15 (t2/t3) svgbob → SVG → 画像チェイン + folding 識別 (2026-05-14)
 
 - **新モジュール** `llove/views/svgbob_render.py`: ASCII art (罫線・矢印・箱)
