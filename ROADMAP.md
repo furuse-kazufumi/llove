@@ -266,6 +266,19 @@
         これで PlantUML は識別 → renderer → 画像化までフルパイプライン
         接続済。次の Graphviz dot 系は同パターンで `dot_render.py` を追加
         (mermaid_render に近い shape, `-Tsvg -o` で出力ファイル名直接指定可)。
+      - **Graphviz dot ターミナル表示 (dot → SVG → image チェイン) 完了
+        (2026-05-14, F15 (t2/t3))**: `llove/views/dot_render.py` 新設。
+        `dot -Tsvg -o output.svg input.dot` (mermaid_render に近い shape)
+        で SVG 生成 → image catalog 経由で chafa / viu / timg / kitty /
+        wezterm へ。`DotRender` (kind/argv/svg_path/ascii_text/image_tool)
+        は `DiagramRenderResult` Protocol を満たし MarkdownView へ
+        `diagram_renderers={"dot": render_dot}` の 1 行で組み込める。
+        folding.py で ` ```dot ` / ` ```graphviz ` (alias, normalise) を
+        `kind="dot"` ラベリング + summary marker (`▶ ◇ dot: ...`) +
+        prose preset + `:fold by-tag dot` まで一括完了。テスト 24 件
+        (renderer 16 + folding 8)、フルスイート 576 PASS (552 → +24)、
+        回帰ゼロ。次: ditaa / blockdiag / svgbob 等の追加 renderer、
+        実 binary での E2E、キーバインド (Vim/VSCode)。
       - **SVG ターミナル表示 (rsvg-convert → PNG → image チェイン) 基盤完了
         (2026-05-10, F15 (t2))**: `llove/views/svg_render.py` を新設。
         mermaid_render と一対一対応する構造で、SVG XML → temp `.svg` →
