@@ -277,8 +277,20 @@
         `kind="dot"` ラベリング + summary marker (`▶ ◇ dot: ...`) +
         prose preset + `:fold by-tag dot` まで一括完了。テスト 24 件
         (renderer 16 + folding 8)、フルスイート 576 PASS (552 → +24)、
-        回帰ゼロ。次: ditaa / blockdiag / svgbob 等の追加 renderer、
-        実 binary での E2E、キーバインド (Vim/VSCode)。
+        回帰ゼロ。続いて svgbob renderer も追加 (下記)。
+      - **svgbob (ASCII art → SVG) ターミナル表示完了
+        (2026-05-14, F15 (t2/t3))**: `llove/views/svgbob_render.py` 新設。
+        Rust 製 CLI `svgbob input.bob -o output.svg` で ASCII art (罫線・
+        矢印・箱) を SVG 化 → image catalog 経由でターミナル描画。dot CLI
+        と同じ shape (`-o` で出力ファイル名直接指定可)。folding.py で
+        ` ```svgbob ` / ` ```bob ` (短縮 alias) を `kind="svgbob"` に
+        正規化 + summary marker (`▶ ◇ svgbob: ...`) + prose preset +
+        `:fold by-tag svgbob` まで一括完了。テスト 24 件 (renderer 16 +
+        folding 8)、フルスイート 600 PASS (576 → +24)、回帰ゼロ。これで
+        diagram renderer は **5 種類** (mermaid / svg / plantuml / dot /
+        svgbob) が同一 Protocol で揃い、MarkdownView に 1 dict 渡すだけで
+        全サポートが有効化される拡張点を実証。次: ditaa / blockdiag /
+        nomnoml 追加 or kind マッピングの抽象化リファクタ、実 binary E2E。
       - **SVG ターミナル表示 (rsvg-convert → PNG → image チェイン) 基盤完了
         (2026-05-10, F15 (t2))**: `llove/views/svg_render.py` を新設。
         mermaid_render と一対一対応する構造で、SVG XML → temp `.svg` →
