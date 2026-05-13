@@ -140,7 +140,7 @@ def render_per_task_drop(
     lines: list[str] = []
     for k in keys:
         v = per_drop.get(k, 0.0)
-        cells = int(round(abs(v) / max_abs * half))
+        cells = round(abs(v) / max_abs * half)
         if v < 0:
             left = " " * (half - cells) + "─" * cells
             right = " " * half
