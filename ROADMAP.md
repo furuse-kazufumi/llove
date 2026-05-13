@@ -613,14 +613,21 @@ LSP/lint/シンタックスハイライト + Notebook 風セル UI + Command Pal
       上書きしない順序保証 + concept_id linked card 表示 + surprise μ/n
       summary 短縮。**完了 2026-05-14** (テスト 22 件、
       `make_mock_concept_events` fixture 付き、リンクのグラフトポロジ含む)
-- [ ] **F25 (e) llmesh `/timeline/ingest` endpoint** (別リポジトリ作業) —
+- [x] **F25 (e) Dispatch helper + TimelinePollDriver** — `dispatch_events`
+      関数で `event_type` を 3 viewer に振り分け (各 viewer は optional)、
+      `TimelinePollDriver.poll_once()` で `fetch_recent` → `dispatch_events`
+      を 1 メソッド化。`DispatchResult` (bwt/trace/link/unrouted/unknown
+      カウント) と `status_line()` でステータスバー向け observability も
+      担保。Textual `Timer` から `poll_once` を呼ぶ前提で時間軸は持たない
+      設計 (CLI / TUI 双方で使える)。**完了 2026-05-14** (テスト 14 件)
+- [ ] **F25 (f) llmesh `/timeline/ingest` endpoint** (別リポジトリ作業) —
       llmesh 本体に external ingest 経路を追加。schema validator + tests。
       既存 auth / rate limit を継承
-- [ ] **F25 (f) llive writer 補完** (別リポジトリ作業) — route_trace /
+- [ ] **F25 (g) llive writer 補完** (別リポジトリ作業) — route_trace /
       memory_link writer + optional MCP push 経路
-- [ ] **F25 (g) E2E 統合検証** — 3 リポジトリ同時起動で BWTDashboard が
+- [ ] **F25 (h) E2E 統合検証** — 3 リポジトリ同時起動で BWTDashboard が
       実 bwt データを可視化
-- [ ] **F25 (h) SSE / WebSocket push** (v2 候補) — 現状は polling
+- [ ] **F25 (i) SSE / WebSocket push** (v2 候補) — 現状は polling
 
 ### 設計判断
 
