@@ -5,6 +5,29 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — F15 (t2/t3) PlantUML → SVG → 画像チェイン基盤 (2026-05-14)
+
+- **新モジュール** `llove/views/plantuml_render.py`: `mermaid_render` /
+  `svg_render` と並行する構造。`@dataclass(frozen=True) PlantUMLRender`
+  (kind / argv / svg_path / ascii_text / image_tool) は既存 `DiagramRenderResult`
+  Protocol を満たすので、`ImageRenderPane` / `MarkdownView` の
+  `diagram_renderers={"plantuml": render_plantuml, ...}` に直接登録できる。
+- **チェイン**: `plantuml -tsvg <input.puml>` → 同ディレクトリの `<input>.svg`
+  → image catalog 経由で chafa / viu / timg / kitty / wezterm の最優先ツールで
+  ターミナル描画。
+- **plantuml CLI 仕様への合わせ込み**: plantuml は `-o` で出力ファイル名を
+  指定できず「同じディレクトリの input.svg を作る」挙動なので、入力 `.puml`
+  のステムを出力 `.svg` のステムに合わせて temp 書き出し → 一致を保証。
+- **セキュリティ**: subprocess は list-based argv のみ (shell=True 禁止)、
+  source は temp `.puml` 経由で渡す (mermaid_render と同じ哲学)。
+- **ASCII フォールバック**: plantuml / chafa 何れか欠ければ罫線囲みで
+  source をそのまま表示。CI / 未インストール端末で UI が落ちない。
+- **テスト 16 件追加** (`tests/test_plantuml_render.py`):
+  検出系 4 + render_to_svg 5 + ASCII fallback 2 + 統合 5。
+- フルスイート **545 PASS + 1 skipped**、ruff クリーン、回帰ゼロ。
+- 次段階: folding.py で ` ```plantuml ` フェンスを `kind="plantuml"` に
+  リラベルし、prose preset と `:fold by-tag plantuml` を有効化。
+
 ### Changed — F15 (t2/t3) MermaidImagePane → ImageRenderPane リネーム (2026-05-10)
 
 - **モジュール rename**: `llove/views/mermaid_pane.py` を削除し、新規に
