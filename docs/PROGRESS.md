@@ -6,6 +6,89 @@
 
 ---
 
+## 2026-05-14 (続き 7) — F25 (e) Dispatch helper + TimelinePollDriver
+
+### 完成したもの
+
+3 viewer を統合する小さなオーケストレータ。これで「polling 1 回 → 3 viewer
+更新 → ステータスバー」の単位作業が **3 メソッド呼び出し** で書ける状態。
+
+`llove/views/llive/dispatch.py`:
+
+- **`dispatch_events(events, *, bwt=None, trace=None, link=None) -> DispatchResult`**
+  - 純粋関数。1 回の polling で得た events を `event_type` で振り分け、
+    対応する viewer の `feed_events` を呼ぶだけ
+  - viewer は optional: BWT だけ表示 / trace + link だけ表示、いずれも対応可
+  - 未登録 viewer の event は `unrouted` でカウント、未知 event_type は
+    `unknown` でカウント (observability)
+- **`DispatchResult(frozen)`**:
+  `bwt_added` / `trace_added` / `link_added` / `unrouted` / `unknown` +
+  `total_added` プロパティ + `status_line()` でステータスバー向け
+  サマリ。全カウンタ 0 のときだけ `"no new events"`。
+- **`TimelinePollDriver`** (dataclass):
+  - `client / bwt / trace / link / limit / node_id / last_result` のみ
+    持つ薄い周回器
+  - `poll_once()`: `fetch_recent` → `dispatch_events` の 1 メソッド化
+  - `status_line()`: `last_result.status_line()` + `client.last_error` 併記
+  - **時間軸は持たない**: Textual `Timer` / asyncio Timer / CLI 手動
+    いずれからも `poll_once()` を呼べる
+
+### テスト
+
+- 14 件追加 (`tests/test_llive_dispatch.py`):
+  - dispatch routing 5 件 (全 event 種 / 全 viewer なし / 部分 viewer /
+    未知 event_type / 空 events)
+  - status_line 3 件 (no events / non-zero buckets / unrouted)
+  - driver 4 件 (fetch+dispatch / client error 併記 /
+    limit+node_id 受け渡し / repeated poll dedup)
+  - total_added プロパティ 2 件
+- フルスイート **716 PASS + 1 skipped** (702 → +14)、ruff クリーン、回帰ゼロ
+
+### 設計判断
+
+- **時間軸を driver から分離**: Textual の `Timer` 周期はアプリ層で決める。
+  driver は「1 回呼ぶと 1 round 処理する」だけ。これで:
+  - 単体テストで時間軸を制御する必要なし (テスト 14 件全部同期)
+  - CLI から手動 `python -c "...; driver.poll_once()"` で動作確認可能
+  - 周期 polling の頻度や jitter は別実装 (将来 SSE/WebSocket 切替)
+- **observability を struct で返す**: 「何件追加した / 何件落とした」を
+  `DispatchResult` で返すことで、status bar / log / metric 出力に流せる。
+  void 戻り値だと UI 側で別途数えなければならない
+- **viewer optional の意義**: ユーザは「BWT だけ見たい」「trace + link
+  だけ並べたい」など自由に選べる。「3 viewer 全部必須」だと表示画面の
+  柔軟性が失われる
+- **F25 (e) に挿入**: 元の (e)=ingest endpoint は (f) に繰り下げ。
+  letter 順序は a/b/c/d 完了 → e は viewer 統合層、f/g/h は別リポジトリ
+  作業、i は v2 候補。実装順序と並ぶ自然な並び
+
+### F25 全体の進捗 (更新)
+
+| Phase | 内容 | 状態 |
+|---|---|---|
+| 0 | 設計凍結 | ✅ |
+| a | MCP client | ✅ |
+| b | BWTDashboard | ✅ |
+| c | RouteTraceViewer | ✅ |
+| d | MemoryLinkVizPanel | ✅ |
+| **e** | **Dispatch + Driver** | **✅ 2026-05-14** |
+| f | llmesh /timeline/ingest | ⏳ 別リポジトリ |
+| g | llive writer 補完 | ⏳ 別リポジトリ |
+| h | E2E 統合検証 | ⏳ |
+| i | SSE / WebSocket push | ⏳ v2 |
+
+llove 単体での「インフラ整備」は **完全に整った** — Phase f が立てば
+即座に Phase h (E2E) に進める状態。
+
+### 次セッションで着手する候補 (重要度順)
+
+1. **llmesh `/timeline/ingest`** (別リポジトリ) — Phase f
+2. **llove demo に F25 シナリオ追加** — `make_mock_*_events` を 3 viewer
+   に流す `llove demo --scenario llive` の追加。実 llmesh 接続無しで動く
+3. **llive writer 補完** (別リポジトリ) — Phase g
+4. **既存テストの ruff cleanup** — `tests/test_browser.py` 等の残課題
+
+---
+
 ## 2026-05-14 (続き 6) — F25 (c/d) RouteTraceViewer + MemoryLinkVizPanel
 
 ### 完成したもの
