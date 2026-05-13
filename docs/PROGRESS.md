@@ -6,6 +6,72 @@
 
 ---
 
+## 2026-05-14 (続き 2) — F15 (t2/t3) Graphviz dot → SVG → 画像チェイン + folding 識別
+
+### 完成したもの
+
+`llove/views/dot_render.py` を新設し、folding.py の 3 箇所と markdown_view.py
+の 1 箇所を同時に更新。これで ` ```dot ... ``` ` / ` ```graphviz ... ``` `
+フェンス → 画像化までフルパイプラインが繋がる。PlantUML 系より「dot CLI が
+mmdc に近い shape (`-o` で出力ファイル名直接指定可)」のため実装はむしろ
+mermaid_render に近い。
+
+- **`dot_render.py`** (renderer 本体):
+  - `DotRender` (kind/argv/svg_path/ascii_text/image_tool) は
+    `DiagramRenderResult` Protocol を満たす (mermaid/svg/plantuml と同等)。
+  - `dot -Tsvg -o output.svg input.dot` で SVG 化 → image catalog 経由で
+    chafa / viu / timg / kitty / wezterm へ。
+  - fail-closed (dot/chafa 何れか欠如 → ASCII fallback)、subprocess は
+    list-based argv のみ + temp `.dot` 書き出し。
+- **`folding.py`** (識別レイヤ):
+  - `find_code_block_regions`: ` ```dot ` / ` ```graphviz ` を
+    `kind="dot"` にリラベル (graphviz は alias)。
+  - `_summary_line`: ``▶ ◇ dot: <label> (N lines)``。
+  - `_preset_prose` に "dot" 追加 (図全般を `prose` で畳む)。
+- **`markdown_view.py`** (動詞層): `make_markdown_fold_hook` valid kind
+  に "dot" 追加 → `:fold by-tag dot` 動作。
+
+### テスト
+
+- 24 件追加:
+  - `tests/test_dot_render.py` 16 件 (検出 4 + render_to_svg 5 +
+    ASCII fallback 2 + 統合 5)
+  - `tests/test_folding_dot.py` 8 件 (fence 識別 / case-insensitive /
+    graphviz alias 正規化 / 他 diagram kind との共存 / close_by_kind /
+    summary marker / prose preset / 動詞ルーティング)
+- フルスイート **576 PASS + 1 skipped** (552 → +24)、ruff クリーン、回帰ゼロ。
+
+### 設計メモ (将来参照)
+
+- info-string の正規化を導入したのは初めて (`graphviz` → `dot`)。理由は
+  Graphviz の info-string が現実には ``dot`` と ``graphviz`` の両方が
+  使われていて、別 kind にしてしまうと renderer/preset/hook の 4 箇所すべて
+  で分岐を増やすことになる。**正規化** を入れて kind は "dot" 1 つに
+  集約する方が遥かに保守容易。label は元の info-string を保持する。
+- 次の renderer (ditaa / blockdiag / svgbob 等) でも同じ shape の量産が
+  できる。3 renderer 出揃った段階で「kind マッピングテーブル」「diamond
+  marker 規約」「fail-closed 規約」を抽象化するリファクタを検討する。
+  早すぎる抽象化は柔軟性を奪うので、もう少し具体例を積んでから。
+- 「renderer / 識別 / 動詞層」を 1 commit にまとめたのは、3 つ揃わないと
+  ユーザ視点で何も動かないため。````dot ` を書いても renderer 未登録なら
+  ASCII、folding 識別が無ければ畳めない、valid kind に無ければ
+  `:fold by-tag dot` できない。価値が出る最小ユニット = 3 ファイル組。
+
+### 次セッションで着手する候補 (重要度順)
+
+1. **ditaa / blockdiag / svgbob などの追加 renderer** — 4 つ目以降で
+   いよいよ抽象化を検討。
+2. **MarkdownView デモで `diagram_renderers` 全部入りの確認** —
+   `llove demo` の F15 シナリオで mermaid + svg + plantuml + dot の
+   4 種を同じ画面に出す。
+3. **実 plantuml / dot / chafa での E2E 検証** — dev 環境で
+   `llove demo` 経由で動作確認 (CI ではスキップ、binary 依存)。
+4. **キーバインド (Vim/VSCode)** — `za` / `zM` / `zR` / `Ctrl+Shift+[`。
+5. **JSON ツリービュー / ログペイン fold** — folding.py の純粋関数を
+   別ビューに展開。
+
+---
+
 ## 2026-05-14 (続き) — F15 (t2/t3) folding.py で PlantUML 識別 + prose preset 連携
 
 ### 完成したもの
