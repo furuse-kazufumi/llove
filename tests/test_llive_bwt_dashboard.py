@@ -225,7 +225,8 @@ def test_widget_starts_empty() -> None:
 
 def test_widget_feed_events_ingests_bwt_only() -> None:
     w = BWTDashboard()
-    events = make_mock_bwt_events(n=3) + [
+    events = [
+        *make_mock_bwt_events(n=3),
         TimelineEvent(
             event_id="other",
             task_id="t",
@@ -233,7 +234,7 @@ def test_widget_feed_events_ingests_bwt_only() -> None:
             event_type="route_trace",
             timestamp_utc="x",
             metadata={},
-        )
+        ),
     ]
     added = w.feed_events(events)
     assert added == 3
