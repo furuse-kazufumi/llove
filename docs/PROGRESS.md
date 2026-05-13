@@ -6,6 +6,86 @@
 
 ---
 
+## 2026-05-14 (続き 4) — F15 (t2/t3) diagram kind registry 抽象化リファクタ
+
+### 完成したもの
+
+5 種の diagram renderer (mermaid / svg / plantuml / dot / svgbob) を追加
+した結果、kind 情報が 4 箇所に分散してしまったので、新規モジュール
+`llove/views/diagram_kinds.py` に集約。これで「6 種目を追加する」コストが
+renderer 本体作成 + registry 1 行 + MarkdownView 登録だけになる。
+
+### 抽象化のターゲット (リファクタ前)
+
+```
+folding.find_code_block_regions:   if/elif で info-string → kind を 5 種分岐
+folding._summary_line:             if region.kind == ... を 5 種分岐
+folding._preset_prose:             ("code", "table", "mermaid", "svg",
+                                    "plantuml", "dot", "svgbob") の長 tuple
+markdown_view.make_markdown_fold_hook valid set:  上と同じ 5 種を再列挙
+```
+
+### 集約後のレジストリ API
+
+- `DIAGRAM_KIND_NAMES`: `frozenset[str]` (頻繁にメンバーシップ判定するため)
+- `DIAGRAM_KINDS`: `tuple[DiagramKind, ...]` (順序保持で alias → canonical の
+  正規化方向を明示)
+- `normalise_info_string(info_lower) -> str | None`: 'graphviz' → 'dot',
+  'bob' → 'svgbob' 等。非 diagram は None
+- `diagram_summary_marker(kind, label, hidden) -> str | None`:
+  `▶ ◇ <kind>: <label> (N lines)` の共通フォーマット
+
+### 折り返しの構造変更
+
+- `folding.py` で `_PROSE_FOLD_KINDS = frozenset({"code", "table"}) |
+  DIAGRAM_KIND_NAMES` を導入し、`_preset_prose` は単一の `in` 判定に。
+- `find_code_block_regions` の if/elif 5 段ハシゴ → `normalise_info_string`
+  1 呼び出し + ternary。
+- `_summary_line` の if/return 5 段ハシゴ → `diagram_summary_marker` 1 呼び出し。
+- `markdown_view.py` の valid set は `{"heading", "code", "table"} |
+  DIAGRAM_KIND_NAMES` の union 表現に。
+
+### テスト
+
+- 11 件追加 (`tests/test_diagram_kinds.py`):
+  - registry 形状: 5 種が揃う / DIAGRAM_KINDS は tuple / DiagramKind は frozen
+  - `normalise_info_string`: canonical / alias / non-diagram / case-sensitive
+  - `diagram_summary_marker`: 5 種それぞれの完全一致 / non-diagram → None
+  - 統合: 全 diagram kind ループで find_code_block_regions /
+    apply_folds summary / prose preset が正しく動く回帰防止
+- フルスイート **611 PASS + 1 skipped** (600 → +11)、ruff クリーン。
+- **既存の 53 件の folding テスト (mermaid/svg/plantuml/dot/svgbob)** は
+  リファクタ後も無修正で全 PASS = 「内部実装置換のみで外部動作不変」を
+  担保 (リファクタの黄金律をテストレベルで遵守)。
+
+### 設計判断
+
+- `summary_marker` を kind 毎に保持しなかった理由: 現状 5 種全部が
+  `▶ ◇ <kind>: <label> (N lines)` の同形式で、kind 名そのものを差し込む
+  だけで足りる。将来 kind 別にカスタム marker (例: `▶ 🌳 mermaid: ...`) を
+  使いたくなったら `DiagramKind` に `summary_marker` 属性を増やせばよい
+  (single point of change)。
+- `aliases` を set でなく tuple にした理由: 「graphviz は dot に統一」の
+  ような正規化方向を明示するため。set だと方向情報が消える。
+- ruff の SIM108 提案を受けて ternary に統一。可読性とのトレードオフだが、
+  ruff の推奨に従う。
+- 「3 種類以上のシェイプの差」が見えたら抽象化、というポリシーから、
+  5 種揃ったこのタイミングが妥当。早すぎる抽象化を避けつつ、痛みが出る前に
+  集約できた。
+
+### 次セッションで着手する候補 (重要度順)
+
+1. **MarkdownView デモ統合** — `llove demo` で 5 種類同時表示シナリオを
+   1 つ追加 (registry の効果を「絵」で見せる)。
+2. **ditaa / blockdiag / nomnoml 追加** — registry に 1 行 + renderer 本体
+   作成のみで完了することを実証する PR 1〜2 本。
+3. **実 binary E2E** — dev 環境で `llove demo` 経由で動作確認。
+4. **キーバインド (Vim/VSCode)** — `za` / `zM` / `zR` / `Ctrl+Shift+[`。
+5. **JSON ツリービュー / ログペイン fold** — folding.py の純粋関数を
+   別ビューに展開。
+
+---
+
 ## 2026-05-14 (続き 3) — F15 (t2/t3) svgbob → SVG → 画像チェイン + folding 識別
 
 ### 完成したもの
