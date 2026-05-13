@@ -49,8 +49,17 @@ class DispatchResult:
         return self.bwt_added + self.trace_added + self.link_added
 
     def status_line(self) -> str:
-        """ステータスバー向けの 1 行サマリ."""
-        if self.total_added == 0 and self.unknown == 0:
+        """ステータスバー向けの 1 行サマリ.
+
+        ``unrouted`` (既知 event_type だが viewer=None) や ``unknown``
+        (未知 event_type) も 0 以外なら events は届いているので、
+        "no new events" は **全カウンタが 0 のときだけ**返す。
+        """
+        if (
+            self.total_added == 0
+            and self.unrouted == 0
+            and self.unknown == 0
+        ):
             return "no new events"
         parts: list[str] = []
         if self.bwt_added:
