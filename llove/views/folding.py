@@ -363,21 +363,12 @@ def _summary_line(region: FoldRegion, hidden: int) -> str:
         return f"▶ {hashes} {region.label} ({hidden} lines)"
     if region.kind == "code":
         return f"▶ ```{region.label} ({hidden} lines)"
-    if region.kind == "mermaid":
-        # Diamond marker hints visually that this is a diagram, not code.
-        return f"▶ ◇ mermaid: {region.label} ({hidden} lines)"
-    if region.kind == "svg":
-        # Same diamond marker — SVG is also a diagram, not arbitrary code.
-        return f"▶ ◇ svg: {region.label} ({hidden} lines)"
-    if region.kind == "plantuml":
-        # Same diamond marker — PlantUML diagrams render via plantuml CLI.
-        return f"▶ ◇ plantuml: {region.label} ({hidden} lines)"
-    if region.kind == "dot":
-        # Same diamond marker — Graphviz dot diagrams render via dot CLI.
-        return f"▶ ◇ dot: {region.label} ({hidden} lines)"
-    if region.kind == "svgbob":
-        # Same diamond marker — svgbob ASCII art → SVG via svgbob CLI.
-        return f"▶ ◇ svgbob: {region.label} ({hidden} lines)"
+    # Diagram blocks all share the same ▶ ◇ <kind>: <label> (N lines)
+    # marker; the per-kind format lives in diagram_kinds.py so this branch
+    # collapses to a single dispatch.
+    diagram_summary = diagram_summary_marker(region.kind, region.label, hidden)
+    if diagram_summary is not None:
+        return diagram_summary
     if region.kind == "table":
         # Tables count rows rather than lines; "rows" reads more naturally
         # for a table fold, even though both are line counts internally.
