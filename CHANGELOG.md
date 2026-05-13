@@ -5,6 +5,39 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — F25 (e) Dispatch helper + TimelinePollDriver (2026-05-14)
+
+3 viewer (BWTDashboard / RouteTraceViewer / MemoryLinkVizPanel) への
+event 振り分けと、周期 polling 駆動を 1 ヶ所にまとめた小さな
+オーケストレータ。これで「`llove demo --scenario llive`」のような
+シナリオが書ける状態に。
+
+- **新モジュール** `llove/views/llive/dispatch.py`:
+  - `KNOWN_EVENT_TYPES`: `{bwt_summary, route_trace, concept_update}`
+  - `DispatchResult` dataclass (frozen): `bwt_added` / `trace_added` /
+    `link_added` / `unrouted` / `unknown`. `total_added` プロパティ +
+    `status_line()` でステータスバー向け文字列を生成
+  - `dispatch_events(events, *, bwt=None, trace=None, link=None)`:
+    純粋関数。`event_type` で振り分けて各 viewer の `feed_events` を
+    呼ぶだけ。viewer は optional (None なら該当 event_type は unrouted
+    にカウント)
+  - `TimelinePollDriver`: `TimelineClient.fetch_recent` 1 回 →
+    `dispatch_events` の薄い周回器。`poll_once()` メソッドのみで、
+    polling 周期は持たない (Textual `Timer` から呼ぶ前提)。
+    `last_result` / `status_line()` で観測性を提供 (client の
+    `last_error` も併記)
+- **`llove/views/llive/__init__.py`** に
+  `DispatchResult` / `TimelinePollDriver` / `dispatch_events` を re-export
+- **テスト 14 件追加** (`tests/test_llive_dispatch.py`):
+  全 event 種ルーティング / viewer なしの unrouted / 部分 viewer /
+  未知 event_type の unknown / 空 events / status_line 3 種 /
+  driver poll_once 3 ケース (fetch+dispatch / client error 併記 /
+  limit+node_id パラメータ受け渡し) / driver の repeated poll dedup /
+  total_added プロパティ。
+- フルスイート **716 PASS + 1 skipped** (702 → +14)、ruff クリーン、回帰ゼロ。
+- これで F25 Phase 0/1/2/5a/5b/5c (dispatch + driver) が完結。残るは
+  Phase 3 (llmesh ingest) / Phase 4 (llive writer) / Phase 6 (E2E)。
+
 ### Added — F25 (c/d) RouteTraceViewer + MemoryLinkVizPanel (2026-05-14)
 
 llive 3 種データに対する viewer を全て揃え、`llove/views/llive/`
