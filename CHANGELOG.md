@@ -5,6 +5,31 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — F15 (t2/t3) Graphviz dot → SVG → 画像チェイン + folding 識別 (2026-05-14)
+
+- **新モジュール** `llove/views/dot_render.py`: `mermaid_render` /
+  `svg_render` / `plantuml_render` と並行する構造。`DotRender`
+  (kind/argv/svg_path/ascii_text/image_tool) は既存 `DiagramRenderResult`
+  Protocol を満たすので、`ImageRenderPane` / `MarkdownView` の
+  `diagram_renderers={"dot": render_dot}` の 1 行で組み込める。
+- **チェイン**: `dot -Tsvg -o output.svg input.dot` → image catalog 経由で
+  chafa / viu / timg / kitty / wezterm の最優先ツールで描画。
+- **dot CLI shape**: mmdc に近く ``-o`` で出力ファイル名を直接指定可
+  (plantuml と違って自由に命名できる)。実装は mermaid_render に近い形。
+- **folding.py**: ` ```dot ` / ` ```graphviz ` フェンスを ``kind="dot"`` に
+  リラベル (graphviz は alias、normalise して "dot" に統一)。
+  `_summary_line` ``▶ ◇ dot: <label> (N lines)``。
+  `_preset_prose` に "dot" 追加 (図全般を `prose` で畳む)。
+- **`make_markdown_fold_hook` valid kind** に "dot" 追加。
+  `:fold by-tag dot` が動作。
+- **テスト 24 件追加**:
+  - `tests/test_dot_render.py` 16 件 (検出 4 + render_to_svg 5 +
+    ASCII fallback 2 + 統合 5)
+  - `tests/test_folding_dot.py` 8 件 (fence 識別 / case-insensitive /
+    graphviz alias / 他 diagram kind との共存 / close_by_kind /
+    summary marker / prose preset / `:fold by-tag dot` 動詞ルーティング)
+- フルスイート **576 PASS + 1 skipped** (552 → +24)、ruff クリーン、回帰ゼロ。
+
 ### Changed — F15 (t2/t3) folding.py で PlantUML フェンス識別 (2026-05-14)
 
 - **`find_code_block_regions`**: ` ```plantuml ... ``` ` を ``kind="plantuml"``
