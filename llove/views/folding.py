@@ -285,10 +285,7 @@ def find_code_block_regions(source: str) -> list[FoldRegion]:
         info_label = info.strip()
         info_lower = info_label.lower()
         diagram_kind = normalise_info_string(info_lower)
-        if diagram_kind is not None:
-            kind = diagram_kind
-        else:
-            kind = "code"
+        kind = diagram_kind if diagram_kind is not None else "code"
         regions.append(
             FoldRegion(
                 kind=kind,
