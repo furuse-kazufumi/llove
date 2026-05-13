@@ -603,10 +603,16 @@ LSP/lint/シンタックスハイライト + Notebook 風セル UI + Command Pal
       `BWTRun` 防御的パース、sparkline + per-task drop ASCII bar、
       `event_id` dedup ingest、`make_mock_bwt_events` fixture。**完了
       2026-05-14** (テスト 25 件)
-- [ ] **F25 (c) RouteTraceViewer** — `event_type="route_trace"` を消費。
-      subblock duration breakdown + memory access trace (folding 連携)
-- [ ] **F25 (d) MemoryLinkVizPanel** — `event_type="concept_update"` を
-      消費。concept graph (ASCII tree) + surprise 統計
+- [x] **F25 (c) RouteTraceViewer** — `event_type="route_trace"` を消費。
+      `SubBlock` / `MemoryAccess` / `RouteTrace` dataclass + 防御的パース、
+      ▓░ subblock duration breakdown + memory access (read=hits 数+最大
+      スコア / write=surprise) の TUI 表示。**完了 2026-05-14**
+      (テスト 26 件、`make_mock_route_trace_events` fixture 付き)
+- [x] **F25 (d) MemoryLinkVizPanel** — `event_type="concept_update"` を
+      消費。`concept_id` 単位で latest を保持し、時系列逆順受信でも最新を
+      上書きしない順序保証 + concept_id linked card 表示 + surprise μ/n
+      summary 短縮。**完了 2026-05-14** (テスト 22 件、
+      `make_mock_concept_events` fixture 付き、リンクのグラフトポロジ含む)
 - [ ] **F25 (e) llmesh `/timeline/ingest` endpoint** (別リポジトリ作業) —
       llmesh 本体に external ingest 経路を追加。schema validator + tests。
       既存 auth / rate limit を継承
