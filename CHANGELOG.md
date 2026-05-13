@@ -5,6 +5,26 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Changed — F15 (t2/t3) folding.py で PlantUML フェンス識別 (2026-05-14)
+
+- **`find_code_block_regions`**: ` ```plantuml ... ``` ` を ``kind="plantuml"``
+  にリラベル (mermaid / svg と同じ pattern)。case-insensitive
+  (`PlantUML` も同じ kind)。
+- **`_summary_line`**: ``▶ ◇ plantuml: <label> (N lines)`` を追加。
+  mermaid / svg と同じ diamond marker で diagram と分かる表示。
+- **`_preset_prose`**: ``("code", "table", "mermaid", "svg", "plantuml")``
+  に拡張。`:fold preset prose` で plantuml 図も畳まれる (図全般)。
+- **`make_markdown_fold_hook` の valid kind** (`markdown_view.py`):
+  `{"heading", "code", "table", "mermaid", "svg", "plantuml"}` に拡張。
+  `:fold by-tag plantuml` が動作 (hook 未設定なら audit warn)。
+- **テスト 7 件追加** (`tests/test_folding_plantuml.py`):
+  fence 識別 / case-insensitive / 他 kind との共存 / close_by_kind /
+  summary marker / prose preset / `:fold by-tag plantuml` 動詞ルーティング。
+- フルスイート **552 PASS + 1 skipped** (545 → +7)、ruff クリーン、回帰ゼロ。
+- これで PlantUML → 画像化のパイプラインが folding 識別 → renderer 実行
+  まで全段つながった。MarkdownView の `diagram_renderers=
+  {"plantuml": render_plantuml}` を渡せば即動作する。
+
 ### Added — F15 (t2/t3) PlantUML → SVG → 画像チェイン基盤 (2026-05-14)
 
 - **新モジュール** `llove/views/plantuml_render.py`: `mermaid_render` /
