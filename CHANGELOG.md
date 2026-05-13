@@ -5,6 +5,49 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — F25 (a/b) llove ↔ llmesh ↔ llive 連携インフラ (2026-05-14)
+
+llmesh の既存 MCP サーバー (`TimelineStore`) を中継 hub として、llive の
+観測データ (bwt_summary / route_trace / concept_update) を llove TUI に
+流す連携設計を確定 + 消費側 (llove) を mock 駆動で先行実装。
+
+- **設計仕様凍結** (`docs/llove_llive_bridge.md`): B 案採用 — llmesh に
+  ingest endpoint 1 つだけ追加し、既存 `TimelineStore` と既存 GET
+  endpoints (`/timeline/recent` / `/timeline/task/{task_id}`) を流用。
+  llove は llive を直接 import せず、llmesh HTTP API のみに依存する単方向
+  依存。`node_id` (例: `llive-instance-1`) で複数ソースを分離可能。
+  実装フェーズ表 (Phase 0〜6) を文書化、3 リポジトリ並行可能な設計。
+- **新パッケージ `llove/mcp/`** (`llove/mcp/__init__.py` + `client.py`):
+  `TimelineClient` (read-only HTTP client), `TimelineEvent` / `TaskTimeline`
+  dataclass, `UrllibTransport` (stdlib のみ、依存ゼロ), `MCPTransport`
+  Protocol (DI でテスト用 fake を差し込み可能), `make_fake_transport`
+  helper。fail-closed (HTTP / JSON / connection エラー全てで例外を投げず
+  空 list + `last_error` 文字列を返す)。同期 API で Textual の worker
+  thread から呼ぶ前提。`event_type` の client-side フィルタは forward-
+  compat (server が後に server-side filter を実装しても切替不要)。
+- **新パッケージ `llove/views/llive/`** (`bwt_dashboard.py`):
+  - `BWTRun` dataclass (`from_event(TimelineEvent)` で防御的パース、不正
+    な metadata はスキップして UI を壊さない)
+  - `render_sparkline` / `render_per_task_drop` / `render_dashboard` の
+    pure 関数群 (UI 非依存、テスト容易)
+  - `BWTDashboard(Static, View)` widget: `feed_events(events)` で
+    `event_id` dedup しながら累積、`run_count` / `latest` で照会、
+    `border_subtitle` に runs 数を自動更新
+  - `make_mock_bwt_events(n)` fixture: 実 llmesh / llive 接続が無い CI /
+    デモでも dashboard を駆動できる合成 event 生成器
+- **テスト 43 件追加**:
+  - `tests/test_mcp_client.py` 18 件 (URL 組立 / query string / headers /
+    response parsing / lenient parser / HTTP error / JSON parse error /
+    connection error / unexpected type / dedup / fetch_task / 404 /
+    default transport)
+  - `tests/test_llive_bwt_dashboard.py` 25 件 (BWTRun parse 7 種 /
+    sparkline 3 種 / per_task_drop 4 種 / render_dashboard 4 種 / widget
+    API 6 種 / mock fixture sanity 2 種)
+- フルスイート **654 PASS + 1 skipped** (611 → +43)、ruff クリーン、回帰ゼロ。
+- 次フェーズ: (Phase 3) llmesh `/timeline/ingest` endpoint 追加 ←別セッション、
+  (Phase 4) llive writer 補完 ←別セッション、(Phase 5) `RouteTraceViewer` /
+  `MemoryLinkVizPanel` 追加。Phase 1〜2 は完結 (mock 駆動で動作)。
+
 ### Changed — F15 (t2/t3) diagram kind registry に集約リファクタ (2026-05-14)
 
 - **新モジュール** `llove/views/diagram_kinds.py` を新設し、これまで
