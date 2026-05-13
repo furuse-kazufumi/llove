@@ -29,6 +29,12 @@ import re
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 
+from llove.views.diagram_kinds import (
+    DIAGRAM_KIND_NAMES,
+    diagram_summary_marker,
+    normalise_info_string,
+)
+
 # Compile once. ATX-only for v1 — Setext (`Title\n===`) can come later if a
 # scenario actually needs it; pinning ATX keeps the surface predictable.
 _RE_ATX_HEADING = re.compile(r"^(?P<hashes>#{1,6})\s+(?P<label>.+?)\s*#*\s*$")
