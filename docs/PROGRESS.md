@@ -6,6 +6,68 @@
 
 ---
 
+## 2026-05-14 (続き 3) — F15 (t2/t3) svgbob → SVG → 画像チェイン + folding 識別
+
+### 完成したもの
+
+`llove/views/svgbob_render.py` を新設し、folding.py / markdown_view.py を
+同パターンで拡張。これで diagram renderer は **5 種類** (mermaid / svg /
+plantuml / dot / svgbob) が同一 `DiagramRenderResult` Protocol で揃った。
+MarkdownView に 1 つの dict を渡すだけで全サポートが有効化される拡張点を
+実証。
+
+- **`svgbob_render.py`** (renderer 本体):
+  - `SvgbobRender` は他 4 種と同じ Protocol shape。
+  - `svgbob input.bob -o output.svg` (dot CLI と同じ shape)。
+  - svgbob は Rust 製で、ASCII art (罫線・矢印・箱) を SVG に変換する珍しい
+    ツール。Markdown コードドキュメント (rust-lang / bevy / servo 等) で
+    よく使われる。DSL ではなく「絵をそのまま書ける」のが mermaid/dot/
+    plantuml との違い。
+- **`folding.py`** (識別レイヤ):
+  - ` ```svgbob ` / ` ```bob ` (短縮 alias) を `kind="svgbob"` に正規化。
+  - `_summary_line`: ``▶ ◇ svgbob: <label> (N lines)``。
+  - `_preset_prose` に "svgbob" 追加 (図全般)。
+- **`markdown_view.py`**: valid kind に "svgbob" 追加 → `:fold by-tag svgbob`。
+
+### テスト
+
+- 24 件追加:
+  - `tests/test_svgbob_render.py` 16 件 (検出 4 + render_to_svg 5 +
+    ASCII fallback 2 + 統合 5)
+  - `tests/test_folding_svgbob.py` 8 件
+- フルスイート **600 PASS + 1 skipped** (576 → +24)、ruff クリーン、回帰ゼロ。
+
+### 設計メモ (将来参照)
+
+- 同一 commit で 5 つ目の renderer を追加。**抽象化の機運が完全に整った**
+  状態。次の 6 つ目 (ditaa / blockdiag / nomnoml いずれか) に進む前に、
+  以下を 1 つのテーブルにまとめるリファクタを検討すべき:
+  - info-string → kind の正規化 (e.g. graphviz→dot, bob→svgbob)
+  - kind → renderer 関数 のデフォルト dispatch
+  - kind → summary marker (diamond/code 文字列)
+  - prose preset の対象 kind 集合
+  - `make_markdown_fold_hook` valid kind 集合
+- 現在は 4 ヶ所 (`find_code_block_regions` / `_summary_line` /
+  `_preset_prose` / valid kind set) に分散。1 ヶ所に集約すれば
+  「diagram_kind に新規 kind を 1 行追加するだけ」で renderer 追加が
+  完結する。
+- ただし抽象化の前に、ditaa の調査 (java + jar が必要なケース) と nomnoml
+  の調査 (node + npx が必要、最終出力が SVG ではなく PNG/HTML のケース)
+  をやらないと、抽象化の interface 設計が片寄る可能性がある。**抽象化は
+  「3 種類以上のシェイプの差」が見えてから** に倒す方が良い。
+
+### 次セッションで着手する候補 (重要度順)
+
+1. **kind マッピング抽象化リファクタ** — 4 ヶ所分散している現状を 1 ヶ所
+   集約。新 renderer 追加コストを 1 ファイル + 1 dict 行に下げる。
+2. **MarkdownView デモ統合** — `llove demo` で 5 種類 (mermaid / svg /
+   plantuml / dot / svgbob) を 1 つの文書に同時表示するデモ追加。
+3. **ditaa / blockdiag / nomnoml の追加** — 抽象化後にやるとシンプル。
+4. **実 binary E2E** — dev 環境で `llove demo` 経由で動作確認。
+5. **キーバインド (Vim/VSCode)** — `za` / `zM` / `zR` / `Ctrl+Shift+[`。
+
+---
+
 ## 2026-05-14 (続き 2) — F15 (t2/t3) Graphviz dot → SVG → 画像チェイン + folding 識別
 
 ### 完成したもの
