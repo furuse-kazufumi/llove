@@ -133,9 +133,10 @@ def _preset_data_only(kind: str, level: int) -> bool:
 
 
 def _preset_prose(kind: str, level: int) -> bool:
-    # Reading mode: collapse code, tables, and diagrams (mermaid / svg);
-    # leave headings (and any future "prose-friendly" kinds) open.
-    return kind in ("code", "table", "mermaid", "svg")
+    # Reading mode: collapse code, tables, and diagrams
+    # (mermaid / svg / plantuml); leave headings (and any future
+    # "prose-friendly" kinds) open.
+    return kind in ("code", "table", "mermaid", "svg", "plantuml")
 
 
 _FOLD_PRESETS = {
