@@ -6,6 +6,111 @@
 
 ---
 
+## 2026-05-14 (続き 5) — F25 (a/b) llove ↔ llmesh ↔ llive 連携インフラ整備
+
+### 背景
+
+ユーザ要望: 「llmesh が MCP として仲介して llive と llove が連携する形」。
+llive は別途大規模開発中なので、いまは **将来繋ぐためのインフラ整備**
+だけ進める方針。llove 側のインフラを mock 駆動で先行実装する。
+
+### 確定した設計
+
+`docs/llove_llive_bridge.md` v1 で凍結。要点:
+
+```
+[llive process]  ─POST /timeline/ingest─►  [llmesh MCP server]  ◄─GET /timeline/recent─  [llove TUI]
+                                              │ TimelineStore (既存)
+                                              └─ event_type で分離 (bwt_summary /
+                                                 route_trace / concept_update)
+```
+
+**B 案** (既存 router 流用 + ingest endpoint 1 個だけ追加) を採用。理由:
+
+- llmesh 既存 `TimelineStore` の (task_id, node_id, event_type, metadata)
+  五つ組が llive 3 種データに完全フィット
+- 新 router を作らないので llmesh 本体への侵襲が最小
+- llove は llmesh HTTP API のみに依存 → llive を import せず単方向依存
+- `node_id` (`"llive-instance-1"` 等) で複数ソース分離 → 将来 MQTT/SPC 等
+  も同じ pipeline で集約可能
+
+### 完成したもの (Phase 0/1/2)
+
+1. **設計凍結** (`docs/llove_llive_bridge.md`):
+   - アーキテクチャ図 / TimelineEvent 三種マッピング表 / `/timeline/ingest`
+     endpoint 仕様 / llove API 設計 / 実装フェーズ表
+   - 「将来繋ぐためのインフラ整備」として位置付けを明文化
+
+2. **MCP client** (`llove/mcp/__init__.py` + `client.py` + 18 tests):
+   - `TimelineClient` (read-only, sync) — `fetch_recent` /
+     `fetch_task(task_id)`
+   - `TimelineEvent` / `TaskTimeline` dataclass — lenient parser で
+     forward-compat (新規 field は無視、missing optional は default)
+   - `UrllibTransport` (stdlib のみ、依存ゼロ) +
+     `MCPTransport` Protocol (DI で fake 注入可)
+   - fail-closed: HTTP / JSON / connection エラー全てで例外を投げず
+     空 list + `last_error` 文字列
+   - client-side `event_type` filter (server-side filter 未実装に対応、
+     server が後に実装しても透過)
+   - `make_fake_transport` helper でテスト容易化
+
+3. **BWTDashboard** (`llove/views/llive/__init__.py` + `bwt_dashboard.py`
+   + 25 tests):
+   - Pure render 関数群 (`render_sparkline` / `render_per_task_drop` /
+     `render_dashboard`) — UI 非依存、テスト容易
+   - `BWTRun.from_event(TimelineEvent)` — 防御的パース、不正 metadata は
+     スキップ (`bwt` が文字列 / `per_task_drop` が list / etc.)
+   - `BWTDashboard(Static, View)` widget:
+     - `feed_events(events)` で event_id dedup 累積
+     - `border_subtitle` に runs 数自動更新
+     - `clear()` / `run_count()` / `latest()` API
+   - `make_mock_bwt_events(n=5)` fixture: 実 llmesh / llive 無しで CI も
+     `llove demo` も走らせられる
+
+### テスト
+
+- 43 件追加 (MCP client 18 + BWTDashboard 25)
+- フルスイート **654 PASS + 1 skipped** (611 → +43)、ruff クリーン、回帰ゼロ
+- 全テストが **外部 HTTP / 実 llmesh 接続なし** で完結 (transport DI + mock
+  fixture で完全独立)
+
+### 設計の効いた判断
+
+- **依存ゼロ**: httpx ではなく stdlib `urllib.request`。llove 全体の依存
+  グラフを増やさず、CI の冷スタートも維持
+- **Transport Protocol**: 「将来 httpx に切替」「テストで fake 注入」
+  「実機で MITM proxy」全部 1 つの Protocol を満たすクラスを差し替えれば
+  対応可。production code には 1 行も変更不要
+- **mock 駆動先行開発**: llmesh ingest endpoint も llive writer も無くて
+  も viewer は完成・テスト・デプロイできる。Phase 3-6 の **遅延が
+  llove 開発をブロックしない** (3 リポジトリ並行可能)
+- **`event_type` client-side filter**: server-side filter が実装されたら
+  自動で server-side に倒れる。並行進化に強い
+
+### 次セッションで着手する候補 (重要度順)
+
+1. **`RouteTraceViewer`** (`event_type="route_trace"`) — subblock duration
+   breakdown + memory access trace の folding 連携。既存 folding.py の
+   純粋関数を再利用できる
+2. **`MemoryLinkVizPanel`** (`event_type="concept_update"`) — concept
+   graph の ASCII tree + surprise 統計の sparkline
+3. **llmesh `/timeline/ingest` endpoint** (別リポジトリ作業) — Phase 3
+4. **llive writer 補完** (別リポジトリ作業) — Phase 4
+5. **E2E 統合検証** — 3 リポジトリ同時起動 (Phase 6)
+
+### 将来繋がる設計の検証
+
+「インフラ整備」と表現される作業の妥当性を以下で担保:
+
+- `TimelineEvent` schema は llive `bwt.py` の現状 JSONL と整合 (バージョン
+  field、metadata の構造一致)
+- llmesh 既存の `/timeline/recent` レスポンス形 (`{count, events: [...]}`)
+  に対する parser を実装し、サーバ実体に対する fixture 駆動テストも可
+- ingest endpoint が無くても `RouteTraceViewer` / `MemoryLinkVizPanel`
+  は同じ pipeline で実装可能 → llove 側だけで多くの作業を進められる
+
+---
+
 ## 2026-05-14 (続き 4) — F15 (t2/t3) diagram kind registry 抽象化リファクタ
 
 ### 完成したもの
