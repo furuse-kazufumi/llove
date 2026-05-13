@@ -6,6 +6,107 @@
 
 ---
 
+## 2026-05-14 (続き 6) — F25 (c/d) RouteTraceViewer + MemoryLinkVizPanel
+
+### 完成したもの
+
+llive 3 種データに対する viewer をすべて揃え、`llove/views/llive/`
+パッケージとして 3 種コンプリート。これで llmesh ingest endpoint が稼働
+した瞬間に 3 viewer すべてが実データを受けて動く準備が完了。
+
+**`route_trace_viewer.py`** (F25 c):
+
+- `SubBlock` / `MemoryAccess` / `RouteTrace` dataclass で metadata を
+  構造化。`RouteTrace.from_event` は subblock の type/duration 不正、
+  memory access の hits 不正、metrics 不正を全てスキップする防御的パース
+- Pure render 3 種:
+  - `render_subblock_bars`: 合計 ms に対する各 subblock の比率を ▓░ bar
+    で表示。zero-total fallback で 0 ms の subblock 群も crash しない
+  - `render_memory_access`: op=read は `hits=N best=score`、op=write は
+    `surprise=value`、その他 op (invalidate 等) も transparent に表示
+  - `render_trace`: container + Request + Subblocks + Memory access の
+    4 部構成
+- `RouteTraceViewer(Static, View)` widget: `feed_events` で event_id
+  dedup + history deque (max 100)、`latest()` で最新 trace、
+  `border_subtitle` に traces 数自動更新
+- `make_mock_route_trace_events(n=3)` fixture: 4 subblock (pre_norm /
+  memory_read / ffn_swiglu / memory_write) + read/write 2 種 memory access
+  を含むリアルな event。`llove demo` でそのまま使える
+
+**`memory_link_panel.py`** (F25 d):
+
+- `SurpriseStats` / `ConceptUpdate` dataclass。`ConceptUpdate.from_event`
+  は `concept_id` 必須 (空文字 / 欠落で拒否)、linked_*_ids が list でな
+  ければ空タプル、surprise_stats が壊れていれば SurpriseStats() デフォルト
+- Pure render 2 種:
+  - `render_concept_card`: ◆ title (page_type) + linked concepts +
+    surprise μ/n + summary 120 字短縮 (省略時 `...`)
+  - `render_concept_list`: latest 順 + max_items 超過時に `... and N more`
+- **`MemoryLinkVizPanel(Static, View)` widget** — ここが従来 viewer と
+  違う部分:
+  - **concept_id 単位で latest を保持** (BWTDashboard / RouteTraceViewer
+    は event_id 単位で全件保持なのと対照的)
+  - event の `timestamp_utc` で順序判定。同じ concept_id でも新しい
+    update が来たら上書き、古い update は無視
+  - `concepts_in_order()` は最新更新順 (insert(0, ...))
+  - **順序逆受信耐性**: timeline polling で順序が前後しても、tirme stamp
+    比較で正しい latest が残る
+- `make_mock_concept_events(n=4)` fixture: 6 種 concept (memory-
+  consolidation / surprise-gate / free-energy / predictive-coding /
+  hippocampal-replay / schema-update) の中から取り出し、隣接 concept に
+  リンクするグラフトポロジ
+
+### テスト
+
+- 48 件追加 (RouteTraceViewer 26 + MemoryLinkVizPanel 22)
+- フルスイート **702 PASS + 1 skipped** (654 → +48)、ruff クリーン、回帰ゼロ
+- MemoryLinkVizPanel の「順序逆受信でも latest が保たれる」(`test_widget_
+  older_update_does_not_overwrite_newer`) はサイレントな regression を
+  防ぐ重要なテスト。polling 順序を保証しない設計で唯一壊れやすい部分
+
+### 設計判断: concept_id 単位 vs event_id 単位
+
+- BWTDashboard / RouteTraceViewer は **時系列データ** (バックワード比較
+  には複数 run / 複数 request を見たい) なので event_id 単位で全件保持
+- MemoryLinkVizPanel は **コンセプト集合のスナップショット** (同じ
+  concept は更新されたら古いものは要らない) なので concept_id 単位の
+  latest 保持
+- この違いは「リテンション戦略 ≒ データ意味論」で決まる。3 viewer 全部
+  同じパターンで揃えると意味が崩れる
+- 将来 RouteTraceViewer も「同じ request_id (= task_id) でリトライされた
+  場合は最新を残す」ロジックを足したくなる可能性があるが、現状の llive
+  仕様では request_id は 1 回限りなので不要
+
+### F25 全体の進捗状況
+
+| Phase | 内容 | 状態 |
+|---|---|---|
+| 0 | 設計凍結 (docs/llove_llive_bridge.md) | ✅ 2026-05-14 |
+| 1 | MCP Timeline client | ✅ 2026-05-14 |
+| 2 | BWTDashboard | ✅ 2026-05-14 |
+| 3 | llmesh /timeline/ingest endpoint | ⏳ 別リポジトリ |
+| 4 | llive writer 補完 (route_trace / memory_link) | ⏳ 別リポジトリ |
+| 5a | RouteTraceViewer | ✅ 2026-05-14 |
+| 5b | MemoryLinkVizPanel | ✅ 2026-05-14 |
+| 6 | E2E 統合検証 | ⏳ 3 リポジトリ同時 |
+
+llove 側のインフラは **完全に整った**。Phase 3-4 (別リポジトリ作業) が
+完了した瞬間に Phase 6 (E2E) に進める状態。
+
+### 次セッションで着手する候補 (重要度順)
+
+1. **llmesh `/timeline/ingest` endpoint** (別リポジトリ作業) — Phase 3
+   - llmesh 本体に endpoint 1 個追加 + schema validator + tests
+   - 既存 auth middleware / rate limiter を継承
+2. **llive writer 補完** (別リポジトリ作業) — Phase 4
+   - route_trace / memory_link JSONL writer 実装
+   - optional な MCP push 経路 (LLIVE_MCP_INGEST_URL 環境変数)
+3. **llove demo に F25 シナリオ追加** — `make_mock_*_events` を使った
+   `llove demo --scenario llive` で 3 viewer を 1 つの画面に並べる
+4. **既存テストの ruff cleanup** — `tests/test_browser.py` 等の残課題
+
+---
+
 ## 2026-05-14 (続き 5) — F25 (a/b) llove ↔ llmesh ↔ llive 連携インフラ整備
 
 ### 背景
