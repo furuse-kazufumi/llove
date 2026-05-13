@@ -6,6 +6,69 @@
 
 ---
 
+## 2026-05-14 — F15 (t2/t3) PlantUML → SVG → 画像チェイン基盤
+
+### 完成したもの
+
+`llove/views/plantuml_render.py` を新設。`mermaid_render.py` /
+`svg_render.py` と並行する構造で、PlantUML DSL → temp `.puml` →
+`plantuml -tsvg input.puml` → 同ディレクトリ `<stem>.svg` → image catalog
+(chafa / viu / timg / kitty +kitten icat / wezterm imgcat) でターミナル
+描画。
+
+- `PlantUMLRender(kind/argv/svg_path/ascii_text/image_tool)` は既存
+  `DiagramRenderResult` Protocol (kind / argv / ascii_text) を満たすので、
+  `ImageRenderPane` / `MarkdownView` の
+  `diagram_renderers={"plantuml": render_plantuml}` の 1 行で組み込める。
+- 入力 `.puml` のステムを出力 `.svg` のステムに合わせて temp 書き出し →
+  plantuml の `-o` 仕様 (出力ファイル名を直接指定できず同ディレクトリの
+  `<stem>.svg` を作る) を吸収。
+- subprocess は list-based argv のみ (shell=True 禁止) + temp file 経由で
+  source を渡す (mermaid_render と同じ哲学)。
+- ASCII フォールバック (plantuml / chafa いずれか欠如時) は罫線で囲んで
+  source を全表示 (PlantUML は人間可読 DSL なので svg_render の 240 文字
+  抜粋とは違うアプローチ)。
+
+### テスト
+
+- 16 件 (`tests/test_plantuml_render.py`): 検出系 4 + render_to_svg 5 +
+  ASCII fallback 2 + 統合 5。pure 関数 + 依存性注入で plantuml/chafa
+  未インストール環境でもフルテスト可能。
+- フルスイート **545 PASS + 1 skipped** (前回 442 → +103 は Phase 6
+  explainability dashboard 38 件 + その他の積み増し)、ruff クリーン、
+  回帰ゼロ。
+
+### 次セッションで着手する候補 (重要度順)
+
+1. **folding.py で `kind="plantuml"` リラベル + prose preset + `:fold
+   by-tag plantuml`** — mermaid / svg と同じパターンを 1 ファイルだけ
+   さわって追加。これで MarkdownView 統合まで完結。
+2. **Graphviz dot 系の `dot_render.py`** — `dot -Tsvg -o out.svg in.dot`
+   で plantuml_render とほぼ同じ shape。folding.py の plantuml 拡張と
+   同時に dot kind ラベリングも入れる。
+3. **実 plantuml + chafa での E2E 検証** — dev 環境で `llove demo`
+   経由で動作確認 (CI ではスキップ、binary 依存)。
+4. **キーバインド (Vim/VSCode)** — `za` / `zM` / `zR` / `Ctrl+Shift+[`。
+5. **JSON ツリービュー / ログペイン fold** — folding.py の純粋関数を
+   別ビューに展開。
+
+### 設計メモ (将来参照)
+
+- plantuml CLI は `-o` でディレクトリしか指定できない (mmdc とは違い
+  出力ファイル名を直接指定不可)。入力 `.puml` のステム = 出力 `.svg`
+  のステム規約を採用して吸収。
+- 後続の `dot_render` は `dot -Tsvg -o output.svg input.dot` で
+  出力ファイル名を直接指定でき、むしろ mermaid_render に近い shape。
+  両者を 1 つの抽象に共通化することは可能だが、現段階では各 renderer
+  を独立モジュールにしておく方が拡張・テスト・依存解析がしやすい
+  (cairosvg / ditaa / blockdiag 等の追加時に shape が違っても困らない)。
+- `DiagramRenderResult` Protocol が「kind / argv / ascii_text の 3 つ
+  だけを要求」なので、内部の差 (svg_path / png_path / out_path 名) は
+  ImageRenderPane から見えない。後続の renderer が増えても pane を
+  触らなくて済むのは Protocol 設計の利点。
+
+---
+
 ## 2026-05-10 (続き 7) — F15 (t2/t3) MermaidImagePane → ImageRenderPane リネーム
 
 ### 完成したもの
