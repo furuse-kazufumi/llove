@@ -370,6 +370,9 @@ def _summary_line(region: FoldRegion, hidden: int) -> str:
     if region.kind == "plantuml":
         # Same diamond marker — PlantUML diagrams render via plantuml CLI.
         return f"▶ ◇ plantuml: {region.label} ({hidden} lines)"
+    if region.kind == "dot":
+        # Same diamond marker — Graphviz dot diagrams render via dot CLI.
+        return f"▶ ◇ dot: {region.label} ({hidden} lines)"
     if region.kind == "table":
         # Tables count rows rather than lines; "rows" reads more naturally
         # for a table fold, even though both are line counts internally.
