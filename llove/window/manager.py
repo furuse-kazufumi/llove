@@ -39,7 +39,7 @@ LoveApp との互換: ``window_layout=None`` の DemoScenario は WindowManager 
 
 from __future__ import annotations
 
-import sys
+import tomllib  # type: ignore[import-not-found]
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
@@ -51,12 +51,6 @@ from llove.window.containers import (
     WindowGroup,
 )
 from llove.window.types import get_window_type
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:  # pragma: no cover — Python <3.11 は要件外だが defensive
-    import tomli as tomllib  # type: ignore[import-not-found]
-
 
 WindowMode = Literal["SDI", "MDI", "Tabbed", "Tile"]
 
