@@ -15,7 +15,6 @@ import pytest
 
 from llove.identity import LoveIdentity, load_local_identity
 
-
 # ---------------------------------------------------------------------------
 # Fixture: a self-contained llmesh-flavoured identity directory
 # ---------------------------------------------------------------------------

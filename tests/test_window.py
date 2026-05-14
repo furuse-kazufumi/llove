@@ -23,8 +23,7 @@ from llove.window import (
     list_window_types,
     register_window_type,
 )
-from llove.window.iconset import _detect_kind  # noqa: PLC2701 — テスト用
-
+from llove.window.iconset import _detect_kind
 
 # ---------------------------------------------------------------------------
 # WindowType + Registry

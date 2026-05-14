@@ -22,7 +22,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
-
 # 拡張子 → URI scheme の主索引。F15 (q)(iii) の「多形式対応」を 1 個所
 # にまとめておくと、新しい形式を追加するときに viewer 側に手を入れずに
 # 済む (まずは scheme を返すだけでよい)。

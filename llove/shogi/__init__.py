@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from llove.shogi.engine import Engine, EngineUnavailable
 from llove.shogi.loop import GameOutcome, run_game
-from llove.shogi.players.base import Move, Player, ThinkResult, parse_provider_spec, make_player
+from llove.shogi.players.base import Move, Player, ThinkResult, make_player, parse_provider_spec
 
 __all__ = [
     "Engine",

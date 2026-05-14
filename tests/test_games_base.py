@@ -7,11 +7,9 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 import pytest
 
-from llove.events import Event, EventKind
+from llove.events import Event
 from llove.games.base import (
     GameEngine,
     GameOutcome,
@@ -23,7 +21,6 @@ from llove.games.base import (
     run_game,
 )
 from llove.games.base.engine import LegalityResult, TermResult
-
 
 # ---------------------------------------------------------------------------
 # Toy game: counters

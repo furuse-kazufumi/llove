@@ -176,7 +176,7 @@ class WindowManager:
         privileged にいじる (シナリオ切替は Manager の責務として許可).
         """
         # locked の付け替え (privileged: シナリオ切替で内部 _windows を強制 reset)
-        self.locked._windows.clear()  # noqa: SLF001 — privileged reset
+        self.locked._windows.clear()
         for spec in layout.locked:
             self.register_view(
                 spec.type_id, group="locked",

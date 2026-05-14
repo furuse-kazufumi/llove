@@ -10,8 +10,6 @@ from llove.games.typing import (
     MockWordSource,
     TypingEngine,
 )
-from llove.games.typing.engine import TypingStats
-
 
 # ---------------------------------------------------------------------------
 # TypingEngine

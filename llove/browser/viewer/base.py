@@ -12,9 +12,8 @@ Qt へ、あるいは Qt から TUI ASCII 化レイヤーへ camera を渡して
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, replace
 from typing import Any, Literal
-
 
 # ---------------------------------------------------------------------------
 # Camera

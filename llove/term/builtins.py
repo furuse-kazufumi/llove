@@ -117,7 +117,7 @@ def _cmd_theme(args: list[str], ctx: CommandContext) -> CommandResult:
         if callable(get):
             try:
                 current = get()
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 return CommandResult(ok=False, error=f"テーマ取得失敗: {e}")
             return CommandResult(ok=True, output=(f"current theme: {current}",))
         return CommandResult(
@@ -135,7 +135,7 @@ def _cmd_theme(args: list[str], ctx: CommandContext) -> CommandResult:
             )
         try:
             themes = tuple(lister())
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             return CommandResult(ok=False, error=f"テーマ列挙失敗: {e}")
         if not themes:
             return CommandResult(ok=True, output=("(利用可能なテーマがありません)",))
@@ -151,7 +151,7 @@ def _cmd_theme(args: list[str], ctx: CommandContext) -> CommandResult:
         )
     try:
         setter(name)
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         return CommandResult(ok=False, error=f"テーマ切替失敗: {e}")
     return CommandResult(ok=True, output=(f"theme 切替: {name}",))
 

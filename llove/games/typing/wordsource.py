@@ -23,7 +23,6 @@ import random
 from abc import ABC, abstractmethod
 from collections.abc import AsyncIterator
 
-
 # ---------------------------------------------------------------------------
 # 同梱辞書 (BUILTIN_GENRES)
 # ---------------------------------------------------------------------------

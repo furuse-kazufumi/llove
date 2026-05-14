@@ -16,7 +16,6 @@ import os
 from abc import ABC, abstractmethod
 from typing import Literal
 
-
 IconKind = Literal["nerd", "emoji", "ascii"]
 
 

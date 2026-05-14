@@ -16,7 +16,7 @@ llove は薄い shim に徹し、画像 / PDF / HTML / 動画などの実描画�
 from __future__ import annotations
 
 import shutil
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True)

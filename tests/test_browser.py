@@ -13,9 +13,8 @@ from llove.browser import (
     parse_uri,
     resolve_renderer,
 )
-from llove.browser.external import register_tool, _registered_for_test_only
+from llove.browser.external import _registered_for_test_only, register_tool
 from llove.browser.registry import register_handler
-
 
 # ---------------------------------------------------------------------------
 # URI parsing
