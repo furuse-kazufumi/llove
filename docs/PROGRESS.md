@@ -6,6 +6,52 @@
 
 ---
 
+## 2026-05-14 (続き 8) — F25 audience demo polish & 多言語化 + 7 章ドキュメント
+
+llmesh-demos / llive のドキュメント側を残課題ごと一気に解消したセッション。
+
+### llmesh-demos: F25 audience demo
+
+- `f25_audience_demo.py`
+  - `TRANSLATIONS` を **ja / en / zh / ko / de / es** の 6 言語並列辞書に拡張
+  - 各言語に S2-S8 + help overlay を含む全 sub/h2/p/cards/labels/products/CTA を登録
+  - `_apply_lang` を「ja テンプレ文字列を target 文字列へ全置換」する汎用ロジックに書き換え
+  - `JA_H2_ORIGINALS` の役割は `_apply_lang` に統合 (削除)
+  - `_ogp_meta` に `og:image` / `og:image:type=image/svg+xml` / 1200x630 / `og:locale` / `twitter:image` を追加
+  - 6 言語分の HTML を `--lang all` で生成し smoke 検証 → ja_remnants none を確認
+- `scripts/gen_ogp.py` (新規)
+  - 1200×630 SVG OGP/Twitter Card サムネジェネレータ (依存ゼロ)
+  - 各言語の `og_title` / `og_description` を読み、CJK は文字数ベース、欧文は単語境界で折返し
+  - 出力: `logs/ogp/f25-audience-demo.<lang>.ogp.svg`
+- `docs/04-security-compliance.md` (新規) — mTLS / Trusted Peers / SHA-256 監査チェーン / FDA・J-SOX・バーゼル III・GDPR 等の規制マッピング / Quarantined Zone + Reverse-Evo + Ed25519 鍵運用
+- `docs/05-operations.md` (新規) — systemd / health endpoint / Prometheus メトリクス / アラート閾値 / バックアップ / DR 計画 / RPO/RTO 目標
+- `docs/06-troubleshooting.md` (新規) — 接続 / mTLS / BWT auto-halt / audit chain verify fail / 性能劣化 / TUI 系 / フルリストア手順
+- `docs/07-capacity-planning.md` (新規) — S/M/L/XL ワークロード分類 + GPU/CPU/RAM/ストレージ/ネット/スループット見積 + サイジング FAQ
+
+### llive: LinkedIn 投稿 markdown
+
+- `D:/projects/llive/docs/linkedin/post_2026-05-14_overview.ja.md` (新規)
+- `D:/projects/llive/docs/linkedin/post_2026-05-14_overview.en.md` (新規)
+- 「AI 理解 + キャリアアップ」観点で llive プロジェクトの動機・8 つの設計の核・キャリア面で得たもの・現在地 (v0.3.0 / 429 tests / 98% coverage) を整理
+
+### memory 更新
+
+- `[[f25-demo-polish]]` の残課題を更新 (本セッションで 1, 2, 6 を完了 — 残るは韓/独/西の追加翻訳品質レビュー、動画化、実機視聴)
+
+### 残課題 (実機 / 外部ツール必須なため保留)
+
+1. 動画化パイプライン (OBS / FFmpeg) — 実機視聴前提
+2. F25 audience demo の実機視聴 + 印象フィードバックループ — sandbox 不可
+3. ko/de/es 翻訳の native レビュー — 機械翻訳ベースなので品質保証は人レビュー必要
+4. Phase h: F25 連携基盤 E2E (3 リポジトリ同時起動) — 実機検証
+5. Qiita 投稿 markdown (F25 連携基盤を題材にした技術記事) — 着手未
+
+### コミット指針
+
+llmesh-demos と llive (linkedin/) は別リポジトリなので **2 コミット**。
+
+---
+
 ## 2026-05-14 (続き 7) — F25 (e) Dispatch helper + TimelinePollDriver
 
 ### 完成したもの
