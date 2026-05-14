@@ -49,12 +49,21 @@ class Translator:
         if env:
             self.set_locale(env)
             return
+        sys_locale: str | None = None
         try:
-            sys_locale = _locale.getdefaultlocale()[0]
+            # Python 3.13+ deprecates getdefaultlocale(); prefer getlocale() +
+            # the LANG / LC_ALL fallback used by every other CLI tool.
+            sys_locale = _locale.getlocale()[0]
         except Exception:  # nosec B110 — locale lookup is best-effort
             sys_locale = None
+        if not sys_locale:
+            for env_var in ("LC_ALL", "LC_MESSAGES", "LANG"):
+                v = os.environ.get(env_var, "").strip()
+                if v and v.lower() not in {"c", "c.utf-8", "posix"}:
+                    sys_locale = v
+                    break
         if sys_locale:
-            primary = sys_locale.split("_")[0].lower()
+            primary = sys_locale.split(".")[0].split("_")[0].lower()
             if self._has_locale(primary):
                 self._active = primary
 
