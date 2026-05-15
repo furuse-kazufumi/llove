@@ -1,5 +1,7 @@
 # 💗 llove
 
+> **Part of the FullSense ™ family** — `llmesh` (secure LLM hub) ・ `llive` (self-evolving memory) ・ **llove** (TUI dashboard) の 3 製品を束ねる FullSense ブランドの中で、TUI ダッシュボードと HITL ワークベンチを担当します。FullSense Spec v1.1 は `llive` リポジトリの `docs/fullsense_spec_eternal.md` 参照。
+
 [![CI](https://github.com/furuse-kazufumi/llove/actions/workflows/ci.yml/badge.svg)](https://github.com/furuse-kazufumi/llove/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/furuse-kazufumi/llove/actions/workflows/codeql.yml/badge.svg)](https://github.com/furuse-kazufumi/llove/actions/workflows/codeql.yml)
 [![codecov](https://codecov.io/gh/furuse-kazufumi/llove/branch/main/graph/badge.svg)](https://codecov.io/gh/furuse-kazufumi/llove)
