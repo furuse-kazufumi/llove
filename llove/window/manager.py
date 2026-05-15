@@ -39,7 +39,7 @@ LoveApp との互換: ``window_layout=None`` の DemoScenario は WindowManager 
 
 from __future__ import annotations
 
-import tomllib  # type: ignore[import-not-found]
+import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
