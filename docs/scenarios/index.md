@@ -29,10 +29,37 @@ py -3.11 scripts/export_demo_svgs.py --size=160x40 --delay=3.5
 リポジトリに commit すれば、次回 GitHub Pages build で自動的に gallery に
 反映されます。
 
-## Gallery
+## Animated Gallery (動きがあるシナリオ)
 
-> **注**: 下記は **テンプレート placeholder** です。実機 TUI で `export_demo_svgs.py`
-> を実行して SVG を生成し commit すると、ここに自動表示されます。
+時間軸を持つシナリオは **animated SVG** で動きを残しています。
+
+### Shogi (将棋 8 フレーム × 1.5s = 12 秒ループ)
+
+<img src="anim/shogi.svg" alt="shogi animation" width="100%">
+
+### Mindmap (6 フレーム × 1.5s = 9 秒ループ)
+
+<img src="anim/mindmap.svg" alt="mindmap animation" width="100%">
+
+### RAG (6 フレーム × 1.5s = 9 秒ループ)
+
+<img src="anim/rag.svg" alt="rag animation" width="100%">
+
+### Chat (6 フレーム × 1.5s = 9 秒ループ)
+
+<img src="anim/chat.svg" alt="chat animation" width="100%">
+
+### Benchmark (6 フレーム × 1.5s = 9 秒ループ)
+
+<img src="anim/bench.svg" alt="bench animation" width="100%">
+
+再生成: `py -3.11 scripts/export_demo_anim_svg.py --scenario=<name> --frames=N --frame-delay=S`
+
+---
+
+## Static Gallery
+
+各 scenario の 1 フレーム静的 SVG (`docs/scenarios/svg/<name>.svg`)。
 
 ### Audit
 
