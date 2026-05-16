@@ -95,11 +95,12 @@ def _build_animated_svg(frames_svg: list[str], frame_duration_s: float) -> str:
     )
 
 
-async def _capture_frames(name: str, *, size: tuple[int, int], frames: int, frame_delay: float) -> list[str]:
+async def _capture_frames(name: str, *, lang: str, size: tuple[int, int], frames: int, frame_delay: float) -> list[str]:
+    set_locale(lang)
     scenario = get_scenario(name)
     app = LoveApp(source=scenario, with_narration=True)
     frame_texts: list[str] = []
-    tmpdir = Path(tempfile.mkdtemp(prefix=f"anim-{name}-"))
+    tmpdir = Path(tempfile.mkdtemp(prefix=f"anim-{name}-{lang}-"))
     async with app.run_test(size=size) as pilot:
         # 初期描画安定化
         await pilot.pause(delay=0.5)
