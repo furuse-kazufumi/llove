@@ -120,10 +120,20 @@ def _parse_size(s: str) -> tuple[int, int]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--scenario", required=True, help="scenario name (e.g. shogi)")
+    parser.add_argument("--lang", default="ja", help="locale (default 'ja')")
     parser.add_argument("--frames", type=int, default=6, help="number of frames")
     parser.add_argument("--frame-delay", type=float, default=1.5, help="seconds between frames")
     parser.add_argument("--size", default="120x30", help="terminal size, WxH")
-    parser.add_argument("--out", default="docs/scenarios/anim", help="output directory")
+    parser.add_argument(
+        "--out",
+        default="docs/scenarios/anim",
+        help="output base. File written to <out>/<scenario>/<lang>.svg",
+    )
+    parser.add_argument(
+        "--legacy-naming",
+        action="store_true",
+        help="write to <out>/<scenario>.svg without lang subpath (legacy)",
+    )
     args = parser.parse_args(argv)
 
     if args.scenario not in SCENARIOS:
@@ -132,15 +142,18 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     out_dir = Path(args.out)
-    out_dir.mkdir(parents=True, exist_ok=True)
     size = _parse_size(args.size)
 
-    print(f"capturing {args.frames} frame(s) of {args.scenario} (size={size[0]}x{size[1]}, delay={args.frame_delay}s)")
-    frames_svg = asyncio.run(_capture_frames(args.scenario, size=size, frames=args.frames, frame_delay=args.frame_delay))
+    print(f"capturing {args.frames} frame(s) of {args.scenario}/{args.lang} (size={size[0]}x{size[1]}, delay={args.frame_delay}s)")
+    frames_svg = asyncio.run(_capture_frames(args.scenario, lang=args.lang, size=size, frames=args.frames, frame_delay=args.frame_delay))
     print(f"  captured {len(frames_svg)} frame(s)")
 
     animated = _build_animated_svg(frames_svg, frame_duration_s=args.frame_delay)
-    out_path = out_dir / f"{args.scenario}.svg"
+    if args.legacy_naming:
+        out_path = out_dir / f"{args.scenario}.svg"
+    else:
+        out_path = out_dir / args.scenario / f"{args.lang}.svg"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(animated, encoding="utf-8")
     print(f"  ✓ {out_path}  ({out_path.stat().st_size // 1024} KB)")
     return 0
