@@ -73,7 +73,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--overwrite",
         action="store_true",
-        help="overwrite existing baseline files (snap-<scenario>-<lang>.svg)",
+        help="overwrite existing baseline files",
+    )
+    parser.add_argument(
+        "--legacy-naming",
+        action="store_true",
+        help="use legacy flat naming (out/snap-<scenario>-<lang>.svg) instead of out/scenarios/<scenario>/<lang>.svg",
     )
     args = parser.parse_args(argv)
 
