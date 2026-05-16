@@ -49,29 +49,35 @@ py -3.11 scripts/export_demo_anim_svg.py --scenario=shogi --frames=8
 
 ## Animated Gallery (動きがあるシナリオ)
 
-時間軸を持つシナリオは **animated SVG** で動きを残しています。
+時間軸を持つシナリオは **animated SVG** で動きを残しています。階層は
+`anim/<scenario>/<lang>.svg` で静止画と整合。
 
-### Shogi (将棋 8 フレーム × 1.5s = 12 秒ループ)
+### Shogi (6 フレーム × 1.5s = 9 秒ループ)
+| ja | en |
+|---|---|
+| <img src="anim/shogi/ja.svg" alt="shogi ja"> | <img src="anim/shogi/en.svg" alt="shogi en"> |
 
-<img src="anim/shogi.svg" alt="shogi animation" width="100%">
+### Mindmap
+| ja | en |
+|---|---|
+| <img src="anim/mindmap/ja.svg" alt="mindmap ja"> | <img src="anim/mindmap/en.svg" alt="mindmap en"> |
 
-### Mindmap (6 フレーム × 1.5s = 9 秒ループ)
+### RAG
+| ja | en |
+|---|---|
+| <img src="anim/rag/ja.svg" alt="rag ja"> | <img src="anim/rag/en.svg" alt="rag en"> |
 
-<img src="anim/mindmap.svg" alt="mindmap animation" width="100%">
+### Chat
+| ja | en |
+|---|---|
+| <img src="anim/chat/ja.svg" alt="chat ja"> | <img src="anim/chat/en.svg" alt="chat en"> |
 
-### RAG (6 フレーム × 1.5s = 9 秒ループ)
+### Benchmark
+| ja | en |
+|---|---|
+| <img src="anim/bench/ja.svg" alt="bench ja"> | <img src="anim/bench/en.svg" alt="bench en"> |
 
-<img src="anim/rag.svg" alt="rag animation" width="100%">
-
-### Chat (6 フレーム × 1.5s = 9 秒ループ)
-
-<img src="anim/chat.svg" alt="chat animation" width="100%">
-
-### Benchmark (6 フレーム × 1.5s = 9 秒ループ)
-
-<img src="anim/bench.svg" alt="bench animation" width="100%">
-
-再生成: `py -3.11 scripts/export_demo_anim_svg.py --scenario=<name> --frames=N --frame-delay=S`
+再生成: `py -3.11 scripts/export_demo_anim_svg.py --scenario=<name> --lang=<ja|en> --frames=N --frame-delay=S`
 
 ---
 
