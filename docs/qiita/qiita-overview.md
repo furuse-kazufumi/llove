@@ -20,6 +20,36 @@ pip install llmesh-llove
 llove demo --scenario llive    # llmesh 経由で llive データを見るシナリオ
 ```
 
+## アーキテクチャ (F25 Bridge flow)
+
+```mermaid
+flowchart LR
+    LI["llive (memory + BWT)"]
+    LM["llmesh (MCP hub)"]
+    POLL["TimelinePollDriver<br/>(periodic poll)"]
+    DISP["dispatch_events()<br/>(routing)"]
+    BWT["BWT viewer"]
+    TR["Route trace viewer"]
+    ML["Memory link panel"]
+    STATUS["Status bar"]
+    LI -->|events| POLL
+    LM -->|events| POLL
+    POLL --> DISP
+    DISP -->|bwt_event| BWT
+    DISP -->|trace_event| TR
+    DISP -->|link_event| ML
+    DISP --> STATUS
+```
+
+## 実機の見た目 (TUI スクリーンショット)
+
+各 demo シナリオの SVG スクリーンショットを GitHub Pages で公開しています:
+
+- Gallery: <https://furuse-kazufumi.github.io/llove/scenarios/>
+- Raw SVG: `https://raw.githubusercontent.com/furuse-kazufumi/llove/main/docs/scenarios/svg/<name>.svg`
+
+代表的な scenario (firewall / chat / multimodal / shogi / rag) は Qiita 投稿時に img タグで埋め込み予定 (詳細は [docs/qiita/AUTHORING.md](AUTHORING.md))。
+
 ---
 
 ## なぜ TUI なのか
