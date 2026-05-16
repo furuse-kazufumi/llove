@@ -7,27 +7,45 @@ nav_order: 5
 # Demo Scenarios — SVG Gallery
 
 llove は TUI dashboard としての見え方を、各シナリオに **SVG スクリーンショット**
-として `docs/scenarios/svg/` に commit していく方針。
+として階層的に commit していく方針。
 
-各 SVG は Textual の `App.save_screenshot()` で出力される **ベクター形式**
+階層レイアウト:
+
+```
+docs/scenarios/svg/
+├── audit/
+│   ├── ja.svg
+│   └── en.svg
+├── chat/
+│   ├── ja.svg
+│   └── en.svg
+...
+
+docs/scenarios/anim/      ← animated SVG (動きがあるシナリオ)
+├── shogi.svg
+├── mindmap.svg
+...
+```
+
+各 SVG は Textual の `App.export_screenshot()` で出力された **ベクター形式**
 (ターミナル非依存)、GitHub Pages からそのまま見られます。
 
 ## 取得手順 (ユーザがローカルで実行)
 
 ```bash
-# 単一 scenario
-py -3.11 scripts/export_demo_svgs.py --scenario=firewall
+# 全 scenario × ja/en を docs に書き出し (公開用)
+py -3.11 scripts/snapshot_all_scenarios.py --out=docs/scenarios/svg --overwrite
 
-# 全 scenario
-py -3.11 scripts/export_demo_svgs.py
+# 単一 scenario の単一言語
+py -3.11 scripts/snapshot_scenario.py firewall ja docs/scenarios/svg/firewall/ja.svg
 
-# サイズ / 待ち時間調整
-py -3.11 scripts/export_demo_svgs.py --size=160x40 --delay=3.5
+# 全 scenario × ja/en を out に書き出し (実行ログ、gitignore 対象)
+py -3.11 scripts/snapshot_all_scenarios.py
+# → out/scenarios/<name>/<lang>.svg
+
+# Animated SVG (動きがあるシナリオ向け)
+py -3.11 scripts/export_demo_anim_svg.py --scenario=shogi --frames=8
 ```
-
-出力先: `docs/scenarios/svg/<scenario>.svg`。確認後 `git add docs/scenarios/svg/` で
-リポジトリに commit すれば、次回 GitHub Pages build で自動的に gallery に
-反映されます。
 
 ## Animated Gallery (動きがあるシナリオ)
 
@@ -57,87 +75,110 @@ py -3.11 scripts/export_demo_svgs.py --size=160x40 --delay=3.5
 
 ---
 
-## Static Gallery
+## Static Gallery (各 scenario × 言語)
 
-各 scenario の 1 フレーム静的 SVG (`docs/scenarios/svg/<name>.svg`)。
+各 scenario のディレクトリに `ja.svg` / `en.svg` を配置。Textual の
+CJK font fallback chain で日本語表記が崩れないよう対策済。
 
 ### Audit
-
-![audit](svg/audit.svg)
+| ja | en |
+|---|---|
+| ![](svg/audit/ja.svg) | ![](svg/audit/en.svg) |
 
 ### Backends
-
-![backends](svg/backends.svg)
+| ja | en |
+|---|---|
+| ![](svg/backends/ja.svg) | ![](svg/backends/en.svg) |
 
 ### Benchmark
-
-![bench](svg/bench.svg)
+| ja | en |
+|---|---|
+| ![](svg/bench/ja.svg) | ![](svg/bench/en.svg) |
 
 ### Chat
-
-![chat](svg/chat.svg)
+| ja | en |
+|---|---|
+| ![](svg/chat/ja.svg) | ![](svg/chat/en.svg) |
 
 ### Coin Toss
-
-![coin_toss](svg/coin_toss.svg)
+| ja | en |
+|---|---|
+| ![](svg/coin_toss/ja.svg) | ![](svg/coin_toss/en.svg) |
 
 ### Cost
-
-![cost](svg/cost.svg)
+| ja | en |
+|---|---|
+| ![](svg/cost/ja.svg) | ![](svg/cost/en.svg) |
 
 ### Drift
-
-![drift](svg/drift.svg)
+| ja | en |
+|---|---|
+| ![](svg/drift/ja.svg) | ![](svg/drift/en.svg) |
 
 ### Firewall
-
-![firewall](svg/firewall.svg)
+| ja | en |
+|---|---|
+| ![](svg/firewall/ja.svg) | ![](svg/firewall/en.svg) |
 
 ### MCP Call
-
-![mcp_call](svg/mcp_call.svg)
+| ja | en |
+|---|---|
+| ![](svg/mcp_call/ja.svg) | ![](svg/mcp_call/en.svg) |
 
 ### Mindmap
-
-![mindmap](svg/mindmap.svg)
+| ja | en |
+|---|---|
+| ![](svg/mindmap/ja.svg) | ![](svg/mindmap/en.svg) |
 
 ### Multimodal
-
-![multimodal](svg/multimodal.svg)
+| ja | en |
+|---|---|
+| ![](svg/multimodal/ja.svg) | ![](svg/multimodal/en.svg) |
 
 ### Point Cloud
-
-![pointcloud](svg/pointcloud.svg)
+| ja | en |
+|---|---|
+| ![](svg/pointcloud/ja.svg) | ![](svg/pointcloud/en.svg) |
 
 ### RAG
-
-![rag](svg/rag.svg)
+| ja | en |
+|---|---|
+| ![](svg/rag/ja.svg) | ![](svg/rag/en.svg) |
 
 ### Reliability
-
-![reliability](svg/reliability.svg)
+| ja | en |
+|---|---|
+| ![](svg/reliability/ja.svg) | ![](svg/reliability/en.svg) |
 
 ### SCADA
-
-![scada](svg/scada.svg)
+| ja | en |
+|---|---|
+| ![](svg/scada/ja.svg) | ![](svg/scada/en.svg) |
 
 ### Shogi
-
-![shogi](svg/shogi.svg)
+| ja | en |
+|---|---|
+| ![](svg/shogi/ja.svg) | ![](svg/shogi/en.svg) |
 
 ### Vision
-
-![vision](svg/vision.svg)
+| ja | en |
+|---|---|
+| ![](svg/vision/ja.svg) | ![](svg/vision/en.svg) |
 
 ## 設計上のメモ
 
-- `App.save_screenshot()` は Textual 標準機能、ターミナル非依存の SVG を生成
+- `App.save_screenshot()` / `App.export_screenshot()` は Textual 標準機能、
+  ターミナル非依存の SVG を生成
 - LLM 呼び出しを必要とする scenario (chat / multimodal) は `MockBackend` 前提
-- `--delay` は scenario が描画を開始するまでの時間。複雑な scenario は 3〜5 秒推奨
-- SVG はテキストなので git diff で差分が見える (binary PNG と違って blame しやすい)
+- `--pause` (snapshot) / `--delay` (animated) は scenario が描画を開始するまでの時間
+- 日本語の文字化け回避: `snapshot_scenario.py` の `_patch_cjk_fonts()` で
+  Fira Code → CJK monospace fallback chain を SVG 内に injection
+- 階層化前の flat ファイル (`out/snap-*-*.svg`) は手作業 review 資産として残置
 
 ## 関連
 
-- `scripts/export_demo_svgs.py` — SVG export スクリプト
+- `scripts/snapshot_scenario.py` — 単一 scenario × 言語
+- `scripts/snapshot_all_scenarios.py` — 全 scenario × 全言語の wrapper
+- `scripts/export_demo_anim_svg.py` — animated SVG (N frame 連結)
 - `llove/demo/scenarios/` — 全 scenario の実装
 - `llove/app.py` — `LoveApp` (Textual ベース TUI)
