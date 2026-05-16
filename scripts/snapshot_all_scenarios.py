@@ -1,19 +1,31 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Capture SVG snapshots for **all demo scenarios × all locales** to `out/`.
+"""Capture SVG snapshots for **all demo scenarios × all locales**.
 
 `scripts/snapshot_scenario.py` の core 関数 `_capture()` を再利用して、
 全 scenario と全 locale (ja, en) の組合せを一気に生成する wrapper。
-出力命名規則は既存 `snap-<scenario>-<lang>.svg` と整合。
+
+**出力レイアウト (デフォルト、階層型)**::
+
+    out/scenarios/
+    ├── audit/
+    │   ├── ja.svg
+    │   └── en.svg
+    ├── chat/
+    │   ├── ja.svg
+    │   └── en.svg
+    ...
+
+**旧 flat レイアウト** (互換用)::
+
+    out/snap-<scenario>-<lang>.svg
+
+`--legacy-naming` フラグで旧式に切替。デフォルトは新階層。
 
 Usage::
 
-    py -3.11 scripts/snapshot_all_scenarios.py
-    py -3.11 scripts/snapshot_all_scenarios.py --languages=ja,en,zh --out=out
-    py -3.11 scripts/snapshot_all_scenarios.py --scenarios=cost,chat,shogi
-
-注: out/ にある既存の手作業バージョン (`snap-cost-ja-v2.svg` 等) は
-上書きしない。本 wrapper は **v サフィックス無し** のベースラインを
-更新するだけ。手作業 v タグ付きは別途レビュー資産として残す方針。
+    py -3.11 scripts/snapshot_all_scenarios.py                       # 新階層
+    py -3.11 scripts/snapshot_all_scenarios.py --legacy-naming       # 旧 flat
+    py -3.11 scripts/snapshot_all_scenarios.py --scenarios=cost,shogi
 """
 
 from __future__ import annotations
