@@ -30,6 +30,7 @@ for stream in (sys.stdout, sys.stderr):
 
 from llove.app import LoveApp
 from llove.demo.scenarios import SCENARIOS, get_scenario
+from llove.i18n import set_locale
 
 
 SVG_OPEN_RE = re.compile(r"(<svg[^>]*>)", re.DOTALL)
