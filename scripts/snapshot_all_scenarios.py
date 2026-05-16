@@ -57,7 +57,11 @@ def _parse_csv(s: str) -> list[str]:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--out", default="out", help="output directory (default 'out')")
+    parser.add_argument(
+        "--out",
+        default="out/scenarios",
+        help="output base directory. Default 'out/scenarios' (hierarchical: <out>/<scenario>/<lang>.svg). With --legacy-naming, omit subdir (e.g. --out=out)",
+    )
     parser.add_argument(
         "--languages",
         default="ja,en",
