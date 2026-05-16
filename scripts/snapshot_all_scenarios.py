@@ -103,7 +103,10 @@ def main(argv: list[str] | None = None) -> int:
             failed += 1
             continue
         for lang in languages:
-            out_path = out_dir / f"snap-{name}-{lang}.svg"
+            if args.legacy_naming:
+                out_path = out_dir / f"snap-{name}-{lang}.svg"
+            else:
+                out_path = out_dir / "scenarios" / name / f"{lang}.svg"
             if out_path.exists() and not args.overwrite:
                 print(f"  - {out_path}  (exists, skip — use --overwrite to replace)")
                 skipped += 1
