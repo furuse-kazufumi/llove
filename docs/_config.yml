@@ -1,0 +1,46 @@
+# GitHub Pages (Jekyll) configuration
+# Activate via: GitHub repo Settings → Pages → Build & deploy → Source: main branch / docs folder
+
+title: "FullSense ™ — llove"
+description: "TUI dashboard / HITL workbench for LLM agents"
+remote_theme: just-the-docs/just-the-docs
+markdown: kramdown
+highlighter: rouge
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+plugins:
+  - jekyll-relative-links
+  - jekyll-seo-tag
+  - jekyll-remote-theme
+relative_links:
+  enabled: true
+  collections: true
+
+color_scheme: light
+search_enabled: true
+heading_anchors: true
+aux_links:
+  "GitHub":
+    - "https://github.com/furuse-kazufumi/llove"
+  "PyPI":
+    - "https://pypi.org/project/llmesh-llove/"
+aux_links_new_tab: true
+footer_content: 'Copyright &copy; 2026 Kazufumi Furuse. FullSense ™ / llove ™ are trademarks. Code under <a href="https://github.com/furuse-kazufumi/llove/blob/main/LICENSE">repository license</a>.'
+nav_external_links:
+  - title: GitHub repository
+    url: https://github.com/furuse-kazufumi/llove
+    hide_icon: false
+back_to_top: true
+back_to_top_text: "Back to top"
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
+author: Kazufumi Furuse
+github:
+  repository_nwo: furuse-kazufumi/llove
+url: https://furuse-kazufumi.github.io/llove
+baseurl: ""
