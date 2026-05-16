@@ -1,0 +1,4 @@
+# Demo scenario SVG snapshots will be generated here by:
+#   py -3.11 scripts/export_demo_svgs.py
+#
+# Generated SVGs should be committed to git so GitHub Pages can render them.
