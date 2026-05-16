@@ -27,6 +27,13 @@ import asyncio
 import sys
 from pathlib import Path
 
+# Windows cp932 console issue: ✓ / ✗ などの非 ASCII を出すと UnicodeEncodeError.
+# 環境変数 PYTHONIOENCODING に依存せず、ここで明示的に utf-8 に切替える.
+for stream in (sys.stdout, sys.stderr):
+    reconfigure = getattr(stream, "reconfigure", None)
+    if callable(reconfigure):
+        reconfigure(encoding="utf-8", errors="replace")
+
 from llove.app import LoveApp
 from llove.demo.scenarios import SCENARIOS, get_scenario
 
