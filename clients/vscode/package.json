@@ -1,0 +1,75 @@
+{
+  "name": "llove-vscode",
+  "displayName": "llove — LLMesh observability + research IDE",
+  "description": "On-prem LLM observation & research IDE for llove engine. EAR-clean, marketplace-independent, llive integration.",
+  "version": "0.1.0-alpha",
+  "publisher": "furuse-kazufumi",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/furuse-kazufumi/llove"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Visualization",
+    "Other"
+  ],
+  "keywords": [
+    "llm",
+    "observability",
+    "on-prem",
+    "llmesh",
+    "llive",
+    "ai-agent",
+    "regulated",
+    "ear-clean"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "llove.showEngineInfo",
+        "title": "llove: Show engine info"
+      },
+      {
+        "command": "llove.runDepsAudit",
+        "title": "llove: Run dependency audit (deps --audit)"
+      },
+      {
+        "command": "llove.checkOffline",
+        "title": "llove: Check offline status (no outbound calls)"
+      }
+    ],
+    "configuration": {
+      "title": "llove",
+      "properties": {
+        "llove.engineUrl": {
+          "type": "string",
+          "default": "http://127.0.0.1:8765",
+          "description": "URL of the locally running llove engine (Pattern B/C from PART5)."
+        },
+        "llove.autoStartEngine": {
+          "type": "boolean",
+          "default": true,
+          "description": "Spawn the engine subprocess when the extension activates."
+        }
+      }
+    }
+  },
+  "activationEvents": [
+    "onCommand:llove.showEngineInfo",
+    "onCommand:llove.runDepsAudit",
+    "onCommand:llove.checkOffline"
+  ],
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  }
+}
