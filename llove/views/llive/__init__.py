@@ -21,6 +21,11 @@ from llove.views.llive.bwt_dashboard import (
     BWTDashboard,
     make_mock_bwt_events,
 )
+from llove.views.llive.cognitive_mesh_panel import (
+    COG_EVENT_TYPES,
+    CognitiveMeshPanel,
+    make_mock_cog_events,
+)
 from llove.views.llive.dispatch import (
     DispatchResult,
     TimelinePollDriver,
@@ -37,12 +42,15 @@ from llove.views.llive.route_trace_viewer import (
 
 __all__ = [
     "BWTDashboard",
+    "COG_EVENT_TYPES",
+    "CognitiveMeshPanel",
     "DispatchResult",
     "MemoryLinkVizPanel",
     "RouteTraceViewer",
     "TimelinePollDriver",
     "dispatch_events",
     "make_mock_bwt_events",
+    "make_mock_cog_events",
     "make_mock_concept_events",
     "make_mock_route_trace_events",
 ]
