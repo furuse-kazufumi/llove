@@ -6,6 +6,44 @@
 
 ---
 
+## 2026-05-19 — M8.1 CognitiveMeshPanel skeleton 配備
+
+llive 側 COG-MESH 全件 (M8.2〜M8.9) 本実装完了を受け、llove F25 bridge
+基盤上に **cognitive_mesh 3 種 event** (proactive utterance / risk alert
+/ quarantine pending) を表示する読み取り専用パネルを skeleton 配備。
+
+### 新規 module
+
+- `llove/views/llive/cognitive_mesh_panel.py` (200 行強)
+  - `CogEntry` dataclass — event → entry 正規化 (3 種 event_type を判定)
+  - `render_panel(entries, max_lines=12)` — pure rendering, newest-first
+  - `CognitiveMeshPanel(Static, View)` — idempotent feed_events、event_id
+    dedup、`entry_count()` / `latest()` / `clear()` API
+  - `make_mock_cog_events(n)` — offline demo / CI 用 fixture
+
+### dispatch 配線 (backward compatible)
+
+- `KNOWN_EVENT_TYPES` に COG_EVENT_TYPES (3 種) を追加
+- `DispatchResult.cog_added: int = 0` を field 追加
+- `dispatch_events(... cog=...)` を optional 引数追加
+- `TimelinePollDriver.cog` 同様追加
+- `status_line()` に `cog+N` 表示追加
+
+### テスト
+
+- `tests/test_cognitive_mesh_panel.py` 15 件追加 (全件 PASS)
+- 既存 786 件 (前回 771 + 新規 15) regress 無し
+- 既存失敗 6 件 (image_tool 関連) は本変更と無関係 baseline
+
+### 次セッション
+
+- 実 Timeline emit 配線: llive cognitive_mesh の各 emit を llmesh Timeline
+  server に push する adapter (`llive/cognitive_mesh/timeline_emitter.py`)
+- asciinema 録画 — Active/Quiet 切替で panel が反応する様子 (操作者)
+- TUI 統合: llove app に panel を add_pane する経路 (Phase 6)
+
+---
+
 ## 2026-05-14 (続き 8) — F25 audience demo polish & 多言語化 + 7 章ドキュメント
 
 llmesh-demos / llive のドキュメント側を残課題ごと一気に解消したセッション。
