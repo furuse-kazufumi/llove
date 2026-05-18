@@ -113,4 +113,44 @@ def make_app() -> FastAPI:
             ),
         }
 
+    @app.post("/api/v1/brief/submit")
+    def submit_brief(req: BriefSubmitRequest) -> dict[str, Any]:
+        """F25 Phase h.1 — submit a Brief through llive.
+
+        Behaviour (docs/design/f25-phase-h-e2e.md 4.6.1, draft v0.2):
+
+        - 200 + BriefResult shape on success
+        - 400 if ``goal`` is missing / empty (also handled by Pydantic validation)
+        - 503 if llive is not installed (independence principle:
+          feedback_independence_principle — llove engine ships standalone,
+          llive is an optional runtime peer)
+        - LLM-level / backend errors are surfaced inside ``result.status`` /
+          ``result.error`` (200 with status="error"), not as HTTP errors.
+        """
+        # Lazy-import to preserve llove independence (feedback_independence_principle).
+        try:
+            from llive.mcp.tools import tool_submit_brief
+        except ModuleNotFoundError as exc:
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error": "backend_unavailable",
+                    "reason": "llive is not installed in this environment",
+                    "hint": "pip install 'llmesh-llive[llm]' alongside llove",
+                    "missing_module": exc.name,
+                },
+            ) from None
+
+        return tool_submit_brief(
+            goal=req.goal,
+            brief_id=req.brief_id,
+            constraints=list(req.constraints),
+            source=req.source,
+            priority=float(req.priority),
+            backend=req.backend,
+            tools=list(req.tools),
+            success_criteria=list(req.success_criteria),
+            approval_required=bool(req.approval_required),
+        )
+
     return app
