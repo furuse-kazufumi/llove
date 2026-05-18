@@ -30,6 +30,8 @@ def test_cog_event_types_in_known() -> None:
 def test_cog_entry_from_proactive_event() -> None:
     ev = TimelineEvent(
         event_id="e1",
+        task_id="",
+        node_id="",
         event_type="cog_proactive_utterance",
         timestamp_utc="2026-05-19T10:00:00+09:00",
         metadata={"content": "build done", "mode": "timer", "gift_value": 0.75},
