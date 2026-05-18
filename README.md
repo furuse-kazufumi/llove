@@ -273,6 +273,15 @@ llove demo
 - [`ROADMAP.md`](ROADMAP.md) — v0.1 〜 v1.0 のフェーズ計画
 - [`docs/snapshots/`](docs/snapshots/) — 各バージョンで動く絵（GitHub プレビュー）
 
+## FullSense Portal hubs (drift 防止)
+
+家族プロダクト横断の真実ソースは FullSense portal 配下の hub ページ:
+
+- [Spec hub](https://furuse-kazufumi.github.io/fullsense/spec/) — FullSense Eternal Spec v1.1
+- [Benchmark Policy](https://furuse-kazufumi.github.io/fullsense/benchmarks/policy/)
+- [Recommended models](https://furuse-kazufumi.github.io/fullsense/recommended-models/)
+- [Comparison](https://furuse-kazufumi.github.io/fullsense/comparison)
+
 ---
 
 ## ライセンス
