@@ -73,6 +73,8 @@ class DispatchResult:
             parts.append(f"trace+{self.trace_added}")
         if self.link_added:
             parts.append(f"link+{self.link_added}")
+        if self.cog_added:
+            parts.append(f"cog+{self.cog_added}")
         if self.unrouted:
             parts.append(f"unrouted={self.unrouted}")
         if self.unknown:
