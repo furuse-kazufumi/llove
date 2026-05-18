@@ -63,6 +63,8 @@ def test_cog_entry_from_risk_event() -> None:
 def test_cog_entry_from_quarantine_event_verified() -> None:
     ev = TimelineEvent(
         event_id="e3",
+        task_id="",
+        node_id="",
         event_type="cog_quarantine_pending",
         timestamp_utc="2026-05-19T10:00:00+09:00",
         metadata={"signer_id": "trusted-rss", "verified": True, "summary": "x"},
