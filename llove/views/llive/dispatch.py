@@ -174,6 +174,7 @@ class TimelinePollDriver:
     bwt: BWTDashboard | None = None
     trace: RouteTraceViewer | None = None
     link: MemoryLinkVizPanel | None = None
+    cog: CognitiveMeshPanel | None = None  # M8.1 cognitive mesh panel
     limit: int = 50
     node_id: str = ""
     last_result: DispatchResult = DispatchResult()
@@ -184,7 +185,11 @@ class TimelinePollDriver:
             limit=self.limit, node_id=self.node_id
         )
         result = dispatch_events(
-            events, bwt=self.bwt, trace=self.trace, link=self.link
+            events,
+            bwt=self.bwt,
+            trace=self.trace,
+            link=self.link,
+            cog=self.cog,
         )
         self.last_result = result
         return result
