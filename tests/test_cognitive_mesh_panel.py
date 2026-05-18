@@ -78,6 +78,8 @@ def test_cog_entry_from_quarantine_event_verified() -> None:
 def test_cog_entry_from_quarantine_event_unsigned() -> None:
     ev = TimelineEvent(
         event_id="e4",
+        task_id="",
+        node_id="",
         event_type="cog_quarantine_pending",
         timestamp_utc="2026-05-19T10:00:00+09:00",
         metadata={"signer_id": "unsigned", "verified": False},
