@@ -5,6 +5,27 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — M8.1 skeleton: CognitiveMeshPanel (2026-05-19)
+
+llive 側 COG-MESH 全件本実装 (M8.2〜M8.9) を受け、F25 bridge 上に
+cognitive_mesh 3 種 event 表示パネルを skeleton 配備。実 Timeline emit
+配線は次セッション。
+
+- **新モジュール** `llove/views/llive/cognitive_mesh_panel.py`:
+  - `COG_EVENT_TYPES` 集合 (`cog_proactive_utterance` /
+    `cog_risk_alert` / `cog_quarantine_pending`)
+  - `CogEntry` dataclass + `CogKind` Literal
+  - `render_panel(entries, max_lines)` — pure rendering, newest-first
+  - `CognitiveMeshPanel(Static, View)` — idempotent feed_events
+    (event_id dedup), `entry_count()` / `latest()` / `clear()` API
+  - `make_mock_cog_events(n)` fixture
+- **既存拡張** `llove/views/llive/dispatch.py` (backward compatible):
+  - `KNOWN_EVENT_TYPES` に COG_EVENT_TYPES を union
+  - `DispatchResult.cog_added: int = 0` field 追加
+  - `dispatch_events(... cog=...)` / `TimelinePollDriver.cog` 追加
+- **テスト** `tests/test_cognitive_mesh_panel.py` 15 件 (全件 PASS)
+- 既存 786 PASS / 既存失敗 6 件 (image_tool baseline) regress 無し
+
 ### Added — F25 (e) Dispatch helper + TimelinePollDriver (2026-05-14)
 
 3 viewer (BWTDashboard / RouteTraceViewer / MemoryLinkVizPanel) への
