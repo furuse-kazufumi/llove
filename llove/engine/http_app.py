@@ -132,6 +132,11 @@ def make_app() -> FastAPI:
           llive is an optional runtime peer)
         - LLM-level / backend errors are surfaced inside ``result.status`` /
           ``result.error`` (200 with status="error"), not as HTTP errors.
+
+        On completion, emits a ``brief_done`` event on the engine bus so
+        any active ``/api/v1/annotations/stream`` subscriber sees the
+        terminal state. Phase h.2.b will add ``annotation`` /
+        ``stage_complete`` emits once llive exposes a hook into BriefRunner.
         """
         # Lazy-import to preserve llove independence (feedback_independence_principle).
         try:
@@ -147,7 +152,7 @@ def make_app() -> FastAPI:
                 },
             ) from None
 
-        return tool_submit_brief(
+        payload = tool_submit_brief(
             goal=req.goal,
             brief_id=req.brief_id,
             constraints=list(req.constraints),
@@ -159,4 +164,119 @@ def make_app() -> FastAPI:
             approval_required=bool(req.approval_required),
         )
 
+        result = payload.get("result", {}) if isinstance(payload, dict) else {}
+        get_default_bus().emit(
+            "brief_done",
+            data={"status": result.get("status"), "rationale": result.get("rationale")},
+            brief_id=result.get("brief_id"),
+        )
+        return payload
+
+    @app.get("/api/v1/annotations/stream")
+    async def annotations_stream(
+        request: Request,
+        brief_id: str | None = None,
+        target_layer: str | None = None,
+        namespaces: str | None = None,
+    ) -> StreamingResponse:
+        """F25 Phase h.2 — SSE stream of brief events.
+
+        Query params (docs/design/f25-phase-h-e2e.md 4.6.2):
+
+        * ``brief_id`` — filter to a single brief; omit = all
+        * ``target_layer`` — filter by ``target_layer`` (e.g. ``llove``).
+          ``None`` (unset) target layer is treated as "any" and always passes.
+        * ``namespaces`` — CSV of namespaces (applies to ``annotation`` events
+          only; other event types always pass)
+
+        Resume: ``Last-Event-ID`` header replays buffered events with
+        ``seq > last_event_id`` (best-effort, bounded by the engine buffer).
+        """
+        last_event_id_raw = request.headers.get("last-event-id", "0")
+        try:
+            since_seq = int(last_event_id_raw)
+        except ValueError:
+            since_seq = 0
+
+        ns_set: set[str] | None = (
+            {n.strip() for n in namespaces.split(",") if n.strip()}
+            if namespaces
+            else None
+        )
+
+        def matches(ev: BriefEvent) -> bool:
+            if brief_id is not None and ev.brief_id != brief_id:
+                return False
+            if (
+                target_layer is not None
+                and ev.target_layer is not None
+                and ev.target_layer != target_layer
+            ):
+                return False
+            if ev.event_type == "annotation" and ns_set is not None:
+                if ev.namespace not in ns_set:
+                    return False
+            return True
+
+        heartbeat_interval = float(os.environ.get("LLOVE_BRIEF_HEARTBEAT_S", "15"))
+
+        return StreamingResponse(
+            _sse_stream(get_default_bus(), matches, since_seq, heartbeat_interval),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "X-Accel-Buffering": "no",  # disable nginx buffering if proxied
+            },
+        )
+
     return app
+
+
+def _format_sse(ev: BriefEvent) -> bytes:
+    """Encode one BriefEvent as a single SSE message."""
+    payload: dict[str, Any] = {"ts": ev.ts}
+    if ev.brief_id is not None:
+        payload["brief_id"] = ev.brief_id
+    if ev.event_type == "annotation":
+        payload["namespace"] = ev.namespace
+        payload["target_layer"] = ev.target_layer
+    payload.update(ev.data)
+    body = json.dumps(payload, separators=(",", ":"), sort_keys=True)
+    return (
+        f"event: {ev.event_type}\n"
+        f"id: {ev.seq}\n"
+        f"data: {body}\n\n"
+    ).encode("utf-8")
+
+
+async def _sse_stream(
+    bus: BriefEventBus,
+    matches,  # type: ignore[no-untyped-def]
+    since_seq: int,
+    heartbeat_interval: float,
+) -> AsyncIterator[bytes]:
+    """Yield SSE-formatted bytes — replay buffer, then live tail with heartbeat."""
+    # 1. Replay buffered events newer than since_seq (Last-Event-ID resume)
+    for ev in bus.replay_since(since_seq):
+        if matches(ev):
+            yield _format_sse(ev)
+
+    # 2. Subscribe for live events
+    q: asyncio.Queue[BriefEvent] = asyncio.Queue(maxsize=1024)
+    bus._register(q)  # noqa: SLF001 — engine-internal coupling
+    try:
+        while True:
+            try:
+                ev = await asyncio.wait_for(q.get(), timeout=heartbeat_interval)
+            except asyncio.TimeoutError:
+                heartbeat = BriefEvent(
+                    seq=0,
+                    event_type="heartbeat",
+                    data={},
+                )
+                yield _format_sse(heartbeat)
+                continue
+            if matches(ev):
+                yield _format_sse(ev)
+    finally:
+        bus._unregister(q)  # noqa: SLF001
