@@ -93,6 +93,8 @@ def test_cog_entry_from_quarantine_event_unsigned() -> None:
 def test_cog_entry_returns_none_for_unrelated_event() -> None:
     ev = TimelineEvent(
         event_id="e5",
+        task_id="",
+        node_id="",
         event_type="bwt_summary",
         timestamp_utc="2026-05-19T10:00:00+09:00",
         metadata={},
