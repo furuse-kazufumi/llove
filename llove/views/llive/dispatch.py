@@ -88,6 +88,7 @@ def dispatch_events(
     bwt: BWTDashboard | None = None,
     trace: RouteTraceViewer | None = None,
     link: MemoryLinkVizPanel | None = None,
+    cog: CognitiveMeshPanel | None = None,
 ) -> DispatchResult:
     """Split ``events`` by ``event_type`` and feed each viewer.
 
@@ -99,6 +100,7 @@ def dispatch_events(
     bwt_evs: list[TimelineEvent] = []
     trace_evs: list[TimelineEvent] = []
     link_evs: list[TimelineEvent] = []
+    cog_evs: list[TimelineEvent] = []
     unknown = 0
     for ev in events:
         if ev.event_type == "bwt_summary":
@@ -107,6 +109,8 @@ def dispatch_events(
             trace_evs.append(ev)
         elif ev.event_type == "concept_update":
             link_evs.append(ev)
+        elif ev.event_type in COG_EVENT_TYPES:
+            cog_evs.append(ev)
         else:
             unknown += 1
 
@@ -114,6 +118,7 @@ def dispatch_events(
     bwt_added = 0
     trace_added = 0
     link_added = 0
+    cog_added = 0
 
     if bwt is not None and bwt_evs:
         bwt_added = bwt.feed_events(bwt_evs)
@@ -130,10 +135,16 @@ def dispatch_events(
     elif link is None:
         unrouted += len(link_evs)
 
+    if cog is not None and cog_evs:
+        cog_added = cog.feed_events(cog_evs)
+    elif cog is None:
+        unrouted += len(cog_evs)
+
     return DispatchResult(
         bwt_added=bwt_added,
         trace_added=trace_added,
         link_added=link_added,
+        cog_added=cog_added,
         unrouted=unrouted,
         unknown=unknown,
     )
