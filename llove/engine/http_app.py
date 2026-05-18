@@ -268,8 +268,16 @@ async def _sse_stream(
     matches,  # type: ignore[no-untyped-def]
     since_seq: int,
     heartbeat_interval: float,
+    max_duration: float = 0.0,
 ) -> AsyncIterator[bytes]:
-    """Yield SSE-formatted bytes — replay buffer, then live tail with heartbeat."""
+    """Yield SSE-formatted bytes — replay buffer, then live tail with heartbeat.
+
+    ``max_duration > 0`` → terminate the stream after that many wall-clock
+    seconds (client must reconnect with ``Last-Event-ID``). ``0`` = no limit.
+    """
+    loop = asyncio.get_event_loop()
+    deadline = loop.time() + max_duration if max_duration > 0 else None
+
     # 1. Replay buffered events newer than since_seq (Last-Event-ID resume)
     for ev in bus.replay_since(since_seq):
         if matches(ev):
@@ -280,9 +288,22 @@ async def _sse_stream(
     bus._register(q)  # noqa: SLF001 — engine-internal coupling
     try:
         while True:
+            if deadline is not None and loop.time() >= deadline:
+                return
+            # Cap the await on the smaller of heartbeat_interval / remaining-deadline
+            wait_for = heartbeat_interval
+            if deadline is not None:
+                remaining = deadline - loop.time()
+                if remaining <= 0:
+                    return
+                wait_for = min(wait_for, remaining)
             try:
-                ev = await asyncio.wait_for(q.get(), timeout=heartbeat_interval)
+                ev = await asyncio.wait_for(q.get(), timeout=wait_for)
             except asyncio.TimeoutError:
+                # Distinguish heartbeat (timeout == heartbeat_interval) from
+                # deadline-cap (timeout was shorter than heartbeat_interval).
+                if deadline is not None and loop.time() >= deadline:
+                    return
                 heartbeat = BriefEvent(
                     seq=0,
                     event_type="heartbeat",
