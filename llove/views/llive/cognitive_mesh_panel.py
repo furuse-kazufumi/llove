@@ -186,6 +186,8 @@ def make_mock_cog_events(n: int = 3) -> list[TimelineEvent]:
         events.append(
             TimelineEvent(
                 event_id=f"cog-mock-{i:03d}",
+                task_id="",
+                node_id="",
                 event_type=kind,
                 timestamp_utc=f"2026-05-19T10:0{i % 10}:00+09:00",
                 metadata=md,
