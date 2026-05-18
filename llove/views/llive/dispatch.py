@@ -24,6 +24,10 @@ from dataclasses import dataclass
 
 from llove.mcp.client import TimelineClient, TimelineEvent
 from llove.views.llive.bwt_dashboard import BWTDashboard
+from llove.views.llive.cognitive_mesh_panel import (
+    COG_EVENT_TYPES,
+    CognitiveMeshPanel,
+)
 from llove.views.llive.memory_link_panel import MemoryLinkVizPanel
 from llove.views.llive.route_trace_viewer import RouteTraceViewer
 
@@ -31,7 +35,7 @@ from llove.views.llive.route_trace_viewer import RouteTraceViewer
 # カウントするための区別。
 KNOWN_EVENT_TYPES: frozenset[str] = frozenset(
     {"bwt_summary", "route_trace", "concept_update"}
-)
+) | COG_EVENT_TYPES
 
 
 @dataclass(frozen=True)
