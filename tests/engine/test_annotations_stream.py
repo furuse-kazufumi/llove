@@ -28,8 +28,9 @@ from llove.engine.brief_event_bus import (
 
 @pytest.fixture(autouse=True)
 def _fast_heartbeat(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Speed up heartbeat so tests don't wait 15 s."""
+    """Speed up heartbeat + hard cap stream duration so tests never hang."""
     monkeypatch.setenv("LLOVE_BRIEF_HEARTBEAT_S", "0.1")
+    monkeypatch.setenv("LLOVE_BRIEF_SSE_MAX_DURATION_S", "2.0")
     reset_default_bus()
     yield
     reset_default_bus()
