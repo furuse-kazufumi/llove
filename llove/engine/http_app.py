@@ -219,9 +219,23 @@ def make_app() -> FastAPI:
             return True
 
         heartbeat_interval = float(os.environ.get("LLOVE_BRIEF_HEARTBEAT_S", "15"))
+        # 0 / unset = no auto-close; positive = max wall-clock seconds before the
+        # stream auto-terminates. Tests set a small value to avoid hangs; production
+        # may set e.g. 600 to enforce a 10-minute idle timeout via the client.
+        max_duration_raw = os.environ.get("LLOVE_BRIEF_SSE_MAX_DURATION_S", "0")
+        try:
+            max_duration = float(max_duration_raw)
+        except ValueError:
+            max_duration = 0.0
 
         return StreamingResponse(
-            _sse_stream(get_default_bus(), matches, since_seq, heartbeat_interval),
+            _sse_stream(
+                get_default_bus(),
+                matches,
+                since_seq,
+                heartbeat_interval,
+                max_duration,
+            ),
             media_type="text/event-stream",
             headers={
                 "Cache-Control": "no-cache",
