@@ -45,12 +45,13 @@ class DispatchResult:
     bwt_added: int = 0
     trace_added: int = 0
     link_added: int = 0
+    cog_added: int = 0  # M8.1 cog mesh events
     unrouted: int = 0  # 既知 event_type だが viewer=None の数
     unknown: int = 0   # KNOWN_EVENT_TYPES に無い event_type の数
 
     @property
     def total_added(self) -> int:
-        return self.bwt_added + self.trace_added + self.link_added
+        return self.bwt_added + self.trace_added + self.link_added + self.cog_added
 
     def status_line(self) -> str:
         """ステータスバー向けの 1 行サマリ.
