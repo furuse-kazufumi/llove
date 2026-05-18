@@ -47,6 +47,8 @@ def test_cog_entry_from_proactive_event() -> None:
 def test_cog_entry_from_risk_event() -> None:
     ev = TimelineEvent(
         event_id="e2",
+        task_id="",
+        node_id="",
         event_type="cog_risk_alert",
         timestamp_utc="2026-05-19T10:00:00+09:00",
         metadata={"model_name": "critical_logs", "score": 0.85},
