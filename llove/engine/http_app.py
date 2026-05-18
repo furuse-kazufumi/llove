@@ -26,13 +26,29 @@ from __future__ import annotations
 from typing import Any
 
 try:
-    from fastapi import FastAPI
+    from fastapi import FastAPI, HTTPException
+    from pydantic import BaseModel, Field
 except ImportError as exc:  # pragma: no cover
     raise ImportError(
         "llove engine HTTP layer requires fastapi"
     ) from exc
 
 from .info import engine_info
+
+
+# F25 Phase h.1 — request schema mirrors llive.mcp.tools.tool_submit_brief.
+# Kept here (not in a separate module) so the Phase-1 skeleton stays in one file.
+# Defaults match docs/design/f25-phase-h-e2e.md 4.6.1 (draft v0.2, 2026-05-18).
+class BriefSubmitRequest(BaseModel):
+    goal: str = Field(..., min_length=1, description="Brief 目標. 空文字は 400")
+    brief_id: str | None = None
+    constraints: list[str] = Field(default_factory=list)
+    source: str = "engine"
+    priority: float = 0.5
+    backend: str = ""
+    tools: list[str] = Field(default_factory=list)
+    success_criteria: list[str] = Field(default_factory=list)
+    approval_required: bool = True
 
 
 def make_app() -> FastAPI:
