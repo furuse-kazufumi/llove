@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from llove.events import Event, EventKind
 from llove.views import mermaid_render as mr
 from llove.views import svg_render as sv
