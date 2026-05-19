@@ -145,15 +145,37 @@ def test_unknown_diagram_kind_is_left_intact(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_default_renderers_cover_mermaid_and_svg(tmp_path: Path) -> None:
+def test_default_renderers_cover_mermaid_and_svg(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """diagram_renderers を省略しても mermaid / svg 両方の既定 renderer が動く.
 
     既定 renderer は実際に mmdc / rsvg-convert を呼ぶが、未インストール
     環境では ASCII fallback に降りるので本文に元 source の抜粋が残る。
-    """
-    from llove.views.markdown_view import MarkdownView
 
-    v = MarkdownView(diagram_render=True, diagram_cache_dir=tmp_path)
+    環境に chafa 等の image tool がインストールされていると
+    `find_image_tool()` がそれを拾ってしまうため, 各 render モジュールの
+    `shutil.which` を一律 None に固定して「画像ツール一切なし」を再現する.
+    """
+    from llove.views import (
+        dot_render,
+        markdown_view,
+        mermaid_render,
+        plantuml_render,
+        svg_render,
+        svgbob_render,
+    )
+
+    for mod in (
+        dot_render,
+        mermaid_render,
+        plantuml_render,
+        svg_render,
+        svgbob_render,
+    ):
+        monkeypatch.setattr(mod.shutil, "which", lambda name: None)
+
+    v = markdown_view.MarkdownView(diagram_render=True, diagram_cache_dir=tmp_path)
     # mermaid: ASCII fallback で元 source が残る
     v.feed(_narration("```mermaid\nflowchart LR\nA --> B\n```\n"))
     assert "A --> B" in v.last_render
