@@ -123,12 +123,19 @@ class LoveApp(App):
                 yield self._spc
             self._audit = AuditLogView()
             yield self._audit
+            # M8.1 — Cognitive Mesh panel (env-gated, audit log の下).
+            # 既定無効. LLOVE_ENABLE_COG_MESH=1 で有効化.
+            if self._cog_mesh_enabled:
+                self._cog_mesh_panel = CognitiveMeshPanel()
+                yield self._cog_mesh_panel
             self._narration: NarrationView | None = None
             if self._with_narration:
                 self._narration = NarrationView()
                 yield self._narration
         yield Footer()
         self._views = [self._sensor, self._spc, self._audit]
+        if self._cog_mesh_panel is not None:
+            self._views.append(self._cog_mesh_panel)
         if self._narration is not None:
             self._views.append(self._narration)
 
