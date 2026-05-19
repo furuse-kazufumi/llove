@@ -98,6 +98,9 @@ class LoveApp(App):
         self._log_file: TextIO | None = None
         # Pull localised app subtitle so it changes with --lang.
         self.sub_title = t("ui.subtitle")
+        # M8.1 — optional Cognitive Mesh panel (env-gated, off by default).
+        self._cog_mesh_enabled = os.environ.get(ENV_ENABLE_COG_MESH, "") == "1"
+        self._cog_mesh_panel: CognitiveMeshPanel | None = None
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
