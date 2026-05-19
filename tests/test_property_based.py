@@ -36,6 +36,7 @@ _payload = st.dictionaries(
 )
 
 
+@settings(deadline=None)  # Windows での初回 import で 200ms 超えるケースあり (flaky 防止)
 @given(kind=st.sampled_from(list(EventKind)), payload=_payload, source_id=st.text(max_size=24))
 def test_event_roundtrip_through_json(kind: EventKind, payload: dict, source_id: str) -> None:
     """Any constructible Event must survive a full JSON roundtrip."""
