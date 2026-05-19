@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import os
 from pathlib import Path
 from typing import TextIO
 
@@ -19,9 +20,14 @@ from llove.sources.base import DataSource
 from llove.term.palette import CommandPaletteScreen
 from llove.views.audit_log import AuditLogView
 from llove.views.base import View
+from llove.views.llive.cognitive_mesh_panel import CognitiveMeshPanel
 from llove.views.narration import NarrationView
 from llove.views.sensor_stream import SensorStreamView
 from llove.views.spc_chart import SPCChartView
+
+# M8.1 LoveApp 統合 — env=1 で CognitiveMeshPanel を attach.
+# 既定無効 (LoveApp の既存 layout は破壊しない).
+ENV_ENABLE_COG_MESH = "LLOVE_ENABLE_COG_MESH"
 
 
 class LoveApp(App):
