@@ -237,9 +237,13 @@ def test_render_plantuml_falls_back_to_ascii_without_plantuml(
 
 
 def test_render_plantuml_falls_back_to_ascii_without_image_tool(
-    tmp_path: Path,
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     from llove.views import plantuml_render
+
+    # image_tool=None でも find_image_tool() が環境上の chafa 等を拾うため,
+    # PATH 検索を抑止して「画像ツール一切なし」を再現する.
+    monkeypatch.setattr(plantuml_render.shutil, "which", lambda name: None)
 
     def fake_runner(argv: list[str]) -> int:
         puml_path = Path(argv[-1])
