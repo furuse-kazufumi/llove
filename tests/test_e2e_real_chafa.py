@@ -48,6 +48,11 @@ def test_real_e2e_mermaid_to_chafa_via_pane() -> None:
             svg,
             mmdc_path=mmdc,
         )
+        # mmdc が PATH 上に存在しても puppeteer / node のセットアップ
+        # 不備で SVG 生成に失敗するケースがある (Windows でよく見る).
+        # その場合は実機 E2E の前提が崩れているので skip する.
+        if result is None:
+            pytest.skip(f"mmdc at {mmdc} failed to generate SVG (env-specific)")
         assert result == svg
         assert svg.stat().st_size > 100  # 実 SVG のはず (~12 KB)
 
