@@ -66,14 +66,62 @@ def test_engine_endpoint(client: TestClient) -> None:
     assert "sources" in body["capabilities"]
 
 
-def test_audit_deps_stub_shape(client: TestClient) -> None:
-    """Phase-1 stub: returns the expected JSON shape with zero deps."""
+def test_audit_deps_shape(client: TestClient) -> None:
+    """Phase 1 (stub) or Phase 2 (proxy) — both must expose the same shape.
+
+    The endpoint dynamically picks Phase 2 when llmesh is importable in
+    the same environment (2026-05-23 wiring). The skeleton shape — keys
+    and value types — stays identical so UIs render either mode.
+    """
+    response = client.get("/api/v1/audit/deps")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["metadata"]["phase"] in ("1-skeleton", "2-proxy")
+    # Same envelope for both modes
+    assert isinstance(body["summary"]["total"], int)
+    assert isinstance(body["summary"]["origin_breakdown"], dict)
+    assert isinstance(body["summary"]["supply_risk"], dict)
+    for key in ("high", "medium", "low", "unknown"):
+        assert key in body["summary"]["supply_risk"]
+    assert isinstance(body["dependencies"], list)
+    if body["metadata"]["phase"] == "1-skeleton":
+        # Phase-1 fallback must reveal why proxy fell back.
+        assert body["summary"]["total"] == 0
+        assert "reason" in body["metadata"]
+    else:
+        # Phase-2 proxy must expose at least one dep in the test env.
+        assert body["summary"]["total"] >= 1
+        assert any(
+            d.get("name") for d in body["dependencies"]
+        ), "proxy returned empty dependencies — broken upstream"
+
+
+def test_audit_deps_phase1_fallback_when_llmesh_missing(
+    client: TestClient, monkeypatch
+) -> None:
+    """Force Phase-1 fallback by hiding llmesh in sys.modules."""
+    import sys
+    # Remove every cached llmesh.* entry; freshly importing will see the
+    # ImportError we inject below.
+    cached = [k for k in sys.modules if k == "llmesh" or k.startswith("llmesh.")]
+    for k in cached:
+        monkeypatch.delitem(sys.modules, k, raising=False)
+
+    real_import = __builtins__["__import__"] if isinstance(__builtins__, dict) else __builtins__.__import__
+
+    def fake_import(name, globals=None, locals=None, fromlist=(), level=0):
+        if name == "llmesh" or name.startswith("llmesh."):
+            raise ModuleNotFoundError(f"No module named {name!r}", name=name.split(".")[0])
+        return real_import(name, globals, locals, fromlist, level)
+
+    monkeypatch.setattr("builtins.__import__", fake_import)
+
     response = client.get("/api/v1/audit/deps")
     assert response.status_code == 200
     body = response.json()
     assert body["metadata"]["phase"] == "1-skeleton"
+    assert body["metadata"]["missing_module"] == "llmesh"
     assert body["summary"]["total"] == 0
-    assert isinstance(body["dependencies"], list)
 
 
 def test_offline_check_reports_clean(client: TestClient) -> None:
