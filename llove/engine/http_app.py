@@ -79,28 +79,44 @@ def make_app() -> FastAPI:
 
     @app.get("/api/v1/audit/deps")
     def audit_deps() -> dict[str, Any]:
-        """Placeholder: full impl delegates to llmesh.cli.deps_audit.
+        """Phase 2 (2026-05-23): proxy ``llmesh.cli.deps_audit`` when present.
 
-        Phase 1 returns a deterministic stub so UIs can wire the call
-        and exercise the round-trip. Phase 2 will import the real
-        analyser when llmesh is installed alongside llove.
+        Falls back to the Phase-1 deterministic stub when llmesh is not
+        installed (feedback_independence_principle: llove engine ships
+        standalone, llmesh is an optional peer via the ``[llmesh]`` extra).
+        Wiring lets UIs render real supply-chain audit results without
+        each frontend re-implementing the analyser.
         """
-        return {
-            "metadata": {
-                "tool": "llove engine /api/v1/audit/deps (stub)",
-                "phase": "1-skeleton",
-            },
-            "summary": {
-                "total": 0,
-                "origin_breakdown": {},
-                "supply_risk": {"high": 0, "medium": 0, "low": 0, "unknown": 0},
-            },
-            "dependencies": [],
-            "note": (
-                "Phase-1 stub. Run `python -m llmesh.cli.deps_audit --json` "
-                "for real data; Phase-2 will proxy it through this endpoint."
-            ),
-        }
+        try:
+            from llmesh.cli.deps_audit import _to_json as _llmesh_to_json
+            from llmesh.supply_chain import Origins, audit_installed
+        except ModuleNotFoundError as exc:
+            return {
+                "metadata": {
+                    "tool": "llove engine /api/v1/audit/deps (stub)",
+                    "phase": "1-skeleton",
+                    "reason": "llmesh not installed in this environment",
+                    "missing_module": exc.name,
+                },
+                "summary": {
+                    "total": 0,
+                    "origin_breakdown": {},
+                    "supply_risk": {"high": 0, "medium": 0, "low": 0, "unknown": 0},
+                },
+                "dependencies": [],
+                "note": (
+                    "Phase-1 stub. Install llmesh to enable real-data proxy "
+                    "(pip install 'llmesh-llove[llmesh]')."
+                ),
+            }
+
+        entries = audit_installed(origins=Origins())
+        payload = json.loads(_llmesh_to_json(entries))
+        payload["metadata"]["tool"] = (
+            "llove engine /api/v1/audit/deps (proxy -> llmesh.cli.deps_audit)"
+        )
+        payload["metadata"]["phase"] = "2-proxy"
+        return payload
 
     @app.get("/api/v1/audit/offline-check")
     def offline_check() -> dict[str, Any]:
