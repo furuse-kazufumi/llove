@@ -97,10 +97,17 @@ def _build_animated_svg(frames_svg: list[str], frame_duration_s: float) -> str:
     """Combine multiple static SVGs into a single animated SVG via **SMIL**.
 
     Each frame is wrapped in ``<g id="frame-i" display="none">`` and made
-    visible only during its 1/n slice of the cycle through a SMIL
-    ``<set attributeName="display" to="inline" begin=.. dur=.. .../>`` that
-    repeats indefinitely. Frame 0 also keeps a static ``display="none"`` →
-    its ``<set>`` flips it on at ``begin="0s"``, so the loop is seamless.
+    visible only during its 1/n slice of the cycle through a single SMIL
+    ``<animate attributeName="display" calcMode="discrete" .../>`` whose
+    ``values`` / ``keyTimes`` toggle ``inline`` exactly during that frame's
+    window and ``none`` otherwise. ``repeatCount="indefinite"`` loops the whole
+    cycle seamlessly.
+
+    ``<animate>`` (rather than a pair of repeating ``<set>`` elements) is used
+    because a discrete ``values``/``keyTimes`` schedule over the full cycle is
+    unambiguous: each frame's group owns one animation timeline that restarts
+    cleanly every loop, with no risk of a ``<set>``'s own ``dur`` re-firing at
+    the wrong cadence.
 
     No CSS ``animation`` / ``@keyframes`` and no ``<script>`` — only SMIL,
     which is the empirically-verified path for ``<img>`` embedding on
@@ -117,25 +124,31 @@ def _build_animated_svg(frames_svg: list[str], frame_duration_s: float) -> str:
     inner_groups: list[str] = []
     for i, svg in enumerate(frames_svg):
         _, inner = _strip_svg_tags(_self_contain(svg))
-        begin = i * frame_duration_s
-        # Frame visible for one slice, then hidden, looping over the whole
-        # cycle. Two <set> elements per frame keep state crisp (snap in / out)
-        # and self-restoring at the start of each loop.
-        set_on = (
-            f'<set attributeName="display" to="inline" '
-            f'begin="{begin:.4f}s" dur="{frame_duration_s:.4f}s" '
-            f'repeatCount="indefinite"/>'
-        )
-        # Hide again at the end of this frame's slice (i.e. when the next frame
-        # begins). The last frame hides at the cycle boundary.
-        hide_begin = (i + 1) * frame_duration_s % total_duration
-        set_off = (
-            f'<set attributeName="display" to="none" '
-            f'begin="{hide_begin:.4f}s" '
-            f'repeatCount="indefinite"/>'
+        # Discrete display schedule over the full cycle. keyTimes must be
+        # strictly increasing and span [0, 1]; the value held from each keyTime
+        # until the next is the value at that index (calcMode="discrete").
+        start = i / n
+        end = (i + 1) / n
+        if i == 0:
+            # Visible from t=0; collapsing a leading 0;0 keyTime pair is
+            # illegal, so start the schedule at 0 with "inline".
+            values = "inline;none"
+            key_times = f"0;{end:.6f}"
+        elif i == n - 1:
+            # Visible until the cycle boundary; no trailing "none" segment
+            # needed (and a 1;1 pair would be illegal).
+            values = "none;inline"
+            key_times = f"0;{start:.6f}"
+        else:
+            values = "none;inline;none"
+            key_times = f"0;{start:.6f};{end:.6f}"
+        animate = (
+            '<animate attributeName="display" calcMode="discrete" '
+            f'values="{values}" keyTimes="{key_times}" '
+            f'dur="{total_duration:.4f}s" repeatCount="indefinite"/>'
         )
         inner_groups.append(
-            f'<g id="frame-{i}" display="none">{set_on}{set_off}{inner}</g>'
+            f'<g id="frame-{i}" display="none">{animate}{inner}</g>'
         )
 
     # Compose final SVG. The xmlns URI is a namespace identifier (never
