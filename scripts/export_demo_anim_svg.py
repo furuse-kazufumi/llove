@@ -3,10 +3,22 @@
 
 Textual の `App.save_screenshot()` は静的 SVG しか返さないので、本スクリプト
 では `run_test` + `pilot.pause` を組合せて **複数フレーム** を取り、それらを
-1 つの SVG に CSS keyframes で結合する。
+1 つの SVG に **SMIL** (`<set>` による display 切替) で結合する。
 
-将棋 (shogi) / mindmap / RAG など、時間軸を持つ scenario で動きを伝えるの
-に有効。
+設計判断 (2026-05-23 普及ファネル即効):
+- **SMIL のみ** (`<set attributeName="display" .../>`) を使う。経験的事実として
+  SMIL は Qiita / GitHub の ``<img>`` 内で animate する (連載 #24 で実証済)。
+  一方、SVG-in-``<img>`` 内の CSS ``@keyframes`` は GitHub Camo proxy で
+  剥がされる可能性が高く未検証なので使わない。``<script>`` も使わない。
+- **完全 self-contained** — Rich が埋め込む cdnjs の ``@font-face`` block を
+  全 frame から除去し、``_patch_cjk_fonts`` で CJK monospace fallback chain を
+  注入する。出力 SVG は外部 ``http`` / ``cdnjs`` 参照を一切持たない
+  (root の xmlns 名前空間 URI を除く — これは fetch されない識別子)。
+- **fail-closed validation** — 書き込み前に ``minidom.parseString`` で XML を
+  検証し、malformed なら拒否する。
+
+将棋 (shogi) / SCADA (scada) / mindmap / RAG など、時間軸を持つ scenario で
+動きを伝えるのに有効。
 
 Usage::
 
@@ -22,6 +34,7 @@ import re
 import sys
 import tempfile
 from pathlib import Path
+from xml.dom import minidom
 
 for stream in (sys.stdout, sys.stderr):
     reconfigure = getattr(stream, "reconfigure", None)
@@ -32,10 +45,20 @@ from llove.app import LoveApp
 from llove.demo.scenarios import SCENARIOS, get_scenario
 from llove.i18n import set_locale
 
+# _patch_cjk_fonts is defined alongside the static snapshot tool; reuse it so
+# the CJK monospace fallback chain stays in one place.
+from snapshot_scenario import _patch_cjk_fonts
+
 
 SVG_OPEN_RE = re.compile(r"(<svg[^>]*>)", re.DOTALL)
 SVG_CLOSE_RE = re.compile(r"</svg>\s*$", re.DOTALL)
 VIEWBOX_RE = re.compile(r'viewBox="([^"]+)"')
+# Rich embeds @font-face blocks that reference cdnjs.cloudflare.com. Each block
+# has no nested braces, so a flat `{[^}]*}` match is safe.
+FONT_FACE_RE = re.compile(r"@font-face\s*\{[^}]*\}", re.DOTALL)
+# Rich's generator comment links to textualize.io — strip it to keep the file
+# free of external http references.
+GENERATOR_COMMENT_RE = re.compile(r"<!--\s*Generated with Rich[^>]*-->", re.DOTALL)
 
 
 def _strip_svg_tags(svg_text: str) -> tuple[str, str]:
@@ -51,8 +74,35 @@ def _strip_svg_tags(svg_text: str) -> tuple[str, str]:
     return open_tag, svg_text[inner_start:close_match.start()]
 
 
+def _self_contain(svg_text: str) -> str:
+    """Make one captured frame fully self-contained.
+
+    1. Drop every Rich ``@font-face`` block (they pull woff/woff2 from
+       cdnjs.cloudflare.com — an external dependency that GitHub Camo proxy may
+       strip and that breaks offline rendering).
+    2. Drop the ``Generated with Rich`` comment (links to textualize.io).
+    3. Apply ``_patch_cjk_fonts`` so glyphs render via a local CJK-aware
+       monospace fallback chain instead of the now-removed CDN font.
+    """
+    svg_text = FONT_FACE_RE.sub("", svg_text)
+    svg_text = GENERATOR_COMMENT_RE.sub("", svg_text)
+    svg_text = _patch_cjk_fonts(svg_text)
+    return svg_text
+
+
 def _build_animated_svg(frames_svg: list[str], frame_duration_s: float) -> str:
-    """Combine multiple static SVGs into a single animated SVG via CSS keyframes."""
+    """Combine multiple static SVGs into a single animated SVG via **SMIL**.
+
+    Each frame is wrapped in ``<g id="frame-i" display="none">`` and made
+    visible only during its 1/n slice of the cycle through a SMIL
+    ``<set attributeName="display" to="inline" begin=.. dur=.. .../>`` that
+    repeats indefinitely. Frame 0 also keeps a static ``display="none"`` →
+    its ``<set>`` flips it on at ``begin="0s"``, so the loop is seamless.
+
+    No CSS ``animation`` / ``@keyframes`` and no ``<script>`` — only SMIL,
+    which is the empirically-verified path for ``<img>`` embedding on
+    Qiita / GitHub.
+    """
     if not frames_svg:
         raise ValueError("no frames")
     open_tag, _ = _strip_svg_tags(frames_svg[0])
@@ -60,39 +110,47 @@ def _build_animated_svg(frames_svg: list[str], frame_duration_s: float) -> str:
     viewbox = viewbox_match.group(1) if viewbox_match else "0 0 1280 768"
     n = len(frames_svg)
     total_duration = frame_duration_s * n
-    # Per-frame visible window = 1/n of the cycle. Slight cross-fade omitted
-    # for simplicity (each frame snaps in).
-    keyframes_parts: list[str] = []
-    css_rules: list[str] = []
-    for i in range(n):
-        start_pct = (i / n) * 100
-        end_pct = ((i + 1) / n) * 100
-        slightly_before_end_pct = max(start_pct, end_pct - 0.01)
-        # Each frame: visible during its window, hidden otherwise.
-        css_rules.append(f"#frame-{i} {{ opacity: 0; animation: f{i} {total_duration}s steps(1) infinite; }}")
-        keyframes_parts.append(
-            f"@keyframes f{i} {{"
-            f" 0% {{ opacity: 0; }}"
-            f" {start_pct:.4f}% {{ opacity: 1; }}"
-            f" {slightly_before_end_pct:.4f}% {{ opacity: 1; }}"
-            f" {end_pct:.4f}% {{ opacity: 0; }}"
-            f" 100% {{ opacity: 0; }} }}"
-        )
-    style_block = "<style>" + "".join(css_rules) + "".join(keyframes_parts) + "</style>"
 
     inner_groups: list[str] = []
     for i, svg in enumerate(frames_svg):
-        _, inner = _strip_svg_tags(svg)
-        inner_groups.append(f'<g id="frame-{i}">{inner}</g>')
+        _, inner = _strip_svg_tags(_self_contain(svg))
+        begin = i * frame_duration_s
+        # Frame visible for one slice, then hidden, looping over the whole
+        # cycle. Two <set> elements per frame keep state crisp (snap in / out)
+        # and self-restoring at the start of each loop.
+        set_on = (
+            f'<set attributeName="display" to="inline" '
+            f'begin="{begin:.4f}s" dur="{frame_duration_s:.4f}s" '
+            f'repeatCount="indefinite"/>'
+        )
+        # Hide again at the end of this frame's slice (i.e. when the next frame
+        # begins). The last frame hides at the cycle boundary.
+        hide_begin = (i + 1) * frame_duration_s % total_duration
+        set_off = (
+            f'<set attributeName="display" to="none" '
+            f'begin="{hide_begin:.4f}s" '
+            f'repeatCount="indefinite"/>'
+        )
+        inner_groups.append(
+            f'<g id="frame-{i}" display="none">{set_on}{set_off}{inner}</g>'
+        )
 
-    # Compose final SVG
+    # Compose final SVG. The xmlns URI is a namespace identifier (never
+    # fetched), the only remaining http-prefixed token by design.
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{viewbox}" '
         f'width="100%" preserveAspectRatio="xMidYMid meet">'
-        f"{style_block}"
         + "".join(inner_groups)
         + "</svg>"
     )
+
+
+def _validate_svg(svg_text: str) -> None:
+    """Fail-closed: refuse to write malformed XML.
+
+    Mirrors ``manga-md-poc/mangamd_poc.py``'s ``minidom.parseString`` gate.
+    """
+    minidom.parseString(svg_text.encode("utf-8"))
 
 
 async def _capture_frames(name: str, *, lang: str, size: tuple[int, int], frames: int, frame_delay: float) -> list[str]:
