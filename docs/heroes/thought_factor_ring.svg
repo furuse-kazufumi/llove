@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 480" width="480" height="480" role="img" aria-label="llive 10 思考因子 ring chart">
+<rect width="100%" height="100%" fill="#0d1117"/>
+<g transform="translate(240.0 240.0)">
+<g>
+<animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="6.0s" repeatCount="indefinite"/>
+<g transform="rotate(0.0000)"><rect x="-6" y="-120.4000" width="12" height="92.4000" fill="#79c0ff" opacity="0.805" rx="3"/><text y="-136.4000" text-anchor="middle" fill="#e6edf3" font-size="10" font-family="ui-monospace, Menlo, monospace" opacity="0.85">structurize</text></g>
+<g transform="rotate(36.0000)"><rect x="-6" y="-94.0000" width="12" height="66.0000" fill="#79c0ff" opacity="0.675" rx="3"/><text y="-110.0000" text-anchor="middle" fill="#e6edf3" font-size="10" font-family="ui-monospace, Menlo, monospace" opacity="0.85">recompose</text></g>
+<g transform="rotate(72.0000)"><rect x="-6" y="-133.6000" width="12" height="105.6000" fill="#79c0ff" opacity="0.870" rx="3"/><text y="-149.6000" text-anchor="middle" fill="#e6edf3" font-size="10" font-family="ui-monospace, Menlo, monospace" opacity="0.85">closed_loop</text></g>
+<g transform="rotate(108.0000)"><rect x="-6" y="-107.2000" width="12" height="79.2000" fill="#79c0ff" opacity="0.740" rx="3"/><text y="-123.2000" text-anchor="middle" fill="#e6edf3" font-size="10" font-family="ui-monospace, Menlo, monospace" opacity="0.85">self_extend</text></g>
+<g transform="rotate(144.0000)"><rect x="-6" y="-133.6000" width="12" height="105.6000" fill="#79c0ff" opacity="0.870" rx="3"/><text y="-149.6000" text-anchor="middle" fill="#e6edf3" font-size="10" font-family="ui-monospace, Menlo, monospace" opacity="0.85">uncertainty</text></g>
+<g transform="rotate(180.0000)"><rect x="-6" y="-80.8000" width="12" height="52.8000" fill="#79c0ff" opacity="0.610" rx="3"/><text y="-96.8000" text-anchor="middle" fill="#e6edf3" font-size="10" font-family="ui-monospace, Menlo, monospace" opacity="0.85">exploration</text></g>
+<g transform="rotate(216.0000)"><rect x="-6" y="-146.8000" width="12" height="118.8000" fill="#79c0ff" opacity="0.935" rx="3"/><text y="-162.8000" text-anchor="middle" fill="#e6edf3" font-size="10" font-family="ui-monospace, Menlo, monospace" opacity="0.85">consistency</text></g>
+<g transform="rotate(252.0000)"><rect x="-6" y="-94.0000" width="12" height="66.0000" fill="#79c0ff" opacity="0.675" rx="3"/><text y="-110.0000" text-anchor="middle" fill="#e6edf3" font-size="10" font-family="ui-monospace, Menlo, monospace" opacity="0.85">provenance</text></g>
+<g transform="rotate(288.0000)"><rect x="-6" y="-107.2000" width="12" height="79.2000" fill="#79c0ff" opacity="0.740" rx="3"/><text y="-123.2000" text-anchor="middle" fill="#e6edf3" font-size="10" font-family="ui-monospace, Menlo, monospace" opacity="0.85">multiview</text></g>
+<g transform="rotate(324.0000)"><rect x="-6" y="-80.8000" width="12" height="52.8000" fill="#79c0ff" opacity="0.610" rx="3"/><text y="-96.8000" text-anchor="middle" fill="#e6edf3" font-size="10" font-family="ui-monospace, Menlo, monospace" opacity="0.85">reality_link</text></g>
+</g>
+<text text-anchor="middle" dy="0.35em" fill="#e6edf3" font-size="13" font-family="ui-monospace, Menlo, monospace" opacity="0.7">10-factor</text>
+</g>
+</svg>

@@ -258,6 +258,7 @@ def export_svg(out_path: Path, persona: str | None, factors: str | None, duratio
     from xml.dom import minidom
 
     from llove.export.svg import (
+        THOUGHT_FACTOR_LABELS,
         SvgExportConfig,
         sample_persona_factors,
         thought_factor_ring_svg,
@@ -273,7 +274,7 @@ def export_svg(out_path: Path, persona: str | None, factors: str | None, duratio
         elif factors:
             values = tuple(float(x) for x in factors.split(","))
         else:
-            values = (0.5,) * len(SvgExportConfig and __import__("llove.export.svg", fromlist=["THOUGHT_FACTOR_LABELS"]).THOUGHT_FACTOR_LABELS)
+            values = (0.5,) * len(THOUGHT_FACTOR_LABELS)
         svg = thought_factor_ring_svg(values, config=SvgExportConfig(duration_s=duration))
         # fail-closed: refuse to write malformed XML.
         minidom.parseString(svg.encode("utf-8"))
