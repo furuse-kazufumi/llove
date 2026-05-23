@@ -3,7 +3,8 @@
 
 Textual の `App.save_screenshot()` は静的 SVG しか返さないので、本スクリプト
 では `run_test` + `pilot.pause` を組合せて **複数フレーム** を取り、それらを
-1 つの SVG に **SMIL** (`<set>` による display 切替) で結合する。
+1 つの SVG に **SMIL** (`<animate attributeName="display">` による discrete
+切替) で結合する。
 
 設計判断 (2026-05-23 普及ファネル即効):
 - **SMIL のみ** (`<set attributeName="display" .../>`) を使う。経験的事実として
