@@ -229,5 +229,62 @@ def export(source: str, html_path: Path, duration: float) -> None:
     click.echo(f"wrote {html_path}")
 
 
+@main.command(
+    name="export-svg",
+    help="Render the 10 思考因子 ring chart to a single animated SVG (SMIL).",
+)
+@click.option(
+    "--out",
+    "out_path",
+    required=True,
+    type=click.Path(path_type=Path),
+    help="Output SVG path.",
+)
+@click.option(
+    "--persona",
+    default=None,
+    help="Sample persona id (e.g. oka-kiyoshi, feynman, newton, galois). "
+    "Mutually exclusive with --factors.",
+)
+@click.option(
+    "--factors",
+    default=None,
+    help="Comma-separated 10 affinity values in [0,1], e.g. '0.7,0.5,...'. "
+    "Defaults to a balanced 0.5 vector when neither --persona nor "
+    "--factors is given.",
+)
+@click.option("--duration", type=float, default=6.0, show_default=True, help="Rotation period in seconds.")
+def export_svg(out_path: Path, persona: str | None, factors: str | None, duration: float) -> None:
+    from xml.dom import minidom
+
+    from llove.export.svg import (
+        SvgExportConfig,
+        sample_persona_factors,
+        thought_factor_ring_svg,
+    )
+
+    if persona and factors:
+        click.echo("export-svg failed: pass only one of --persona / --factors", err=True)
+        sys.exit(1)
+
+    try:
+        if persona:
+            values = sample_persona_factors(persona)
+        elif factors:
+            values = tuple(float(x) for x in factors.split(","))
+        else:
+            values = (0.5,) * len(SvgExportConfig and __import__("llove.export.svg", fromlist=["THOUGHT_FACTOR_LABELS"]).THOUGHT_FACTOR_LABELS)
+        svg = thought_factor_ring_svg(values, config=SvgExportConfig(duration_s=duration))
+        # fail-closed: refuse to write malformed XML.
+        minidom.parseString(svg.encode("utf-8"))
+    except Exception as exc:
+        click.echo(f"export-svg failed: {exc}", err=True)
+        sys.exit(1)
+
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(svg, encoding="utf-8")
+    click.echo(f"wrote {out_path}")
+
+
 if __name__ == "__main__":  # pragma: no cover
     main()
