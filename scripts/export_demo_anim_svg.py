@@ -207,6 +207,14 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  captured {len(frames_svg)} frame(s)")
 
     animated = _build_animated_svg(frames_svg, frame_duration_s=args.frame_delay)
+
+    # fail-closed: validate XML before touching disk.
+    try:
+        _validate_svg(animated)
+    except Exception as exc:  # noqa: BLE001 — surface any parse failure
+        print(f"  ✗ refusing to write malformed SVG: {exc}", file=sys.stderr)
+        return 1
+
     if args.legacy_naming:
         out_path = out_dir / f"{args.scenario}.svg"
     else:
