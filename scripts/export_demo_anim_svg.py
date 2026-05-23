@@ -41,6 +41,9 @@ for stream in (sys.stdout, sys.stderr):
     if callable(reconfigure):
         reconfigure(encoding="utf-8", errors="replace")
 
+# Allow `from snapshot_scenario import ...` regardless of cwd.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
 from llove.app import LoveApp
 from llove.demo.scenarios import SCENARIOS, get_scenario
 from llove.i18n import set_locale
