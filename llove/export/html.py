@@ -14,9 +14,10 @@ from __future__ import annotations
 
 import asyncio
 import html as _html
+import re
 from datetime import datetime
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 from llove.events import Event, EventKind
 from llove.sources.base import DataSource
