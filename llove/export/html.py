@@ -37,13 +37,66 @@ def export_html(*, source_uri: str, output_path: Path, duration_s: float = 5.0) 
 
 
 def _build_source(uri: str) -> DataSource:
+    """Build a DataSource from a URI *or* a plain local path.
+
+    Robust to several forms that the naive ``urlparse(uri).path`` mishandles:
+      - ``mock://...`` or empty string → synthetic :class:`MockSource`.
+      - ``jsonl://`` / ``file://`` URIs, including Windows drive letters that
+        ``urlparse`` leaves with a spurious leading slash (``jsonl:///D:/x`` →
+        path ``/D:/x``).
+      - plain local paths that are *not* valid URIs: ``D:\\x.jsonl`` /
+        ``D:/x.jsonl`` (a single-letter drive that ``urlparse`` reads as a
+        ``scheme``), ``/home/x.jsonl``, ``out/x.jsonl``.
+
+    Fail-closed: an unknown scheme raises ``ValueError`` and a missing JSONL
+    file raises ``FileNotFoundError`` (so a bad path surfaces an error instead of
+    silently producing an empty snapshot).
+    """
     parsed = urlparse(uri)
-    scheme = parsed.scheme or "mock"
-    if scheme == "mock":
+    scheme = parsed.scheme.lower()
+
+    # 1) explicit mock or empty → synthetic source (backward compatible).
+    if scheme == "mock" or uri == "":
         return MockSource()
+
+    # 2) jsonl:// / file:// → normalise to a local filesystem path.
     if scheme in {"jsonl", "file"}:
-        return JSONLSource(parsed.path)
-    raise ValueError(f"unsupported source scheme: {scheme!r}")
+        return _jsonl_source_or_raise(_uri_to_local_path(uri))
+
+    # 3) plain local path: no scheme, or a single-letter "scheme" that is really
+    #    a Windows drive letter (urlparse reads 'D:/x' as scheme='d').
+    if scheme == "" or _looks_like_windows_path(uri):
+        return _jsonl_source_or_raise(Path(uri))
+
+    raise ValueError(
+        f"unsupported source scheme: {scheme!r} "
+        "(use 'mock://', 'jsonl:///<path>', 'file://<path>', or a plain local path)"
+    )
+
+
+def _looks_like_windows_path(s: str) -> bool:
+    """True for ``D:\\x`` / ``D:/x`` — a Windows drive letter, not a URI scheme."""
+    return bool(re.match(r"^[A-Za-z]:[\\/]", s))
+
+
+def _uri_to_local_path(uri: str) -> Path:
+    """Local ``Path`` from a ``jsonl://`` / ``file://`` URI, tolerant of Windows drives."""
+    parsed = urlparse(uri)
+    path = unquote(parsed.path)
+    # 'file://D:/x' can put the drive in netloc (e.g. netloc='D:'); recombine.
+    if re.match(r"^[A-Za-z]:$", parsed.netloc):
+        path = parsed.netloc + path
+    # 'jsonl:///D:/x' → urlparse path '/D:/x'; strip the spurious leading slash.
+    if re.match(r"^/[A-Za-z]:", path):
+        path = path[1:]
+    return Path(path)
+
+
+def _jsonl_source_or_raise(path: Path) -> JSONLSource:
+    """JSONLSource for an existing file; fail-closed (明示エラー) if it is missing."""
+    if not path.exists():
+        raise FileNotFoundError(f"source file not found: {path}")
+    return JSONLSource(path)
 
 
 async def _collect(source: DataSource, duration_s: float) -> list[Event]:
