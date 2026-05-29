@@ -41,6 +41,7 @@ exports/
 out/
 .bandit-report.json
 .snapshot.tmp/
+debug.log
 
 # Mock data caches
 .demo-cache/
