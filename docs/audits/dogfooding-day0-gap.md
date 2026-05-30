@@ -89,7 +89,7 @@ llove/
 
 **Phase 1 で残置 (結合度 3-5)**:
 - views/, widgets/, window/, term/, games/, shogi/
-- これらは TUI 専用として残し、Phase 2 で view 層と分離を検討
+- これらは TUI 専用として残し、Phase 2 でビュー(view)層と分離を検討
 
 ## 5. Week 1 dogfooding スプリントの予測
 
