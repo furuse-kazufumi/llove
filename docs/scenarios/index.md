@@ -6,7 +6,9 @@ nav_order: 5
 
 # Demo Scenarios — SVG Gallery
 
-llove は TUI dashboard としての見え方を、各シナリオに **SVG スクリーンショット**
+> **このページは何か(かみ砕いた説明)**: llove を `llove demo` で動かしたときの「実際の画面」を、機能ごとに 1 枚ずつ SVG 画像として保存・一覧化したギャラリーです。各画面は日本語版(ja)と英語版(en)を並べて掲載し、時間軸のあるものは動く SVG(animated SVG)で残しています。専門用語は [用語集(GLOSSARY.md)](../GLOSSARY.md) を参照してください。
+
+llove は TUI(Text User Interface、テキストユーザーインターフェース) ダッシュボード(dashboard) としての見え方を、各シナリオ(scenario)に **SVG スクリーンショット**
 として階層的に commit していく方針。
 
 階層レイアウト:
