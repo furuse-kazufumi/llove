@@ -1,6 +1,6 @@
 # Contributing demo scenarios to llove
 
-> **かみ砕いた説明:** これは llove のデモ用シナリオ(scenario、デモの筋書き)を新しく追加するための寄稿ガイドです。テンプレートを 1 つコピーして名前と中身を書き換え、一覧に登録するだけで、約 5 分で自分のデモを足せます。用語は初出で「日本語(English)」の形で示します。略語や専門用語の一覧は [GLOSSARY.md](./GLOSSARY.md) を参照してください。
+> **かみ砕いた説明:** これは、llove のデモの筋書き(シナリオ(scenario)。劇の台本のように「次に何を見せるか」を並べたもの)を、自分で新しく作って付け足すためのやり方をまとめた案内です。やり方はかんたんで、見本のファイル(ひな型、料理でいう「型抜きクッキーの型」のようなもの)を 1 つコピーして、名前と中身を書き換え、最後に「メニュー一覧」に名前を登録するだけ。これで約 5 分で自分のデモを 1 つ追加できます。なお、この文章では新しく出てくる言葉を最初に「日本語(English)」の形で書きます。言葉の意味をまとめた一覧は [GLOSSARY.md](./GLOSSARY.md) にあります。
 
 llove ships a small set of scenarios(シナリオ(scenario)) under `llove/demo/scenarios/`. Each one is
 **fully self-contained**, **offline**, and ~100–150 lines of Python. This guide
