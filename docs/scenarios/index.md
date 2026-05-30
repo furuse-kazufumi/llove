@@ -85,7 +85,7 @@ py -3.11 scripts/export_demo_anim_svg.py --scenario=shogi --frames=8
 
 ## Static Gallery (各 scenario × 言語)
 
-各 scenario のディレクトリに `ja.svg` / `en.svg` を配置。Textual の
+各 シナリオ(scenario) のディレクトリに `ja.svg` / `en.svg` を配置。Textual の
 CJK font fallback chain で日本語表記が崩れないよう対策済。
 
 ### Audit
