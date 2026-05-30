@@ -48,7 +48,7 @@
 ## ペインごとの中身
 
 ### 📡 SensorEvent stream  · view
-直近 12 件のセンサー読み取りを時系列で表示。`time / sensor / value` の 3 列。
+直近 12 件のセンサー読み取り(SensorEvent(センサーイベント))をストリーム(stream)として時系列で表示するビュー(view)。`time / sensor / value` の 3 列。
 最下行に直近 40 件の sparkline。Subtitle: `<count> pts | latest <value>`。
 
 ### 📊 SPC chart — CUSUM control  · view
