@@ -59,7 +59,7 @@ class MyThingScenario(DemoScenario):
 | `NARRATION` | narration pane (bottom) | use `narrate(text, title=...)` helper |
 | `INFO` | audit log pane | free-form |
 
-You can add fields freely — views only look at the keys they care about.
+You can add fields freely — views(ビュー(view)) only look at the keys they care about.
 
 ### Lite Markdown in narration
 
