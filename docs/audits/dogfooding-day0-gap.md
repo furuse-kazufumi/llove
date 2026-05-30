@@ -62,7 +62,7 @@ llove/
    「出力する」に特化. これは戦略思索 PART 5 で確認した「llove は LLM 観測 / Research
    IDE が本来の役割」と整合する.
 
-## 4. Engine 抽出可能性評価 (TUI 結合度)
+## 4. Engine 抽出可能性評価 (TUI(Text User Interface、テキストユーザーインターフェース) 結合度)
 
 | Module | 結合度 (1-5) | engine 化方針 |
 |---|---|---|
