@@ -7,7 +7,7 @@
 > 用語の意味は中央用語集 [GLOSSARY.md](GLOSSARY.md) を参照してください (TUI / MCP / ダッシュボード / フェイルクローズド など)。
 
 llmesh の既存 MCP(Model Context Protocol) サーバー + `TimelineStore` を中継 hub として、llive の
-観測 JSONL データを llove の TUI(Text User Interface、テキストユーザーインターフェース) viewer(ビュー) に流す。新規ルーターは追加せず、
+観測 JSONL データを llove の TUI(Text User Interface、テキストユーザーインターフェース) viewer (ビュー(view) 表示) に流す。新規ルーターは追加せず、
 **`/timeline/ingest` という ingest endpoint 1 つを llmesh に足すだけ**で
 連携が成立する設計を採用する (B 案、2026-05-14 確定)。
 
