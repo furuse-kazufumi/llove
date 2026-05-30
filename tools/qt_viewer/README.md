@@ -1,5 +1,10 @@
 # Qt viewers for llove
 
+> **日本語のかみ砕いた説明**
+> これは llove の「目で見る」補助ツールです。llove の シナリオ(scenario)で記録した `vision`(画像・検知枠)や `pointcloud`(回転できる 3D 点群)のデータを、ターミナルではなく Qt の専用ウィンドウでリッチに表示します。llove 本体の依存ではなく、`tools/` に置かれた差し替え可能な独立ツール(別途 `pip install PySide6` が必要)です。llove の基本契約「30 秒で見られるターミナル表示・グラフィック不要」を壊さないため、重い Qt をあえて本体から切り離してあります。
+>
+> → 用語集: [GLOSSARY.md](../../docs/GLOSSARY.md)
+
 Standalone Qt-based viewers that render llove `vision` and `pointcloud`
 scenario events richly — pixels, bounding boxes, rotatable 3D point clouds.
 
