@@ -177,7 +177,7 @@ CJK font fallback chain で日本語表記が崩れないよう対策済。
 
 - `App.save_screenshot()` / `App.export_screenshot()` は Textual 標準機能、
   ターミナル非依存の SVG を生成
-- LLM 呼び出しを必要とする scenario (chat / multimodal) は `MockBackend` 前提
+- LLM 呼び出しを必要とする シナリオ(scenario) (chat / multimodal) は `MockBackend` 前提
 - `--pause` (スナップショット(snapshot)) / `--delay` (animated) は シナリオ(scenario) が描画を開始するまでの時間
 - 日本語の文字化け回避: `snapshot_scenario.py` の `_patch_cjk_fonts()` で
   Fira Code → CJK monospace fallback chain を SVG 内に injection
