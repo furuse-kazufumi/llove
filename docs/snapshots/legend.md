@@ -52,7 +52,7 @@
 最下行に直近 40 件の sparkline。Subtitle: `<count> pts | latest <value>`。
 
 ### 📊 SPC chart — CUSUM control  · view
-状態バナー（**nominal** / **ALARM**）と直近 6 件の CUSUM alarm。
+統計的工程管理(Statistical Process Control, SPC)チャートの状態バナー（**nominal** / **ALARM**）と直近 6 件の累積和(Cumulative Sum, CUSUM) alarm。
 Subtitle: 累計 alarm 件数。
 
 ### 📋 Audit log — audit / LLM / RAG events  · view
