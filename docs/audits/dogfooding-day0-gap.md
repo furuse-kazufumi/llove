@@ -91,7 +91,7 @@ llove/
 - views/, widgets/, window/, term/, games/, shogi/
 - これらは TUI 専用として残し、Phase 2 でビュー(view)層と分離を検討
 
-## 5. Week 1 dogfooding スプリントの予測
+## 5. Week 1 ドッグフーディング(dogfooding) スプリントの予測
 
 ### ✓ できる作業 (4 件) を中心に dogfooding 開始
 
