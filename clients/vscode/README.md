@@ -1,5 +1,9 @@
 # llove VS Code extension (α PoC)
 
+> **日本語のかみ砕いた説明**: これは llove を VS Code 上から使うための拡張機能(クライアント)の説明書です。ローカルで動く llove のエンジンに HTTP で接続し、バージョン情報の表示・依存関係の監査・オフライン状態の確認といった「読み取り専用の観測」機能を IDE に持ち込みます。VS Code マーケットプレイスに依存せず、VSIX ファイルの直接インストールでも導入できる設計です。
+>
+> → 用語集: [../../docs/GLOSSARY.md](../../docs/GLOSSARY.md)
+
 > Phase-1 skeleton — talks to a locally-running `llove-engine` via HTTP.
 > **Marketplace-independent distribution by default.**
 
