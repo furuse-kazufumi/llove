@@ -212,7 +212,7 @@ assert events == []
 1. llive 側で event を書く (writer 補完 = Phase g)
 2. llove 側で viewer を作る (例: `llove/views/llive/foo_viewer.py`)
    - パターン: BWTDashboard / RouteTraceViewer / MemoryLinkVizPanel いずれかに似せる
-   - 防御的パース (`Foo.from_event` で None 返却)、pure render、widget
+   - 防御的パース (`Foo.from_event` で None 返却)、pure render、ウィジェット(widget)
    - mock fixture (`make_mock_foo_events`)
 3. `llove/views/llive/dispatch.py`:
    - `KNOWN_EVENT_TYPES` に追加
