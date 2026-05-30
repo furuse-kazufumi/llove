@@ -189,4 +189,4 @@ CJK font fallback chain で日本語表記が崩れないよう対策済。
 - `scripts/snapshot_all_scenarios.py` — 全 scenario × 全言語の wrapper
 - `scripts/export_demo_anim_svg.py` — animated SVG (N frame 連結)
 - `llove/demo/scenarios/` — 全 scenario の実装
-- `llove/app.py` — `LoveApp` (Textual ベース TUI)
+- `llove/app.py` — `LoveApp` (Textual ベース TUI(Text User Interface、テキストユーザーインターフェース))
