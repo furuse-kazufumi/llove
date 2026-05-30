@@ -60,7 +60,7 @@ Subtitle: 累計 alarm 件数。
 Subtitle: `audit:N · llm:N · rag:N` の小計。
 
 ### 💬 Narration — what's happening, in plain words  · view
-demo シナリオ実行中のみ表示するビュー(view)。Markdown 風（`**bold**` / `` `code` ``）。
+demo シナリオ実行中のみ表示。Markdown 風（`**bold**` / `` `code` ``）。
 Subtitle: `beat <n> · <latest title>`。
 
 ## キーボードとマウスの対応
