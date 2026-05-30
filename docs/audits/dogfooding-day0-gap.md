@@ -110,7 +110,7 @@ llove/
 
 - A/H/K (markdown 編集): F19 scripting IDE を Phase 2 以降で着手
 - C (git): F23 シェル統合を Phase 2 以降で着手
-- D (memory): F19 + memory 専用 view を Phase 3 で着手
+- D (memory): F19 + memory 専用ビュー(view)を Phase 3 で着手
 - F/I (WebSearch/規制調査): HTTP source 経由で実現可能だが優先度低
 - G (pytest): F24 Claude Code 統合の一部
 - J (コード実装): F19 scripting IDE
