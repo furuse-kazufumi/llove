@@ -1,5 +1,7 @@
 # Contributing demo scenarios to llove
 
+> **かみ砕いた説明:** これは llove のデモ用シナリオ(scenario、デモの筋書き)を新しく追加するための寄稿ガイドです。テンプレートを 1 つコピーして名前と中身を書き換え、一覧に登録するだけで、約 5 分で自分のデモを足せます。用語は初出で「日本語(English)」の形で示します。略語や専門用語の一覧は [GLOSSARY.md](./GLOSSARY.md) を参照してください。
+
 llove ships a small set of scenarios under `llove/demo/scenarios/`. Each one is
 **fully self-contained**, **offline**, and ~100–150 lines of Python. This guide
 shows you how to add your own in **about 5 minutes**.
