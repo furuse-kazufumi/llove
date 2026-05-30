@@ -56,7 +56,7 @@
 Subtitle: 累計 alarm 件数。
 
 ### 📋 Audit log — audit / LLM / RAG events  · view
-audit / LLM call / RAG hit / info を新しい順に流すロール。
+監査証跡(Audit / AuditTrail)/ LLM call / 検索拡張生成(Retrieval-Augmented Generation, RAG) hit / info を新しい順に流すロール。
 Subtitle: `audit:N · llm:N · rag:N` の小計。
 
 ### 💬 Narration — what's happening, in plain words  · view
