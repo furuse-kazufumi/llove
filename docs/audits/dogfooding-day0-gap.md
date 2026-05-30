@@ -96,7 +96,7 @@ llove/
 ### ✓ できる作業 (4 件) を中心に dogfooding 開始
 
 - N: 将棋 / chess を見る → 既に実施済
-- O: sensor / SPC / audit ログ表示 → **llmesh 接続環境を作れば dogfooding 開始可**
+- O: sensor / 統計的工程管理(Statistical Process Control, SPC) / audit ログ表示 → **llmesh 接続環境を作れば dogfooding 開始可**
 - P: HTML 出力 → llmesh データを HTML 化して Slack/Issue 貼り付けに使う
 - (Q: typing/tetris 観察)
 
