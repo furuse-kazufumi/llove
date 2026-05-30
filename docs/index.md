@@ -7,7 +7,9 @@ nav_order: 1
 
 # FullSense ™ — llove
 
-> **Part of the [FullSense ™](https://github.com/furuse-kazufumi/llive/blob/main/TRADEMARK.md) family** — `llmesh` ・ `llive` ・ **llove** の 3 製品で構成される FullSense ブランドの中で、本サイトは **llove (TUI dashboard / HITL workbench)** の公式 documentation です。
+> **このページについて(やさしい説明)**: llove は、端末(ターミナル)の中で動く画面表示ツールです。センサーや LLM(大規模言語モデル)から流れてくる情報を、表やグラフのように見やすく並べて表示し、人が見ながら判断・操作できる作業台の役割を果たします。本ページは llove に関する各ドキュメントへの入り口(目次)です。専門用語の意味は [用語集(GLOSSARY.md)](GLOSSARY.md) を参照してください。
+
+> **Part of the [FullSense ™](https://github.com/furuse-kazufumi/llive/blob/main/TRADEMARK.md) family** — `llmesh` ・ `llive` ・ **llove** の 3 製品で構成される FullSense ブランドの中で、本サイトは **llove (TUI(Text User Interface、テキストユーザーインターフェース) ダッシュボード(dashboard) / 人間参加型(Human-in-the-Loop, HITL) ワークベンチ(workbench))** の公式 ドキュメント(documentation) です。
 
 ---
 
