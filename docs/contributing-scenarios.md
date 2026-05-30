@@ -154,7 +154,7 @@ llove demo show?".
   probably teaching too much in one scenario — split it.
 - **Open and close with narrate().** Users need a "what is this" at the start
   and a "so what" at the end.
-- **Speak to the operator, not the implementor.** "When the cumulative sum
+- **Speak to the operator, not the implementor.** "When the cumulative sum(累積和(Cumulative Sum, CUSUM))
   crosses threshold, an alarm fires" is better than `cusum.update_chart()`.
 - **Show, don't tell.** Yield Events first, narrate the meaning second.
 - **Be deterministic for tests.** Accept a `seed` parameter; default to `42`.
