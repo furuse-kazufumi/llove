@@ -38,7 +38,7 @@ flowchart TD
 
 ## Architecture — F25 Bridge (llove ↔ llmesh ↔ llive)
 
-llove は F25 連携基盤を通じて llmesh の MCP hub と llive の memory bus を 1 つの TUI dashboard に統合する。BWT (Bayesian Work Tree) / route trace / memory link を 3 つの viewer に分割表示。
+llove は F25 連携基盤を通じて llmesh の MCP(Model Context Protocol) hub と llive の メモリバス(memory bus) を 1 つの TUI(Text User Interface、テキストユーザーインターフェース) ダッシュボード(dashboard) に統合する。ベイズ作業木(Bayesian Work Tree, BWT) / route trace / memory link を 3 つの ビュー(view) に分割表示。
 
 ```mermaid
 flowchart LR
