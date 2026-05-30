@@ -163,7 +163,7 @@ llove demo show?".
 
 - **No real network calls.** Mock data or hard-coded payloads only.
 - **No filesystem writes.** The scenario should not leave artifacts in the
-  user's directory. (`llove export` is the dedicated path for that.)
+  user's directory. (`llove export`(エクスポート(export)) is the dedicated path for that.)
 - **No imports of LLMesh.** Scenarios should run on a clean
   `pip install llove`. If you want to demonstrate a real LLMesh feature, fake
   the data. We supply `llmesh.export.LloveJSONLExporter` on the LLMesh side
