@@ -150,7 +150,7 @@ llove/
 - Day 1 で観測 pane (sensor/spc/audit) が動かなければ → F25 Phase h E2E が Day 2-7 の
   最優先タスクに昇格
 - Day 1 で 4 pane の 1 つでも空白なら → F9 違反、品質スプリントを最優先化
-- Day 3 までに dogfooding が定着しなければ → F27 / Engine 抽出着手を 1 週間延期、
+- Day 3 までに ドッグフーディング(dogfooding) が定着しなければ → F27 / Engine 抽出着手を 1 週間延期、
   品質スプリント長期化 ([[project-llove-dogfooding-first]] R9 適用)
 
 ---
