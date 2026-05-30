@@ -139,7 +139,7 @@ llove/
 3. **Engine 抽出 Phase 1 (Week 2) で sources + export + mcp + events を engine 化**
    すれば、F27 Research IDE (Week 3) の土台が整う. views / widgets / window 等の
    TUI 専用 layer は Phase 1 では触らない判断
-4. **dogfooding は「観測 + デモ + HTML 出力」だけで開始可能** — 完全カバーを目指す
+4. **ドッグフーディング(dogfooding)は「観測 + デモ + HTML 出力」だけで開始可能** — 完全カバーを目指す
    と着手が遅れる. まず可能な領域で実機運用を回し、不足を Week 2-4 で埋める
 5. **編集機能不在は F19 scripting IDE (Editor/IDE Mode) で解決する設計** だが、これは
    Phase 2-3 (1-3 か月後) の領域. Week 1 内では届かない. dogfooding スプリントは
