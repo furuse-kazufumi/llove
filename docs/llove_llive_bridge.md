@@ -2,8 +2,12 @@
 
 **Status:** Design draft frozen 2026-05-14. 実装は段階着手。
 
-llmesh の既存 MCP サーバー + `TimelineStore` を中継 hub として、llive の
-観測 JSONL データを llove の TUI viewer に流す。新規ルーターは追加せず、
+> **かみ砕いた説明:** この文書は、FullSense ™ 3 製品 (llmesh / llive / llove) を 1 本につなぐ配線図です。llive が出す観測データ (ルートの記録・記憶の更新・ベンチ結果) を、llmesh の MCP(Model Context Protocol) サーバーを中継地点にして、llove の画面 (TUI、テキストユーザーインターフェース) に流し込みます。新しい中継部品は作らず、llmesh に「データの取り込み口」を 1 つ足すだけで連携が成立する、という最小構成の設計をまとめたものです。
+>
+> 用語の意味は中央用語集 [GLOSSARY.md](GLOSSARY.md) を参照してください (TUI / MCP / ダッシュボード / フェイルクローズド など)。
+
+llmesh の既存 MCP(Model Context Protocol) サーバー + `TimelineStore` を中継 hub として、llive の
+観測 JSONL データを llove の TUI(Text User Interface、テキストユーザーインターフェース) viewer(ビュー) に流す。新規ルーターは追加せず、
 **`/timeline/ingest` という ingest endpoint 1 つを llmesh に足すだけ**で
 連携が成立する設計を採用する (B 案、2026-05-14 確定)。
 
