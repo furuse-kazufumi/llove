@@ -125,7 +125,7 @@ class TimelineClient:
 
 - 同期 API (Textual worker thread から呼ぶ前提)
 - httpx 依存性注入 (CI / テスト用に mock transport を差し込める)
-- fail-closed: HTTP error → 空 list + audit log
+- fail-closed(フェイルクローズド): HTTP error → 空 list + audit log
 
 ### Viewers (`llove/views/llive/`)
 
