@@ -1,6 +1,8 @@
 # llove Day-0 Gap Analysis (Week 1 Day 1)
 
-> 2026-05-18 朝着手. Week 1 dogfooding スプリント Day 1 (5/19) 前の予測精度向上が目的.
+> **この文書をひとことで**: llove(TUI(Text User Interface、テキストユーザーインターフェース)製の観測ダッシュボード)を実際の日々の作業で使ってみる「ドッグフーディング(dogfooding)」開始前に、現状の機能で何ができて何が足りないかを棚卸しした監査メモです。結論は「llove は見る・流す・出力するだけの観測専用構造で、編集・操作系が無い」というもの。専門用語は各セクション初出で日本語(英語)の形にし、まとめは末尾の用語集([GLOSSARY.md](../GLOSSARY.md))を参照してください。
+
+> 2026-05-18 朝着手. Week 1 ドッグフーディング(dogfooding)スプリント Day 1 (5/19) 前の予測精度向上が目的.
 > 戦略思索 [[project-llove-dogfooding-first]] + [[project-30day-action-plan-2026-05]] 準拠.
 
 ## 1. 評価軸
