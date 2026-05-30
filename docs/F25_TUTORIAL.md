@@ -78,7 +78,7 @@ print(f"Fetched {len(events)} events. last_error={client.last_error}")
 ```
 
 llmesh が応答しない場合は `events = []` + `client.last_error =
-"connection_error: ..."` で返る (UI を凍結しない fail-closed)。
+"connection_error: ..."` で返る (UI を凍結しない フェイルクローズド(fail-closed))。
 
 ### `TimelinePollDriver` でラップ
 
