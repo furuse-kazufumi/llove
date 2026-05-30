@@ -106,7 +106,7 @@ writer) が立つと自動的に動き出す。
 
 ---
 
-## 3. Textual TUI に組み込む
+## 3. Textual TUI(Text User Interface、テキストユーザーインターフェース) に組み込む
 
 `BWTDashboard` 等は `Static + View` 派生なので、`compose()` でそのまま
 mount できる。`Timer` で周期 polling:
