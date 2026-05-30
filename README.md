@@ -1,5 +1,9 @@
 # 💗 llove
 
+> **かみ砕いた説明（日本語）:** llove は、LLMesh が出すデータ（センサーイベント(SensorEvent)・統計的工程管理(Statistical Process Control, SPC)・検索拡張生成(Retrieval-Augmented Generation, RAG)・監査証跡(Audit / AuditTrail)・トレース(Trace)）を、ターミナル上の美しい TUI(Text User Interface、テキストユーザーインターフェース) ダッシュボード(dashboard)で流して見せる道具です。表示したセッションはそのまま 1 ファイルの HTML にエクスポート(export)して Slack や Issue に貼れます。人間参加型(Human-in-the-Loop, HITL)のワークベンチ(workbench)として、観測・対局(アリーナ(arena))・学習デモまで同じ基盤で動かせます。
+>
+> → 用語集（日本語の用語解説）: [docs/GLOSSARY.md](docs/GLOSSARY.md)
+
 > **Part of the FullSense ™ family** — `llmesh` (secure LLM hub) ・ `llive` (self-evolving memory) ・ **llove** (TUI dashboard) の 3 製品を束ねる FullSense ブランドの中で、TUI ダッシュボードと HITL ワークベンチを担当します。FullSense Spec v1.1 は `llive` リポジトリの `docs/fullsense_spec_eternal.md` 参照。
 
 [![CI](https://github.com/furuse-kazufumi/llove/actions/workflows/ci.yml/badge.svg)](https://github.com/furuse-kazufumi/llove/actions/workflows/ci.yml)
