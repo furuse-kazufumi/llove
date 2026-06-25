@@ -66,12 +66,19 @@ def run_shell(run_dir: str | Path, argv: list[str] | None = None) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    """CLI entry: ``python -m llove.qt <metrics.jsonl>``."""
+    """CLI entry: a metrics file opens the single panel, a run dir opens the shell.
+
+        python -m llove.qt path/to/<run>/metrics.jsonl   # Stage 1 single panel
+        python -m llove.qt path/to/<run>/                 # Stage 2 dockable shell
+    """
     args = list(sys.argv if argv is None else argv)
     if len(args) < 2:
-        sys.stderr.write("usage: python -m llove.qt <metrics.jsonl>\n")
+        sys.stderr.write("usage: python -m llove.qt <metrics.jsonl | run_dir>\n")
         return 2
-    return run_fitness_panel(args[1], argv=args)
+    target = Path(args[1])
+    if target.is_dir():
+        return run_shell(target, argv=args)
+    return run_fitness_panel(target, argv=args)
 
 
-__all__ = ["build_window", "main", "run_fitness_panel"]
+__all__ = ["build_window", "main", "run_fitness_panel", "run_shell"]
