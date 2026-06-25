@@ -35,18 +35,33 @@ def build_window(
     return window, panel, controller
 
 
+def _app(argv: list[str] | None) -> QtWidgets.QApplication:
+    existing = QtWidgets.QApplication.instance()
+    if isinstance(existing, QtWidgets.QApplication):
+        return existing
+    return QtWidgets.QApplication(list(argv) if argv is not None else sys.argv)
+
+
 def run_fitness_panel(metrics_path: str | Path, argv: list[str] | None = None) -> int:
     """Open the live fitness panel for ``metrics_path`` and run the event loop."""
-    existing = QtWidgets.QApplication.instance()
-    app = (
-        existing
-        if isinstance(existing, QtWidgets.QApplication)
-        else QtWidgets.QApplication(list(argv) if argv is not None else sys.argv)
-    )
+    app = _app(argv)
     window, _panel, controller = build_window(metrics_path)
     controller.start()
     window.resize(900, 500)
     window.show()
+    return app.exec()
+
+
+def run_shell(run_dir: str | Path, argv: list[str] | None = None) -> int:
+    """Open the Stage 2 dockable shell for a run directory and run the loop."""
+    from llove.qt.shell import LoveShell
+
+    app = _app(argv)
+    shell = LoveShell(run_dir)
+    shell.open_window("viz.run_monitor")
+    shell.open_window("viz.fitness_trajectory")
+    shell.resize(1100, 650)
+    shell.show()
     return app.exec()
 
 
