@@ -38,6 +38,7 @@ def test_qt_builders_register(qapp: QtWidgets.QApplication) -> None:
     for type_id in (
         "viz.fitness_trajectory",
         "viz.diversity_trajectory",
+        "viz.persona_dominance",
         "viz.run_monitor",
     ):
         wt = get_window_type(type_id)
