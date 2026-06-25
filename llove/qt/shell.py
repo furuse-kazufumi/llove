@@ -53,8 +53,10 @@ class LoveShell(QtWidgets.QMainWindow):
     def _default_config(self, type_id: str) -> dict[str, Any]:
         if self.run_dir is None:
             return {}
-        if type_id == "viz.fitness_trajectory":
+        if type_id in ("viz.fitness_trajectory", "viz.diversity_trajectory"):
             return {"metrics_path": str(self.run_dir / "metrics.jsonl")}
+        if type_id == "viz.persona_dominance":
+            return {"founder_lineage_path": str(self.run_dir / "founder_lineage.jsonl")}
         if type_id == "viz.run_monitor":
             return {"run_dir": str(self.run_dir)}
         return {}
