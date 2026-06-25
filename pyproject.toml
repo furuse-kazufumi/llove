@@ -151,5 +151,5 @@ follow_imports = "silent"
 
 [[tool.mypy.overrides]]
 # Optional / heavyweight third-party deps may lack stubs.
-module = ["textual.*"]
+module = ["textual.*", "pyqtgraph.*", "PySide6.*"]
 ignore_missing_imports = true
