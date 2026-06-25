@@ -5,6 +5,17 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — Stage 3 Qt front: diversity panel (P2) (2026-06-26)
+
+Stage 3 のパネルカタログ着手。P2 を追加 (P4 persona dominance / P6 QD archive 等は後続)。
+
+- `core/viewmodels/diversity_trajectory.py`: `DiversityTrajectoryVM` — metrics 行の
+  `diversity_l2` を generation 別系列へ (fitness と同じ metrics tail を共有・新 reader 不要)。
+- `qt/diversity_panel.py`: `DiversityTrajectoryPanel` (pyqtgraph line)。
+- `qt/registry.py`: `viz.diversity_trajectory` 登録 + 配線を `_wire_metrics_tail` ヘルパへ整理。
+- テスト +5 (diversity VM 4 + shell smoke 拡張)。ruff / mypy green。実 run dir で e2e:
+  diversity 501 点。
+
 ### Added — Stage 2 Qt front: dockable shell + run monitor (2026-06-26)
 
 Stage 1 の単一パネルを「OS 風ドッキングシェル」へ拡張。各 Qt パネルを WindowType
