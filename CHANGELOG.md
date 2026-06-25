@@ -5,6 +5,19 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — Stage 3 Qt front: genome heatmap (P5) (2026-06-26)
+
+P5 genome heatmap パネル(snapshot の Genome3D `c_factors` を個体×遺伝子 heatmap に)。
+
+- `core/viewmodels/genome_heatmap.py`: `GenomeHeatmapVM` — snapshot の各個体
+  `c_factors`(`factor_names`[N] + `factor_weights`[N×K])を `factor#k` 列の行へ平坦化
+  (tolerant: c_factors 欠落/幅不一致の個体は skip して矩形維持)+ `find_latest_snapshot` /
+  `load_snapshot_file` ヘルパ(snapshot は離散ファイル=tail でなく load-on-demand)。
+- `qt/genome_heatmap_panel.py`: `GenomeHeatmapPanel` (pyqtgraph `ImageItem` + viridis)。
+- `qt/registry.py` / `qt/shell.py`: `viz.genome3d_heatmap` 登録(最新 snapshot 自動ロード)+ 配線。
+- テスト +6 (genome VM 5 + shell smoke 拡張)。ruff / mypy green。実 snapshot で e2e:
+  32 個体 × 40 遺伝子。
+
 ### Added — Stage 3 Qt front: persona dominance (P4) + generic JSONL tail (2026-06-26)
 
 P4 founder/persona dominance パネルと、それを駆動する汎用 JSONL tail を追加。
