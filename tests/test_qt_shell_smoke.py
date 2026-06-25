@@ -65,6 +65,22 @@ def test_diversity_panel_plots_rows(qapp: QtWidgets.QApplication) -> None:
     assert len(y) == 2
 
 
+def test_persona_panel_plots_rows(qapp: QtWidgets.QApplication) -> None:
+    from llove.qt.persona_dominance_panel import PersonaDominancePanel
+
+    panel = PersonaDominancePanel()
+    added = panel.feed_rows(
+        [
+            {"generation": 0, "n_individuals": 4, "founder_counts": {"a": 1, "b": 3}},
+            {"generation": 1, "n_individuals": 4, "founder_counts": {"a": 2, "c": 2}},
+            {"generation": 2},  # no founder_counts -> skipped
+        ]
+    )
+    assert added == 2
+    assert panel.vm.founders() == ["a", "b", "c"]
+    assert panel.vm.max_share_per_generation() == [0.75, 0.5]
+
+
 def test_shell_opens_panels(qapp: QtWidgets.QApplication, tmp_path: Path) -> None:
     shell = LoveShell(tmp_path)
     shell.open_window("viz.run_monitor")
