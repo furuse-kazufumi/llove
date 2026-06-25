@@ -14,22 +14,35 @@ from typing import Any
 
 from PySide6 import QtWidgets
 
+from llove.qt.diversity_panel import DiversityTrajectoryPanel
 from llove.qt.fitness_panel import FitnessTrajectoryPanel
 from llove.qt.run_monitor_panel import RunMonitorPanel
 from llove.qt.worker import MetricsTailController
 from llove.window.types import WindowType, register_window_type
 
 
+def _wire_metrics_tail(panel: QtWidgets.QWidget, config: dict[str, Any]) -> None:
+    """Attach a live metrics tail to a panel that exposes ``feed_rows``."""
+    metrics_path = config.get("metrics_path")
+    if not metrics_path:
+        return
+    controller = MetricsTailController(metrics_path, parent=panel)
+    controller.rows_ready.connect(panel.feed_rows)
+    controller.start()  # one immediate read now, then poll on the timer
+    panel.controller = controller  # type: ignore[attr-defined]
+
+
 def _build_fitness(config: dict[str, Any]) -> QtWidgets.QWidget:
     """Build a fitness panel; if ``metrics_path`` is given, tail it live."""
     panel = FitnessTrajectoryPanel()
-    metrics_path = config.get("metrics_path")
-    if metrics_path:
-        controller = MetricsTailController(metrics_path, parent=panel)
-        controller.rows_ready.connect(panel.feed_rows)
-        controller.start()  # one immediate read now, then poll on the timer
-        # keep a handle so callers/tests can reach the controller
-        panel.controller = controller  # type: ignore[attr-defined]
+    _wire_metrics_tail(panel, config)
+    return panel
+
+
+def _build_diversity(config: dict[str, Any]) -> QtWidgets.QWidget:
+    """Build a diversity panel; if ``metrics_path`` is given, tail it live."""
+    panel = DiversityTrajectoryPanel()
+    _wire_metrics_tail(panel, config)
     return panel
 
 
