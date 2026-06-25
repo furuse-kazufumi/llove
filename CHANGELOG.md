@@ -5,6 +5,36 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — Stage 2 Qt front: dockable shell + run monitor (2026-06-26)
+
+Stage 1 の単一パネルを「OS 風ドッキングシェル」へ拡張。各 Qt パネルを WindowType
+Registry の "アプリ" として View メニューから dock 起動でき、perspective (開いている
+パネル + dock 配置) を保存/復元できる (設計 §2 / §3 / §6)。
+
+- **新 Core (UI 非依存)**:
+  - `core/viewmodels/run_status.py`: `RunStatusVM` / `RunStatus` —
+    `run_manifest.json` (config) + `run_summary.json` (完了時のみ) +
+    `metrics.jsonl` の live tail を 1 つの status スナップショットへ集約
+    (tolerant・engine 非 import)。
+  - `core/drivers/run_control.py`: `RunControl` — pause/resume/stop を
+    `control.json` へ atomic 書込 (fail-closed: 既知コマンドのみ + monotonic seq)。
+    run 側の honor は llive 契約 (llove は要求の書込みのみ)。
+- **新 Qt (`[gui]` extra)**:
+  - `run_monitor_panel.py`: `RunMonitorPanel` (P7) — status 表示 +
+    Pause / Resume / Stop ボタン。
+  - `registry.py`: `register_qt_window_types()` — `viz.fitness_trajectory` /
+    `viz.run_monitor` を `WindowType` builder として登録 (lazy・core を汚さない)。
+  - `shell.py`: `LoveShell(QMainWindow)` — QDockWidget ベースの dockable シェル +
+    View メニュー + perspective save/restore (JSON)。
+  - `run.py`: 引数がディレクトリ → シェル / ファイル → 単一パネル に分岐
+    (`python -m llove.qt <run_dir>` でシェル起動)。
+- **docking**: 設計 §2.2 本命の QtAds (VS Code 級) はコンパイル third-party で wheel
+  保証がなく自動進行を止めうるため常時パスから除外し、PySide6 同梱の QDockWidget で
+  実装 (QtAds は後段のドロップイン置換)。
+- **テスト** +16 (run_status 5 / run_control 6 / shell smoke 5)。ruff / mypy green。
+  実 run dir (`evo_run_2026_05_25`) で e2e: シェル 2 dock・run status "completed"・
+  fitness 501 点を確認。core import が PySide6 非依存・既存 regress なし。
+
 ### Added — Stage 1 Qt front: live fitness-trajectory panel (2026-06-26)
 
 Textual TUI を第一フロントとして残しつつ、重い可視化用の第2フロントとして
