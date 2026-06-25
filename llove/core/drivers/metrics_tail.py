@@ -17,6 +17,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from llove.core.drivers._tail import read_new_complete_lines
 from llove.core.viewmodels.fitness_trajectory import parse_metrics_row
 
 
@@ -40,40 +41,10 @@ class MetricsTailReader:
         :meth:`reset`. In practice runs write to a fresh ``out/<run>/`` path, so
         this edge does not arise during normal tailing.
         """
-        if not self._path.exists():
-            return []
-
-        try:
-            size = self._path.stat().st_size
-        except OSError:
-            return []
-        if size < self._offset:
-            # File was truncated or rewritten (e.g. a fresh run) — start over.
-            self._offset = 0
-
-        with self._path.open("rb") as fh:
-            fh.seek(self._offset)
-            data = fh.read()
-
-        if not data:
-            return []
-
-        last_nl = data.rfind(b"\n")
-        if last_nl == -1:
-            return []  # no complete line available yet
-
-        complete = data[: last_nl + 1]
-        self._offset += len(complete)
-
+        lines, self._offset = read_new_complete_lines(self._path, self._offset)
         rows: list[dict[str, Any]] = []
-        for raw in complete.split(b"\n"):
-            if not raw.strip():
-                continue
-            try:
-                text = raw.decode("utf-8")
-            except UnicodeDecodeError:
-                continue
-            row = parse_metrics_row(text)
+        for line in lines:
+            row = parse_metrics_row(line)
             if row is not None:
                 rows.append(row)
         return rows
