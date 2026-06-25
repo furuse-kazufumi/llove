@@ -61,6 +61,7 @@ def test_diversity_panel_plots_rows(qapp: QtWidgets.QApplication) -> None:
     assert added == 2
     x, y = panel.diversity_curve.getData()
     assert len(x) == 2
+    assert len(y) == 2
 
 
 def test_shell_opens_panels(qapp: QtWidgets.QApplication, tmp_path: Path) -> None:
