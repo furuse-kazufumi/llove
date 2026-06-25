@@ -65,6 +65,16 @@ def register_qt_window_types() -> None:
     )
     register_window_type(
         WindowType(
+            id="viz.diversity_trajectory",
+            display_name="Diversity Trajectory",
+            category="visualization",
+            description="Live population diversity_l2 per generation (P2).",
+            default_size=(900, 400),  # px (Qt)
+            builder=_build_diversity,
+        )
+    )
+    register_window_type(
+        WindowType(
             id="viz.run_monitor",
             display_name="Run Monitor",
             category="visualization",
