@@ -59,4 +59,4 @@ def main(argv: list[str] | None = None) -> int:
     return run_fitness_panel(args[1], argv=args)
 
 
-__all__ = ["build_window", "run_fitness_panel", "main"]
+__all__ = ["build_window", "main", "run_fitness_panel"]

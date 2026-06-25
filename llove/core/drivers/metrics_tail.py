@@ -31,8 +31,14 @@ class MetricsTailReader:
         """Return metrics rows that became complete since the previous call.
 
         Only consumes bytes up to the last newline, so a partially-written final
-        line is left for a later poll. Detects truncation/rewrite (a fresh run)
-        by resetting the offset when the file shrinks below it.
+        line is left for a later poll. Detects a rewrite (a fresh run) when the
+        file **shrinks** below the consumed offset and resets.
+
+        Honest limitation: an in-place rewrite to the *same or larger* size
+        cannot be distinguished from an append using ``stat`` alone, so it is not
+        auto-detected — point the reader at the new run's path, or call
+        :meth:`reset`. In practice runs write to a fresh ``out/<run>/`` path, so
+        this edge does not arise during normal tailing.
         """
         if not self._path.exists():
             return []

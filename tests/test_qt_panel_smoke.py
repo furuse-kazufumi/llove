@@ -17,10 +17,10 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 pytest.importorskip("PySide6")
 pytest.importorskip("pyqtgraph")
 
-from PySide6 import QtWidgets  # noqa: E402
+from PySide6 import QtWidgets
 
-from llove.qt.fitness_panel import FitnessTrajectoryPanel  # noqa: E402
-from llove.qt.worker import MetricsTailController  # noqa: E402
+from llove.qt.fitness_panel import FitnessTrajectoryPanel
+from llove.qt.worker import MetricsTailController
 
 
 @pytest.fixture(scope="module")
