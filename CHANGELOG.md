@@ -5,6 +5,37 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — Stage 1 Qt front: live fitness-trajectory panel (2026-06-26)
+
+Textual TUI を第一フロントとして残しつつ、重い可視化用の第2フロントとして
+PySide6 + pyqtgraph による Qt GUI を `[gui]` extra で着手 (Stage 1)。設計正本 =
+fullsense `docs/research/llove_qt_gui_architecture_2026_05_25.md`。
+
+- **新パッケージ `llove/core/`** (UI フレームワーク非依存層・textual も PySide6 も
+  import しない):
+  - `core/viewmodels/fitness_trajectory.py`: `FitnessTrajectoryVM` (進化ラン
+    `metrics.jsonl` の `{generation, best_score, mean_score, median_score,
+    std_score}` を整列系列に蓄積) + `parse_metrics_row` (tolerant パーサ)。
+    欠損フィールドは nan で長さ整列。
+  - `core/drivers/metrics_tail.py`: `MetricsTailReader` (offset ベースの tail。
+    `views/llive/dispatch.py` の `TimelinePollDriver` と同じ time-axis 非依存方針。
+    partial 行 / 不正行 / 縮小書換を fail-closed で処理)。
+- **新パッケージ `llove/qt/`** (`[gui]` extra):
+  - `fitness_panel.py`: `FitnessTrajectoryPanel(QWidget)` — pyqtgraph で
+    best/mean/median を live 描画 (nan は `connect="finite"` で gap)。
+  - `worker.py`: `MetricsTailController` — QTimer poll → `rows_ready` signal。
+    `poll_now()` で event loop 無しの同期テスト可。
+  - `run.py` + `__main__.py`: `python -m llove.qt <metrics.jsonl>` launcher。
+  - `__init__.py`: `ensure_gui()` (extra 未導入時の親切なエラー)。
+- **依存** `pyproject.toml`: `gui` extra = `PySide6>=6.6` (LGPLv3 — MIT core と両立。
+  PyQt6=GPL は licence 衝突のため不採用) + `pyqtgraph>=0.13` (MIT)。mypy override に
+  PySide6/pyqtgraph 追加。core wheel は不変 (extra opt-in)。
+- **テスト** 18 件 (VM 9 / tail 6 / panel smoke 3, offscreen)。ruff / mypy green。
+  core import が PySide6 を引き込まないこと + 既存テスト regress 無しを確認。
+  実データ (llive `persona_evo_1000` = 1001 世代) で end-to-end 描画を検証。
+- honest 留保: 同一バイト長の in-place 書換は stat だけでは未検出 (実運用は新 run dir
+  なので非問題)。poll は Stage 1 では GUI スレッド QTimer (QThread 化は Stage 2)。
+
 ### Added — M8.1 skeleton: CognitiveMeshPanel (2026-05-19)
 
 llive 側 COG-MESH 全件本実装 (M8.2〜M8.9) を受け、F25 bridge 上に
