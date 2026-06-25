@@ -5,6 +5,24 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — Stage 3 Qt front: persona dominance (P4) + generic JSONL tail (2026-06-26)
+
+P4 founder/persona dominance パネルと、それを駆動する汎用 JSONL tail を追加。
+
+- **共有化**: offset-tail ロジックを `core/drivers/_tail.py:read_new_complete_lines`
+  へ抽出し `MetricsTailReader` を再実装 (挙動不変・既存テストで保証)。
+- `core/drivers/jsonl_tail.py`: `JsonlTailReader` — 任意 JSONL を raw dict 行として
+  tail (metrics 以外の run 成果物=`founder_lineage.jsonl` 用)。
+- `core/viewmodels/persona_dominance.py`: `PersonaDominanceVM` — founder_lineage
+  行を founder 別 *share* 系列へ世代横断整列 (後発 founder は 0 backfill・欠席は 0)。
+  `max_share_per_generation()` で monoculture guard (<0.8)。
+- `qt/persona_dominance_panel.py`: `PersonaDominancePanel` (founder 別 share ライン)。
+- `qt/worker.py`: `_TailController` 基底へ整理 + `JsonlTailController` 追加。
+- `qt/registry.py` / `qt/shell.py`: `viz.persona_dominance` 登録 + default config 配線。
+- テスト +16 (persona VM 7 / jsonl tail 4 / shell smoke 拡張 + 既存 metrics tail 回帰)。
+  ruff / mypy green。実 founder_lineage で e2e: 501 世代・9 founders・末尾 max_share=1.0
+  (この完走ランは終盤 monoculture を正直に表示)。
+
 ### Added — Stage 3 Qt front: diversity panel (P2) (2026-06-26)
 
 Stage 3 のパネルカタログ着手。P2 を追加 (P4 persona dominance / P6 QD archive 等は後続)。
