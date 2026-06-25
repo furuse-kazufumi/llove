@@ -92,6 +92,16 @@ def register_qt_window_types() -> None:
     )
     register_window_type(
         WindowType(
+            id="viz.persona_dominance",
+            display_name="Persona Dominance",
+            category="visualization",
+            description="Founder/persona population share per generation (P4).",
+            default_size=(900, 400),  # px (Qt)
+            builder=_build_persona,
+        )
+    )
+    register_window_type(
+        WindowType(
             id="viz.run_monitor",
             display_name="Run Monitor",
             category="visualization",
