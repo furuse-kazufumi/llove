@@ -14,8 +14,10 @@ from typing import Any
 
 from PySide6 import QtWidgets
 
+from llove.core.viewmodels.genome_heatmap import find_latest_snapshot, load_snapshot_file
 from llove.qt.diversity_panel import DiversityTrajectoryPanel
 from llove.qt.fitness_panel import FitnessTrajectoryPanel
+from llove.qt.genome_heatmap_panel import GenomeHeatmapPanel
 from llove.qt.persona_dominance_panel import PersonaDominancePanel
 from llove.qt.run_monitor_panel import RunMonitorPanel
 from llove.qt.worker import JsonlTailController, MetricsTailController
