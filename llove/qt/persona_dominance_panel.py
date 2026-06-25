@@ -59,8 +59,9 @@ class PersonaDominancePanel(QtWidgets.QWidget):
     def refresh(self) -> None:
         """Rebuild one curve per founder from the current view-model series."""
         self.plot.clear()
-        legend = self.plot.addLegend(offset=(-10, 10)) if self.plot.plotItem.legend is None else None
-        _ = legend
+        legend = self.plot.plotItem.legend
+        if legend is not None:
+            legend.clear()
         gen = [float(g) for g in self.vm.generations]
         series = self.vm.series()
         for i, founder in enumerate(self.vm.founders()):
