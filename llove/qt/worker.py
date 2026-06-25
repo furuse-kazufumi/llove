@@ -1,37 +1,43 @@
-"""Qt-side tail controller: poll a metrics file on a timer, emit new rows.
+"""Qt-side tail controllers: poll a JSONL file on a timer, emit new rows.
 
-Wraps :class:`MetricsTailReader` (UI-independent) in a ``QObject`` that drives it
-from a ``QTimer`` and emits ``rows_ready`` with each batch of new rows. For
-Stage 1 the poll is a tiny incremental file read, so running it on the GUI thread
-via ``QTimer`` is fine; the QThread worker model (design §4.2) is a Stage 2
-hardening for heavier aggregation.
+Wraps the UI-independent readers (``MetricsTailReader`` / ``JsonlTailReader``) in
+``QObject``s that drive them from a ``QTimer`` and emit ``rows_ready`` with each
+batch of new rows. For Stage 1/3 the poll is a tiny incremental file read, so
+running it on the GUI thread via ``QTimer`` is fine; the QThread worker model
+(design §4.2) is a later hardening for heavier aggregation.
 
-``poll_now`` does one synchronous read+emit so the controller is testable without
+``poll_now`` does one synchronous read+emit so controllers are testable without
 spinning an event loop.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Protocol
 
 from PySide6 import QtCore
 
+from llove.core.drivers.jsonl_tail import JsonlTailReader
 from llove.core.drivers.metrics_tail import MetricsTailReader
 
 
-class MetricsTailController(QtCore.QObject):
-    """Timer-driven poller that emits new metrics rows from a tailed file."""
+class _Reader(Protocol):
+    def poll(self) -> list[dict]: ...
+
+
+class _TailController(QtCore.QObject):
+    """Timer-driven poller that emits new rows from a tailed JSONL reader."""
 
     rows_ready = QtCore.Signal(list)
 
     def __init__(
         self,
-        path: str | Path,
+        reader: _Reader,
         interval_ms: int = 500,
         parent: QtCore.QObject | None = None,
     ) -> None:
         super().__init__(parent)
-        self._reader = MetricsTailReader(path)
+        self._reader = reader
         self._timer = QtCore.QTimer(self)
         self._timer.setInterval(interval_ms)
         self._timer.timeout.connect(self.poll_now)
@@ -53,4 +59,28 @@ class MetricsTailController(QtCore.QObject):
             self.rows_ready.emit(rows)
 
 
-__all__ = ["MetricsTailController"]
+class MetricsTailController(_TailController):
+    """Tail a ``metrics.jsonl`` and emit parsed metrics rows."""
+
+    def __init__(
+        self,
+        path: str | Path,
+        interval_ms: int = 500,
+        parent: QtCore.QObject | None = None,
+    ) -> None:
+        super().__init__(MetricsTailReader(path), interval_ms, parent)
+
+
+class JsonlTailController(_TailController):
+    """Tail an arbitrary JSONL file and emit raw JSON-object rows."""
+
+    def __init__(
+        self,
+        path: str | Path,
+        interval_ms: int = 500,
+        parent: QtCore.QObject | None = None,
+    ) -> None:
+        super().__init__(JsonlTailReader(path), interval_ms, parent)
+
+
+__all__ = ["JsonlTailController", "MetricsTailController"]
