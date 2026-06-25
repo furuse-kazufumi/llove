@@ -21,15 +21,19 @@ from llove.qt.worker import MetricsTailController
 from llove.window.types import WindowType, register_window_type
 
 
-def _wire_metrics_tail(panel: QtWidgets.QWidget, config: dict[str, Any]) -> None:
-    """Attach a live metrics tail to a panel that exposes ``feed_rows``."""
+def _wire_metrics_tail(panel: Any, config: dict[str, Any]) -> None:
+    """Attach a live metrics tail to a panel that exposes ``feed_rows``.
+
+    ``panel`` is a fitness/diversity panel (QWidget with ``feed_rows``); typed
+    ``Any`` because this is a small structural wiring helper.
+    """
     metrics_path = config.get("metrics_path")
     if not metrics_path:
         return
     controller = MetricsTailController(metrics_path, parent=panel)
     controller.rows_ready.connect(panel.feed_rows)
     controller.start()  # one immediate read now, then poll on the timer
-    panel.controller = controller  # type: ignore[attr-defined]
+    panel.controller = controller
 
 
 def _build_fitness(config: dict[str, Any]) -> QtWidgets.QWidget:
