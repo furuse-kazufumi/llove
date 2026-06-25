@@ -51,6 +51,18 @@ def _build_diversity(config: dict[str, Any]) -> QtWidgets.QWidget:
     return panel
 
 
+def _build_persona(config: dict[str, Any]) -> QtWidgets.QWidget:
+    """Build a persona-dominance panel; tail ``founder_lineage_path`` if given."""
+    panel = PersonaDominancePanel()
+    path = config.get("founder_lineage_path")
+    if path:
+        controller = JsonlTailController(path, parent=panel)
+        controller.rows_ready.connect(panel.feed_rows)
+        controller.start()
+        panel.controller = controller  # type: ignore[attr-defined]
+    return panel
+
+
 def _build_run_monitor(config: dict[str, Any]) -> QtWidgets.QWidget:
     """Build a run-monitor panel for ``run_dir`` (defaults to cwd)."""
     return RunMonitorPanel(config.get("run_dir", "."))
