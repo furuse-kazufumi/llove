@@ -82,6 +82,27 @@ def test_persona_panel_plots_rows(qapp: QtWidgets.QApplication) -> None:
     assert panel.vm.max_share_per_generation() == [0.75, 0.5]
 
 
+def test_genome_heatmap_panel_loads_snapshot(qapp: QtWidgets.QApplication) -> None:
+    from llove.qt.genome_heatmap_panel import GenomeHeatmapPanel
+
+    panel = GenomeHeatmapPanel()
+    snap = {
+        "individuals": [
+            {
+                "individual_id": "a",
+                "genome": {"c_factors": {"factor_names": ["f0"], "factor_weights": [[0.1, 0.2]]}},
+            },
+            {
+                "individual_id": "b",
+                "genome": {"c_factors": {"factor_names": ["f0"], "factor_weights": [[0.3, 0.4]]}},
+            },
+        ]
+    }
+    n = panel.load_snapshot(snap)
+    assert n == 2
+    assert panel.vm.heatmap.col_labels == ["f0#0", "f0#1"]
+
+
 def test_shell_opens_panels(qapp: QtWidgets.QApplication, tmp_path: Path) -> None:
     shell = LoveShell(tmp_path)
     shell.open_window("viz.run_monitor")
