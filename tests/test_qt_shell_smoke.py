@@ -35,12 +35,32 @@ def qapp() -> QtWidgets.QApplication:
 
 def test_qt_builders_register(qapp: QtWidgets.QApplication) -> None:
     register_qt_window_types()
-    for type_id in ("viz.fitness_trajectory", "viz.run_monitor"):
+    for type_id in (
+        "viz.fitness_trajectory",
+        "viz.diversity_trajectory",
+        "viz.run_monitor",
+    ):
         wt = get_window_type(type_id)
         assert wt is not None
         assert wt.builder is not None
         widget = wt.builder({})
         assert isinstance(widget, QtWidgets.QWidget)
+
+
+def test_diversity_panel_plots_rows(qapp: QtWidgets.QApplication) -> None:
+    from llove.qt.diversity_panel import DiversityTrajectoryPanel
+
+    panel = DiversityTrajectoryPanel()
+    added = panel.feed_rows(
+        [
+            {"generation": 0, "best_score": 0.5, "mean_score": 0.4, "diversity_l2": 28.5},
+            {"generation": 1, "best_score": 0.6, "mean_score": 0.5, "diversity_l2": 27.9},
+            {"generation": 2, "best_score": 0.7, "mean_score": 0.6},  # no diversity -> skipped
+        ]
+    )
+    assert added == 2
+    x, y = panel.diversity_curve.getData()
+    assert len(x) == 2
 
 
 def test_shell_opens_panels(qapp: QtWidgets.QApplication, tmp_path: Path) -> None:
