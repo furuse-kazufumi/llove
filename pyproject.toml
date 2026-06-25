@@ -67,6 +67,16 @@ chess = [
     # standard (14k★).
     "chess>=1.11",
 ]
+gui = [
+    # Stage 1 Qt front (llove/qt): PySide6 is LGPLv3 (compatible with the
+    # MIT/permissive core — NOT PyQt6, which is GPL/commercial and would force
+    # the whole app's licence). pyqtgraph is MIT and ~75-150x faster than
+    # matplotlib for live plots. Kept behind extras so the TUI core wheel is
+    # unaffected unless the user opts in via `pip install llmesh-llove[gui]`.
+    # See docs design: llove_qt_gui_architecture_2026_05_25 §1.
+    "PySide6>=6.6",
+    "pyqtgraph>=0.13",
+]
 dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
