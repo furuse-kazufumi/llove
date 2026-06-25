@@ -120,6 +120,16 @@ def register_qt_window_types() -> None:
     )
     register_window_type(
         WindowType(
+            id="viz.genome3d_heatmap",
+            display_name="Genome Heatmap",
+            category="visualization",
+            description="Per-individual c_factors weights heatmap from a snapshot (P5).",
+            default_size=(900, 500),  # px (Qt)
+            builder=_build_genome_heatmap,
+        )
+    )
+    register_window_type(
+        WindowType(
             id="viz.run_monitor",
             display_name="Run Monitor",
             category="visualization",
