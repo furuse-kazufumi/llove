@@ -65,6 +65,22 @@ def _build_persona(config: dict[str, Any]) -> QtWidgets.QWidget:
     return panel
 
 
+def _build_genome_heatmap(config: dict[str, Any]) -> QtWidgets.QWidget:
+    """Build a genome heatmap; load ``snapshot_path`` or the latest in ``run_dir``."""
+    panel = GenomeHeatmapPanel()
+    path = config.get("snapshot_path")
+    if not path:
+        run_dir = config.get("run_dir")
+        if run_dir:
+            latest = find_latest_snapshot(run_dir)
+            path = str(latest) if latest is not None else None
+    if path:
+        snap = load_snapshot_file(path)
+        if snap is not None:
+            panel.load_snapshot(snap)
+    return panel
+
+
 def _build_run_monitor(config: dict[str, Any]) -> QtWidgets.QWidget:
     """Build a run-monitor panel for ``run_dir`` (defaults to cwd)."""
     return RunMonitorPanel(config.get("run_dir", "."))
