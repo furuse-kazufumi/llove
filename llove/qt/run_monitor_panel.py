@@ -50,9 +50,6 @@ class RunMonitorPanel(QtWidgets.QWidget):
         self._value_labels: dict[str, QtWidgets.QLabel] = {}
         for label, attr in _ROWS:
             value = QtWidgets.QLabel("—")
-            value.setTextInteractionFlags(
-                value.textInteractionFlags() | QtWidgets.QLabel().textInteractionFlags()
-            )
             self._value_labels[attr] = value
             form.addRow(QtWidgets.QLabel(f"{label}:"), value)
         outer.addLayout(form)
