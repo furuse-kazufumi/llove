@@ -57,9 +57,19 @@ def test_malformed_lines_skipped_but_offset_advances(tmp_path: Path) -> None:
 
 def test_truncation_resets_offset(tmp_path: Path) -> None:
     p = tmp_path / "metrics.jsonl"
-    p.write_text('{"generation":5,"best_score":0.9,"mean_score":0.8}\n', encoding="utf-8")
+    p.write_text(_ROW0 + _ROW1 + _ROW2, encoding="utf-8")  # 3 rows
     reader = MetricsTailReader(p)
-    assert len(reader.poll()) == 1
-    # simulate a fresh run that rewrites a shorter file
+    assert len(reader.poll()) == 3
+    # simulate a fresh run that rewrites a strictly shorter file (size shrinks
+    # below the consumed offset -> detected as a rewrite, offset resets)
     p.write_text(_ROW0, encoding="utf-8")
     assert [r["generation"] for r in reader.poll()] == [0]
+
+
+def test_reset_rereads_from_start(tmp_path: Path) -> None:
+    p = tmp_path / "metrics.jsonl"
+    p.write_text(_ROW0 + _ROW1, encoding="utf-8")
+    reader = MetricsTailReader(p)
+    assert len(reader.poll()) == 2
+    reader.reset()
+    assert [r["generation"] for r in reader.poll()] == [0, 1]
