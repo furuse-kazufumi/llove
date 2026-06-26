@@ -66,6 +66,18 @@ def _build_persona(config: dict[str, Any]) -> QtWidgets.QWidget:
     return panel
 
 
+def _build_lineage(config: dict[str, Any]) -> QtWidgets.QWidget:
+    """Build a lineage panel; tail ``winners_path`` if given."""
+    panel = LineagePanel()
+    path = config.get("winners_path")
+    if path:
+        controller = JsonlTailController(path, parent=panel)
+        controller.rows_ready.connect(panel.feed_rows)
+        controller.start()
+        panel.controller = controller  # type: ignore[attr-defined]
+    return panel
+
+
 def _build_genome_heatmap(config: dict[str, Any]) -> QtWidgets.QWidget:
     """Build a genome heatmap; load ``snapshot_path`` or the latest in ``run_dir``."""
     panel = GenomeHeatmapPanel()
