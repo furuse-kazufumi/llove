@@ -57,6 +57,8 @@ class LoveShell(QtWidgets.QMainWindow):
             return {"metrics_path": str(self.run_dir / "metrics.jsonl")}
         if type_id == "viz.persona_dominance":
             return {"founder_lineage_path": str(self.run_dir / "founder_lineage.jsonl")}
+        if type_id == "viz.lineage_tree":
+            return {"winners_path": str(self.run_dir / "winners.jsonl")}
         if type_id == "viz.genome3d_heatmap":
             return {"run_dir": str(self.run_dir)}
         if type_id == "viz.run_monitor":
