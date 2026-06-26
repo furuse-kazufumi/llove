@@ -133,6 +133,16 @@ def register_qt_window_types() -> None:
     )
     register_window_type(
         WindowType(
+            id="viz.lineage_tree",
+            display_name="Lineage Tree",
+            category="visualization",
+            description="Generation DAG with champion lineage highlighted (P3).",
+            default_size=(1000, 600),  # px (Qt)
+            builder=_build_lineage,
+        )
+    )
+    register_window_type(
+        WindowType(
             id="viz.genome3d_heatmap",
             display_name="Genome Heatmap",
             category="visualization",
