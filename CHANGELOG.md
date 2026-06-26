@@ -5,6 +5,19 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [Unreleased] — 0.3.0a1 in progress
 
+### Added — Stage 3 Qt front: lineage tree (P3) (2026-06-26)
+
+P3 lineage DAG パネル(`winners.jsonl` の親子関係を世代 DAG で描画・champion 強調)。
+
+- `core/viewmodels/lineage.py`: `LineageVM`/`LineageNode` — winner 行から nodes +
+  edges(parent→child・crossover で複数親=DAG・親不在は tolerant に除外)+
+  `champion_path`(最高スコア個体を最良既知親へ遡上)。
+- `qt/lineage_panel.py`: `LineagePanel` — Qt 同梱 `QGraphicsView`(追加依存なし)で
+  世代×個体レイアウト・スコア配色・champion 強調(QWebEngine/mermaid 不要)。
+- `qt/registry.py` / `qt/shell.py`: `viz.lineage_tree` 登録(winners.jsonl を JSONL tail)+ 配線。
+- テスト +6 (lineage VM 5 + shell smoke 拡張)。ruff / mypy(25 files)green。実 winners で
+  e2e: 303 nodes / 271 edges / scene 574 items。
+
 ### Added — Stage 3 Qt front: genome heatmap (P5) (2026-06-26)
 
 P5 genome heatmap パネル(snapshot の Genome3D `c_factors` を個体×遺伝子 heatmap に)。
