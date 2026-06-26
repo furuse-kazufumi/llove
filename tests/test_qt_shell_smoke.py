@@ -104,6 +104,21 @@ def test_genome_heatmap_panel_loads_snapshot(qapp: QtWidgets.QApplication) -> No
     assert panel.vm.heatmap.col_labels == ["f0#0", "f0#1"]
 
 
+def test_lineage_panel_builds_scene(qapp: QtWidgets.QApplication) -> None:
+    from llove.qt.lineage_panel import LineagePanel
+
+    panel = LineagePanel()
+    added = panel.feed_rows(
+        [
+            {"generation": 0, "individual_id": "A", "parent_ids": [], "score": 0.5},
+            {"generation": 1, "individual_id": "B", "parent_ids": ["A"], "score": 0.9},
+        ]
+    )
+    assert added == 2
+    assert panel.node_count == 2
+    assert len(panel.scene.items()) > 0  # nodes + edge rendered
+
+
 def test_shell_opens_panels(qapp: QtWidgets.QApplication, tmp_path: Path) -> None:
     shell = LoveShell(tmp_path)
     shell.open_window("viz.run_monitor")
