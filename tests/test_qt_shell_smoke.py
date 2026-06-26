@@ -39,6 +39,7 @@ def test_qt_builders_register(qapp: QtWidgets.QApplication) -> None:
         "viz.fitness_trajectory",
         "viz.diversity_trajectory",
         "viz.persona_dominance",
+        "viz.lineage_tree",
         "viz.genome3d_heatmap",
         "viz.run_monitor",
     ):
