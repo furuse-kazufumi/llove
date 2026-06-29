@@ -191,7 +191,66 @@ class LoveApp(App):
                     self._audit._rows,
                     maxlen=s.audit_max_entries,
                 )
+
+        # Interactive scenarios get an asker injected so their choice-points can
+        # prompt the user and branch. Non-interactive sources are untouched.
+        self._wire_interactive_asker()
         self._task = asyncio.create_task(self._consume())
+
+    def _wire_interactive_asker(self) -> None:
+        """Give an InteractiveScenario source a handle to prompt the user.
+
+        Idempotent and isinstance-guarded, so non-interactive sources (JSONL
+        tail, mock, every existing demo) are left exactly as they were.
+        """
+        from llove.demo.scenarios.interactive import InteractiveScenario
+
+        if isinstance(self._source, InteractiveScenario):
+            self._source._asker = self.ask_choice
+
+    async def ask_choice(
+        self,
+        prompt: str,
+        options: list[ChoiceOption],
+        *,
+        default_id: str | None = None,
+    ) -> str:
+        """Present an interactive choice-point and return the chosen option id.
+
+        This is the ``ChoiceAsker`` injected into InteractiveScenario sources.
+        It pushes a ``ChoiceScreen`` modal and resolves a Future from the
+        screen's dismiss callback — so we never need a Textual worker context.
+        Escape / dismissing with ``None`` falls back to the prompt's resolved
+        default, keeping the flow deterministic. The decision is recorded as an
+        AUDIT event so a ``--log`` JSONL replays the exact path taken.
+        """
+        cp = ChoicePrompt(prompt=prompt, options=tuple(options), default_id=default_id)
+        future: asyncio.Future[str] = asyncio.get_running_loop().create_future()
+
+        def _on_dismiss(result: str | None) -> None:
+            if not future.done():
+                future.set_result(result if result is not None else cp.resolved_default)
+
+        self.push_screen(ChoiceScreen(cp), _on_dismiss)
+        chosen = await future
+
+        opt = cp.option(chosen)
+        label = opt.label if opt is not None else chosen
+        self._dispatch(
+            Event(
+                kind=EventKind.AUDIT,
+                source_id="llove.choice",
+                payload={
+                    "event": "llove.choice",
+                    "prompt": prompt,
+                    "chosen": chosen,
+                    "chosen_label": label,
+                    "options": [o.id for o in options],
+                    "display": t("ui.choice.audit", label=label),
+                },
+            )
+        )
+        return chosen
 
     async def on_unmount(self) -> None:
         if self._task and not self._task.done():
