@@ -12,11 +12,10 @@ as a gap). Pure — no Qt / Textual.
 
 from __future__ import annotations
 
+import json
 import math
 from dataclasses import dataclass, field
 from typing import Any
-
-from llove.core.viewmodels.fitness_trajectory import parse_metrics_row
 
 
 def _as_float(value: Any) -> float:
