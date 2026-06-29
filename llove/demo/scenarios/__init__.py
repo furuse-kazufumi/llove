@@ -32,6 +32,7 @@ from llove.demo.scenarios.vision import VisionScenario
 SCENARIOS: dict[str, type[DemoScenario]] = {
     "firewall": FirewallScenario,
     "scada": SCADAScenario,
+    "incident": IncidentScenario,
     "multimodal": MultimodalSPCScenario,
     "rag": RAGStoresScenario,
     "backends": LLMBackendsScenario,
