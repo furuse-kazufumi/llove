@@ -21,6 +21,7 @@ from llove.demo.scenarios.interactive import InteractiveScenario
 from llove.demo.scenarios.mcp_call import MCPCallScenario
 from llove.demo.scenarios.mindmap import MindmapScenario
 from llove.demo.scenarios.multimodal import MultimodalSPCScenario
+from llove.demo.scenarios.nim import NimScenario
 from llove.demo.scenarios.pointcloud import PointCloudScenario
 from llove.demo.scenarios.rag import RAGStoresScenario
 from llove.demo.scenarios.reliability import ReliabilityScenario
