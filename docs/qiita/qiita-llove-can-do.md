@@ -134,7 +134,7 @@ llove demo --scenario incident   # ← 今回追加した「あなたが分岐�
 面白いのは、**「選ぶ」ための部品はかなり作られているのに、ライブ app に繋がっていない** という点です。
 
 - **将棋/チェス/タイピング/`games.base` のエンジン**:合法手の列挙・着手検証・違法 3 ストライク失格まで実装済みで、**「選ぶ主体」を差し込めば対局になる** 設計です(`GamePlayer` の抽象基底クラス(ABC、Abstract Base Class)は `HumanPlayer` を名前として予約済み)。ところが具象プレイヤが MockPlayer 以外**ゼロ**。
-- **Command Palette(`:` パレット)**:解析・補完・履歴・alias・macro まで純粋関数として完成。**しかしライブ app は registry を空のまま開くため、`:help` すらエラー**、`:fold`/`:open` も hook 未配線で無反応。
+- **Command Palette(`:` パレット)**:解析・補完・履歴・alias・macro まで純粋関数として完成。**しかしライブ app は registry を空のまま開くため、`:help` すらエラー**、`:fold`/`:open` も hook 未配線で無反応。(※ この記事の執筆**後**、本セッションで registry + hook を配線し、`:help`/`:demo`/`:play`/`:theme`/`:identity` は動くようになりました — §8 を参照。)
 - **F17 WindowManager**:Free/Locked コンテナ + `layout.toml` 往復 + ピン留めビュー削除拒否まで揃うのに、LoveApp は旧来の 4 ペイン直配置のままで**未統合**。
 
 部品は揃っている。あとは**「分岐点を 1 つ、ライブに繋ぐ」**だけ——ここが今回の改造の入口でした。
