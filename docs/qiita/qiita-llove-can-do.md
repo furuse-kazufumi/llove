@@ -12,7 +12,7 @@ tags: Python,TUI,Textual,LLM,HITL
 - **llove(ラブ)** は、AI エコシステム「FullSense ™」の動きを、黒い文字だけの画面(ターミナル)の上で見せる ダッシュボード(dashboard)です。PyPI 配布名は `llmesh-llove`、現在 v0.3.0a1(アルファ)。
 - この記事は「llove で**いま実際にできること**」を、**動くもの・骨組みだけのもの・これからのもの**を取り違えずに地図化します。気持ちよく聞こえる紹介文ではなく、**コードで裏が取れた事実**だけを並べます。
 - 中心テーマは 1 つ:**「決まった動き(台本どおりに流れる固定再生)」から「あなたに選ばせる動き(分岐・対話)」へ**。いまの llove は前者が厚く、後者は設計の骨組みはあるのに配線が未了でした。
-- そこで、この記事を書く過程で **「選択肢を与える動き」を 1 つ、実際に llove へ追加実装** しました(`incident` シナリオ + 選択肢プリミティブ)。その設計・コード・テスト・**正直な限界**まで載せます。
+- そこで、この記事を書く過程で **「選択肢を与える動き」を 1 つ、実際に llove へ追加実装** しました(`incident` シナリオ + 選択肢プリミティブ)。その設計・コード・テスト・**正直な限界**まで載せます。——ただし**新しいのは「分岐の機構」だけ**で、各枝の中身は他のデモ同様に合成データのままです(ここを取り違えないことが本記事の肝)。
 
 ```bash
 pip install llmesh-llove
@@ -44,9 +44,9 @@ llove demo --scenario incident   # ← 今回追加した「あなたが分岐�
 
 **かみくだき(その2)**:llove は FullSense ™ という 3 兄弟(`llmesh`=安全な LLM ハブ / `llive`=自己進化する記憶 / **llove**=見える化と人の判断台)の **「見せる」担当** です。データを作るのは兄弟たち、それを 1 画面に並べて人に見せ、人が「これでいい/やり直して」と関わる作業台が llove です。
 
-**かみくだき(その3・正直版)**:ただし現在の llove は、**「本物のデータを処理して見せる」よりも「本物っぽい合成データを台本どおりに流して見せる」教育デモ** が中心です。これは欠点ではなく、オフラインで・ネットワーク無しで・30 秒で動かせるという立派な設計選択です。けれど「実際に AI を動かして検証している」と読み違えてはいけません。ここを正直に区別するのが本記事の背骨です。
+**かみくだき(その3・正直版)**:ただし現在の llove は、**「本物のデータを処理して見せる」よりも「本物っぽい合成データを台本どおりに流して見せる」教育デモ** が中心です。これは欠点ではなく、オフラインで・ネットワーク無しで・30 秒で動かせるという合理的な設計選択です。けれど「実際に AI を動かして検証している」と読み違えてはいけません。ここを正直に区別するのが本記事の背骨です。
 
-> **用語**:**ダッシュボード(dashboard)**=複数の情報を 1 画面に並べた計器盤。**TUI(Text User Interface、テキストユーザーインターフェース)**=画像ではなく文字で組み立てる画面のこと。
+> **用語**:**ダッシュボード(dashboard)**=複数の情報を 1 画面に並べた計器盤。**TUI(Text User Interface、テキストユーザーインターフェース)**=画像ではなく文字で組み立てる画面のこと。(正式な定義は次の §3、ここでは雰囲気だけ掴んでください。)
 
 ---
 
@@ -58,11 +58,14 @@ llove demo --scenario incident   # ← 今回追加した「あなたが分岐�
 - **選択肢を与える動き(user choice)**:途中で止まって「どうする?」と選ばせ、選んだ結果で**その先が変わる**動き。本記事の主役です。
 - **HITL(Human-in-the-Loop、人間参加型)**:AI に任せきりにせず、要所で人間が判断・承認を挟む仕組み。
 - **SPC(Statistical Process Control、統計的工程管理)** / **CUSUM(Cumulative Sum、累積和)**:数値が少しずつズレていく「ドリフト」を、累積で検出する古典的手法。
+- **HMAC(Hash-based Message Authentication Code、鍵付きハッシュ認証)**:共有鍵を使い、データが改竄されていないかを検知する仕組み。
+- **抽象基底クラス(ABC、Abstract Base Class)**:中身の無い「契約」だけを定めた親クラス。子クラスが実装を埋める。
 - **シナリオ(scenario)**:llove のデモ 1 本分の台本。`llove demo --scenario <名前>` で呼びます。
 - **パレット(Command Palette)**:`:` で開く、コマンドを打ち込む入力欄(Vim の ex 風)。
-- **perspective**:Qt 版で、どのパネルをどこに配置したかの「画面割り」を保存・復元する単位。
+- **JSONL(JSON Lines)**:1 行 1 イベントの JSON ログ形式。`llove` は実行内容をこの形で残し、後から再生できます。
+- **画面割り(perspective)**:Qt 版で、どのパネルをどこに配置したかの配置情報を保存・復元する単位。
 - **BWT(Backward Transfer、後方転移)**:新しい学習が、過去に覚えたことをどれだけ保てた/壊したかの指標(`llive` 由来)。
-- **SMIL**:`<script>` を使わずに SVG 画像へアニメーションを埋め込む標準。GitHub でも動く「動く図」を作れます。
+- **SMIL(Synchronized Multimedia Integration Language)**:`<script>` を使わずに SVG 画像へアニメーションを埋め込む標準。GitHub 上でも動く「動く図」を作れます。
 
 ---
 
@@ -70,9 +73,9 @@ llove demo --scenario incident   # ← 今回追加した「あなたが分岐�
 
 ここは安心して「できます」と言える層です。すべて **オフライン合成データ** で、ネットワーク不要・`pip install llmesh-llove` だけで動きます。
 
-### 4-1. デモ(17 シナリオ)
+### 4-1. デモ(既存 17 + 今回追加の incident = 計 18)
 
-`llove demo --list` で一覧、`llove demo --scenario <名前>` で個別起動します。README は代表的な 7 個しか挙げていませんが、**実レジストリには 17 個**登録されています(README の方が過小申告でした)。
+`llove demo --list` で一覧、`llove demo --scenario <名前>` で個別起動します。README は代表的な 7 個しか挙げていませんが、**実レジストリには既存 17 個**が登録されています(README の方が過小申告でした)。さらに本記事で **`incident` を 1 つ追加したので、現在は計 18 個**です。
 
 | 系統 | シナリオ | 何を「見せる」か |
 |---|---|---|
@@ -80,8 +83,9 @@ llove demo --scenario incident   # ← 今回追加した「あなたが分岐�
 | 運用風 | `audit` `reliability` `cost` `chat` `bench` | 監査ログの tail / パケット再送 / 予算超過 / チャット+遮断 / 3 モデル判定 |
 | 可視化バリエーション | `drift` `mcp_call` `vision` `pointcloud` `mindmap` | 応答長ドリフト / MCP 呼出トレース / 欠陥検出 / 点群欠落 / 知識ツリー展開 |
 | 入門・娯楽 | `coin_toss` `shogi` | コイン 50 回で収束を体感 / mock 2 者の将棋を放送風に観戦 |
+| **対話(今回追加)** | **`incident`** | 警報 →「どう対応?」で**あなたが分岐**させる(詳細は §7) |
 
-> **正直な注記(超重要)**:この 17 本は **全て、実際の LLMesh コンポーネントを呼んでいません**。`scada` は名前に反して実 `ExplainedCUSUM` クラスを使わず素朴なインライン計算で、LLM 呼び出しは `tokens=237 / latency=412` といった**ハードコードの偽イベント**です。`audit` も実 HMAC 計算は一行も無く、ハッシュ値は `deadbeef…` のような飾り文字列です。つまりこれらは「**LLMesh 機能の挙動を“見せる”教育用の紙芝居**」であって、「機能そのものを実行している」わけではありません。デモとしては十分に価値がありますが、ここを取り違えないでください。
+> **正直な注記(超重要)**:この既存 17 本は **すべて、実際の LLMesh コンポーネントを呼んでいません**。`scada` は名前に反して実 `ExplainedCUSUM` クラスを使わず素朴なインライン計算で、LLM 呼び出しは `tokens=237 / latency=412` といった**ハードコードの偽イベント**です。`audit` も実 HMAC 計算は一行も無く、ハッシュ値は `deadbeef…` のような飾り文字列です。つまりこれらは「**LLMesh 機能の挙動を“見せる”教育用の紙芝居**」であって、「機能そのものを実行している」わけではありません。デモとしては十分に価値がありますが、ここを取り違えないでください。(今回追加した `incident` も、データが合成である点はまったく同じです。違うのは「分岐できる」ことだけ。)
 
 ### 4-2. 観測ビュー / 図 / Qt / エクスポート
 
@@ -91,12 +95,12 @@ llove demo --scenario incident   # ← 今回追加した「あなたが分岐�
 | `SPCChartView` | 部分的 | **CUSUM 計算は view に無く**、payload の値を表示するだけ |
 | 図レンダラ(mermaid / svg / plantuml / dot / svgbob の **5 種**) | 部分的 | 外部 CLI(`mmdc` / `rsvg-convert` / `chafa` 等)で画像化。**既定で配線済みは mermaid + svg の 2 種のみ**、しかも `MarkdownView` を載せる実シナリオが無い |
 | 図の ASCII フォールバック | 動く | 外部バイナリ不在でも罫線で可視化(家訓「動く SVG は静的状態も必ず見える」のターミナル版) |
-| Qt 第 2 フロント(7 パネル:fitness / diversity / lineage / persona / genome heatmap / QD archive / run monitor) | 動く | `python -m llove.qt <file>` で `llive` 進化 run の JSONL を tail 描画。ドッキング shell + perspective 保存。`[gui]` extra 必要 |
+| Qt 第 2 フロント(7 パネル:fitness / diversity / lineage / persona / genome heatmap / QD archive / run monitor) | 動く(一部 partial) | `python -m llove.qt <file>` で `llive` 進化 run の JSONL を tail 描画。ドッキング shell + 画面割り(perspective)保存。`[gui]` extra 必要。**ただし Run Monitor の status 表示はライブ更新されません(部分的)** |
 | 単一 HTML エクスポート(`llove export`) | 動く | N 秒分を集めて自己完結 1 枚 HTML に。中身は静的テーブル(最新 200 件) |
 | アニメ SVG エクスポート(`llove export-svg`) | 動く | 「10 思考因子リング」を SMIL で回転する SVG に。`--persona`(oka-kiyoshi / feynman / newton / galois の 4 種)で形が変わる |
-| 多言語(i18n、ja / en) | 動く | `--lang ja` / `LLOVE_LANG` で UI 言語を切替。**CLI から端から端まで効く、数少ない“本物のユーザー選択”** |
+| 多言語化(i18n=internationalization、ja / en) | 動く | `--lang ja` / `LLOVE_LANG` で UI 言語を切替。**CLI から端から端まで効く、数少ない“本物のユーザー選択”** |
 
-**検証済みの数字**:出荷バージョン 0.3.0a1 / デモ 17 / 図種 5(配線済み 2)/ 観測ビュー 7 / Qt パネル 7 / ロケール 2(ja・en)/ 思考因子 10 / 具象ゲームプレイヤ **1**(MockPlayer のみ)。
+**検証済みの数字**:出荷バージョン 0.3.0a1 / デモ **18**(既存 17 + 今回の `incident`)/ 図種 5(配線済み 2)/ 観測ビュー 7 / Qt パネル 7 / ロケール 2(ja・en)/ 思考因子 10 / 具象ゲームプレイヤ **1**(MockPlayer のみ)。
 
 ---
 
@@ -109,16 +113,16 @@ llove demo --scenario incident   # ← 今回追加した「あなたが分岐�
 | 選べる点 | 中身 | ただし |
 |---|---|---|
 | `--lang {en,ja}` | UI 言語の選択 | **端から端まで本当に効く唯一系** |
-| CLI パラメータ(`--scenario` 17 択 / `--persona` / `--source` / `--seed` …) | 「**どれを再生するか**」の選択 | 選んでも中身は台本固定 |
+| CLI パラメータ(`--scenario` 18 択 / `--persona` / `--source` / `--seed` …) | 「**どれを再生するか**」の選択 | 選んでも中身は台本固定 |
 | LoveApp のキー操作(`q` 終了 / `r` 最初から / `space` 一時停止 / `h` ヘルプ / クリックボタン) | 再生の操作 | **流れ自体は分岐しない** |
-| Qt の View メニュー / perspective 保存 / Run Monitor の Pause・Resume・Stop | パネル選択と run 制御(control ファイルへ書込) | Qt 側。唯一の実 HITL 制御点だが status 表示はライブ更新されない |
+| Qt の View メニュー / 画面割り保存 / Run Monitor の Pause・Resume・Stop | パネル選択と run 制御(control ファイルへ書込) | Qt 側。唯一の実 HITL 制御点だが status 表示はライブ更新されない |
 
 ### 5-2. その隣に広がる「台本固定」の領域(正直に)
 
-- **デモ全 17 本**:`events()` の中に入力受付も分岐も一切無く、合成イベント列を `yield` + `sleep` で流すだけ。
-- **観測ビュー 7 種**:すべて受動レンダラー。「中身」(CUSUM 計算・HMAC 検証・LLM 呼出)は view 側に無く、上流の台本が事前計算/偽値を供給。
-- **将棋対局(`mock:script`)**:定跡を順送りする台本再生。**実 LLM 同士の対局は動きません**(`anthropic`/`ollama` は `NotImplementedError`)。
-- **F25 の `llive` ビューア群**(BWT / RouteTrace / MemoryLink / CognitiveMesh):流入イベントの**表示専用**。`CognitiveMeshPanel` は「能動発話・隔離保留」を扱いますが、承認・選択の UI は無く読み取り専用です。
+- **デモの既存 17 本**:`events()` の中に入力受付も分岐も一切無く、合成イベント列を `yield` + `sleep` で流すだけです。
+- **観測ビュー 7 種**:すべて受動レンダラーです。「中身」(CUSUM 計算・HMAC 検証・LLM 呼出)は view 側に無く、上流の台本が事前計算/偽値を供給します。
+- **将棋対局(`mock:script`)**:定跡を順送りする台本再生です。**実 LLM 同士の対局は動きません**(`anthropic`/`ollama` は `NotImplementedError`)。
+- **F25 の `llive` ビューア群**(BWT / RouteTrace / MemoryLink / CognitiveMesh):流入イベントの**表示専用**です。`CognitiveMeshPanel` は「能動発話・隔離保留」を扱いますが、承認・選択の UI は無く読み取り専用です。
 - **研究 IDE・HITL の 4 ビュー**(taskgraph / hypothesis / memo / diff):**承認・メモ・差分を表示するだけ**で、人が打ち込む入力欄(Input / TextArea / Button)を持ちません。「人が選ぶ/書く」ではなく「人の行為の**結果**を映す」段階です。
 
 > つまり、**ライブ TUI の中で「ユーザーが本当に分岐させられる」点は、ほぼ皆無**でした。これが、この記事を書く前の正直な現在地です。
@@ -127,9 +131,9 @@ llove demo --scenario incident   # ← 今回追加した「あなたが分岐�
 
 ## 6. 設計はできて、配線が未了 ―「眠っている choice-ready 資産」
 
-面白いのは、**「選ぶ」ための部品はかなり作り込まれているのに、ライブ app に繋がっていない** という点です。
+面白いのは、**「選ぶ」ための部品はかなり作られているのに、ライブ app に繋がっていない** という点です。
 
-- **将棋/チェス/タイピング/`games.base` のエンジン**:合法手の列挙・着手検証・違法 3 ストライク失格まで備え、**「選ぶ主体」を差し込めば対局になる** 設計(`GamePlayer` ABC は `HumanPlayer` を名前として予約済み)。ところが具象プレイヤが MockPlayer 以外**ゼロ**。
+- **将棋/チェス/タイピング/`games.base` のエンジン**:合法手の列挙・着手検証・違法 3 ストライク失格まで実装済みで、**「選ぶ主体」を差し込めば対局になる** 設計です(`GamePlayer` の抽象基底クラス(ABC、Abstract Base Class)は `HumanPlayer` を名前として予約済み)。ところが具象プレイヤが MockPlayer 以外**ゼロ**。
 - **Command Palette(`:` パレット)**:解析・補完・履歴・alias・macro まで純粋関数として完成。**しかしライブ app は registry を空のまま開くため、`:help` すらエラー**、`:fold`/`:open` も hook 未配線で無反応。
 - **F17 WindowManager**:Free/Locked コンテナ + `layout.toml` 往復 + ピン留めビュー削除拒否まで揃うのに、LoveApp は旧来の 4 ペイン直配置のままで**未統合**。
 
@@ -156,10 +160,10 @@ source.stream() ──Event──► LoveApp._consume() ──► Views   (台�
 InteractiveScenario.events()
    │  choice = await self.ask("どう対応する?", [説明/観測/隔離])   ← ここで一時停止
    ▼
-LoveApp.ask_choice()  ─push_screen→  ChoiceScreen(モーダル)
+LoveApp.ask_choice()  ─push_screen→  ChoiceScreen(中央に被さるモーダル)
    │                                   ↑↓ / 数字 / Enter で選ぶ
    │  ◄─ 選んだ id ───────────────────┘
-   ▼  選択を AUDIT に記録(--log の JSONL に残り、後で再生できる)
+   ▼  選択を AUDIT に記録(--log を付ければ JSONL に残り、後で再生できる)
    分岐: 選んだ枝のイベント列だけが流れる
 ```
 
@@ -169,11 +173,11 @@ LoveApp.ask_choice()  ─push_screen→  ChoiceScreen(モーダル)
 
 | ファイル | 役割 |
 |---|---|
-| `events.py` | `EventKind.CHOICE` を追加(既存に影響なし) |
+| `events.py` | `EventKind.CHOICE` を将来の専用 view 用に**予約**(現状は emit せず、選択は AUDIT として記録) |
 | `term/choice.py` | `ChoiceOption` / `ChoicePrompt` / `render_choice` / `ChoiceAsker`(純粋・Textual 非依存) |
 | `term/choice_screen.py` | `ChoiceScreen` モーダル(↑↓ / 数字 / Enter で選択、Escape は既定枝へ) |
 | `demo/scenarios/interactive.py` | `InteractiveScenario.ask()`。**asker 未注入時は既定枝**を返し、テスト・CI でも決定的 |
-| `demo/scenarios/incident.py` | flagship デモ:警報 → 「どう対応?」3 択 → 枝ごとに別の流れ |
+| `demo/scenarios/incident.py` | 中心デモ:警報 → 「どう対応?」3 択 → 枝ごとに別の流れ |
 | `app.py` | `ask_choice()`(モーダル + Future)+ `isinstance` ガードで InteractiveScenario にだけ asker 注入。選択を AUDIT 記録 |
 | `i18n/{en,ja}.toml` | `[scenario.incident]` と `[ui.choice]` |
 
@@ -185,24 +189,36 @@ LoveApp.ask_choice()  ─push_screen→  ChoiceScreen(モーダル)
 ┌─ llove ─ incident demo ───────────────────┐
 │ bearing_temp 78.9 ▶ CUSUM ALARM            │
 │                                            │
-│  ⚑ llove: 軸受けがドリフトし警報。どう対応?  │
-│   ▸ 1. LLM に説明させる   — LLM 生成を検証   │
-│     2. 観測を続ける       — SPC を検証       │
-│     3. ラインを隔離する   — 監査連鎖を検証   │
-│   ↑↓ 選択   1-3 直接   Enter 決定           │
+│  ┌─ ⚑ llove(中央モーダル)──────────────┐ │
+│  │ 軸受けがドリフトし警報。どう対応?    │ │
+│  │  ▸ 1. LLM に説明させる                │ │
+│  │    2. 観測を続ける                    │ │
+│  │    3. ラインを隔離する                │ │
+│  │  ↑↓ 選択   1-3 直接   Enter 決定      │ │
+│  └────────────────────────────────────────┘ │
 └────────────────────────────────────────────┘
 → 選んだ枝だけが流れる。「説明」を選べば第 2 の決定点
   (修正適用 / 巻き戻し / 人にエスカレーション)へ続く
 ```
 
-**設計上の効きどころ**:3 つの枝は、それぞれ別の系統のイベント(説明=`LLM_CALL` / 観測=2 度目の `SPC_ALARM` / 隔離=監査 `AUDIT` 連鎖)を流します。**1 つの警報から、あなたの選択で見えるものが変わる** ——これが「AI としての機能検証用の道具」という llove の本質に、初めてライブで繋がった瞬間です。
+> ※ 選択欄は画面中央に被さる**モーダル**(`ChoiceScreen`)として開きます。各枝に添えた「LLM 生成を検証 / SPC を検証 / 監査連鎖を検証」は**枝の役割名**であって、中身は全枝とも合成データです(詳細は次節)。
+
+**設計上の効きどころ**:3 つの枝は、それぞれ別系統のイベント(説明=`LLM_CALL` / 観測=2 度目の `SPC_ALARM` / 隔離=監査 `AUDIT` 連鎖)を流します。ただし**いまはどの枝も合成データ**で、ここで用意したのは「将来それぞれの検証(LLM 生成・SPC・監査)を差し込む**位置(スロット)**を、分岐として先に通したもの」です。**1 つの警報から、あなたの選択で先が変わる** ——「AI の機能を検証する作業台」という llove の設計意図に、**ライブの分岐点として初めて繋がった**段階だと捉えてください(中身の本物化は、これからの課題です)。
 
 ### 7-4. 正直な限界(ここが大事)
 
-- **`incident` も合成データの紙芝居である点は他のデモと同じ**です。`LLM_CALL` の `tokens` 等はやはりハードコードで、本物の LLM を呼んではいません。**今回新しくなったのは「分岐(あなたが選んで先が変わる)」という機構だけ**で、「本物の AI 検証」を足したわけではありません。
-- 選択は AUDIT として `--log` の JSONL に残るので、**通った経路をあとから再生・監査できます**(ここは実装済み・テスト済み)。
-- 既存 16 シナリオ・既存挙動は**バイトレベルで不変**(asker 注入は `isinstance` ガード)。公開 PyPI への破壊的変更はありません。
-- 品質:新規ファイルは `ruff` / `mypy` クリーン、選択肢プリミティブ・分岐・app 統合に**専用テストを追加し、全スイート緑(exit 0)**。push は人間の承認ゲート(human-gate)に置いています。
+- **`incident` も合成データの紙芝居である点は、他のデモと同じ**です。`LLM_CALL` の `tokens` 等はやはりハードコードで、本物の LLM を呼んではいません。**今回新しくなったのは「分岐(あなたが選んで先が変わる)」という機構だけ**で、「本物の AI 検証」を足したわけではありません。
+- 選択は AUDIT として記録され、**`--log` を付ければ通った経路をあとから再生・監査できます**(実装済み・テスト済み)。実際に試すには:
+
+  ```bash
+  llove demo --scenario incident --log run.jsonl   # ↑↓/1-3/Enter で選ぶ(Esc=既定枝)
+  llove tail run.jsonl                              # 選んだ経路を再生・監査
+  ```
+
+  (`--log` を省くと、このシナリオはログを残しません。自動ログが効くのは現状 `shogi` のみです。)
+- 既存 17 シナリオ・既存挙動は**バイトレベルで不変**(asker 注入は `isinstance` ガード)。公開 PyPI への破壊的変更はありません(additive)。
+- 品質:新規ファイルは `ruff` / `mypy` クリーン、選択肢プリミティブ・分岐・app 統合に**専用テストを追加し、全スイート緑(exit 0)**。
+- **正直な公開状況**:この実装本体は、リポジトリの auto-commit 運用により、執筆時点で**既に GitHub の `main` に公開済み**でした(なお git push 自体では PyPI への再リリースは起きません)。手元に未 push で残っているのは、最後の lint 修正 1 行だけです。「人間の承認を経てから公開」を意図する運用とはズレているので、ここも正直に記しておきます。
 
 ---
 
@@ -220,8 +236,8 @@ LoveApp.ask_choice()  ─push_screen→  ChoiceScreen(モーダル)
 
 ## 9. まとめ
 
-- いまの llove は、**「綺麗に流す」層**(デモ 17・図レンダラ・Qt 7 パネル・HTML/SVG エクスポート・i18n)が **works_now で厚い**。
-- 一方、**「選ぶ・分岐する・拡張する」層**は、**設計の骨組みは立派なのに配線が未了**でした(Command Palette・将棋プレイヤ・WindowManager・HITL ビュー)。
+- いまの llove は、**「綺麗に流す」層**(デモ 18・図レンダラ・Qt 7 パネル・HTML/SVG エクスポート・i18n)が **works_now で厚い**。
+- 一方、**「選ぶ・分岐する・拡張する」層**は、**設計の骨組みは整っているのに配線が未了**でした(Command Palette・将棋プレイヤ・WindowManager・HITL ビュー)。
 - だから、この記事を書く過程で **「あなたに選ばせる動き」を 1 つ実装**し、固定再生のデモに**初めてライブの分岐点**を入れました。
 - 何より大切なのは、**誇張せず現在地を地図化したこと**です。「動く/骨組み/これから」を取り違えない地図こそ、次の開発の羅針盤になります。
 
@@ -233,7 +249,7 @@ LoveApp.ask_choice()  ─push_screen→  ChoiceScreen(モーダル)
 
 - **実 LLM 対局アリーナ**:`HumanPlayer` と、本物の LLM プレイヤ(`anthropic`/`ollama`)で、人間 vs AI・AI vs AI を実際に指す。
 - **おせっかいに話しかける llove**:`llive` の「隔離保留・能動発話」を受けて、llove の側から「気づいてました?」と**選択肢を差し出す** HITL 承認バス。
-- **埋め込みスクリプト**:ターミナルの中で REPL / エディタ / ノートブックを開き、ユーザーが llove 自身を拡張する。
+- **埋め込みスクリプト**:ターミナルの中で REPL(Read-Eval-Print Loop、対話実行環境)/ エディタ / ノートブックを開き、ユーザーが llove 自身を拡張する。
 
 「**決まった動き**」が「**あなたに選ばせる動き**」へ変わっていく——その続きは、また次回に。
 
