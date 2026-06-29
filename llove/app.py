@@ -356,8 +356,120 @@ class LoveApp(App):
     def action_show_help(self) -> None:
         self.push_screen(HelpScreen())
 
+    def _clear_views(self) -> None:
+        """Clear the rolling state of every pane and redraw its empty state."""
+        for v in self._views:
+            if hasattr(v, "_rows"):
+                v._rows.clear()
+            if hasattr(v, "_alarms"):
+                v._alarms.clear()
+            if hasattr(v, "_entries"):
+                v._entries.clear()
+            if hasattr(v, "_values"):
+                v._values.clear()
+            if hasattr(v, "_count"):
+                v._count = 0
+            if hasattr(v, "_alarm_count"):
+                v._alarm_count = 0
+            if hasattr(v, "_beats"):
+                v._beats = 0
+            if hasattr(v, "_counts") and isinstance(v._counts, dict):
+                for k in list(v._counts):
+                    v._counts[k] = 0
+            # Force a redraw of empty state.
+            if hasattr(v, "update"):
+                empty = getattr(v, "_initial", None)
+                if empty is None:
+                    empty = "(reset)"
+                try:
+                    v.update(empty)
+                except Exception:  # nosec B110 — fail-closed: a broken redraw must not kill the app.
+                    continue
+
+    def _load_source(self, source: DataSource) -> None:
+        """Swap the running data source — the Command Palette 'cartridge loader'.
+
+        Cancels the current consume loop, clears the panes, installs the new
+        source, re-wires the interactive asker, and starts consuming again. The
+        panes are fixed at mount time, so a scenario's narration only shows when
+        the app already has a narration pane (true for ``llove demo --scenario``).
+        """
+        if self._task and not self._task.done():
+            self._task.cancel()
+            self._task = None
+        self._clear_views()
+        self._paused = False
+        if hasattr(self, "_btn_pause"):
+            self._btn_pause.label = t("ui.button.pause")
+        # Truncate the event log so the new run starts a fresh record.
+        if self._log_file is not None and self._log_path is not None:
+            with contextlib.suppress(Exception):
+                self._log_file.close()
+            self._log_file = self._log_path.open("w", encoding="utf-8")
+        self._source = source
+        self._wire_interactive_asker()
+        self._task = asyncio.create_task(self._consume())
+
     def action_command_palette(self) -> None:
-        self.push_screen(CommandPaletteScreen())
+        registry, ctx = self._command_palette_context()
+        self.push_screen(CommandPaletteScreen(registry=registry, ctx=ctx))
+
+    def _command_palette_context(self) -> tuple[CommandRegistry, CommandContext]:
+        """Build (once) the registry + context backing the ':' palette.
+
+        Without this the palette opens with an empty registry, so ``:help``
+        errors and every command is inert. Here we register the builtins and
+        bind the hooks that genuinely work (help / demo / play / theme /
+        identity); the rest (``:open`` / ``:fold`` / ``:layout`` / ``:peer``)
+        keep their honest "not wired yet" responses.
+        """
+        if self._cmd_registry is not None and self._cmd_ctx is not None:
+            return self._cmd_registry, self._cmd_ctx
+        from llove.term.builtins import make_default_context, register_builtins
+
+        registry = CommandRegistry()
+        register_builtins(registry)
+        ctx = make_default_context(registry)  # binds the 'registry' hook for :help
+        # :identity — real did:key when an llmesh identity is present.
+        identity = load_local_identity()
+        if identity is not None and getattr(identity, "did_key", None):
+            ctx.hooks["identity_did"] = identity.did_key
+        # :theme — wire to Textual's own theme machinery.
+        ctx.hooks["get_theme"] = lambda: self.theme
+        ctx.hooks["list_themes"] = lambda: sorted(getattr(self, "available_themes", {}))
+        ctx.hooks["set_theme"] = self._set_app_theme
+        # cartridge loaders: :demo <name> / :play <game> <p1> <p2>.
+        ctx.hooks["start_demo"] = self._start_demo
+        ctx.hooks["start_game"] = self._start_game
+        self._cmd_registry = registry
+        self._cmd_ctx = ctx
+        return registry, ctx
+
+    def _set_app_theme(self, name: str) -> None:
+        # Textual validates the name and raises on an unknown theme; the
+        # command handler turns that into a friendly error.
+        self.theme = name
+
+    def _start_demo(self, name: str) -> None:
+        """`:demo <name>` — load a demo scenario into the running app."""
+        from llove.demo.scenarios import get_scenario
+
+        self._load_source(get_scenario(name))  # ValueError on unknown -> handler reports it
+
+    def _start_game(self, game: str, p1: str, p2: str) -> None:
+        """`:play <game> <p1> <p2>` — load a real game (shogi today)."""
+        if game != "shogi":
+            raise ValueError(f"unsupported game: {game!r} (only 'shogi' is available)")
+        try:
+            from llove.shogi import make_player
+            from llove.shogi.source import ShogiSource
+        except ImportError as exc:  # python-shogi not installed
+            raise RuntimeError(
+                f"shogi engine unavailable: {exc}; install: pip install 'llmesh-llove[shogi]'"
+            ) from exc
+        sente = make_player(p1, side="sente")
+        gote = make_player(p2, side="gote")
+        self._load_source(ShogiSource(sente, gote))
 
     def action_quit_now(self) -> None:
         """Synchronous quit so it can be wired from Button.Pressed."""
