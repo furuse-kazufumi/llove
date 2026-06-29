@@ -86,7 +86,7 @@ __all__ = [
     "make_default_context",
     "make_prompt",
     "parse_line",
-    "render_choice",
     "register_builtins",
     "register_command",
+    "render_choice",
 ]
