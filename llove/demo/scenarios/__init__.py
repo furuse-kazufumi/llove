@@ -16,6 +16,8 @@ from llove.demo.scenarios.coin_toss import CoinTossScenario
 from llove.demo.scenarios.cost import CostBudgetScenario
 from llove.demo.scenarios.drift import ModelDriftScenario
 from llove.demo.scenarios.firewall import FirewallScenario
+from llove.demo.scenarios.incident import IncidentScenario
+from llove.demo.scenarios.interactive import InteractiveScenario
 from llove.demo.scenarios.mcp_call import MCPCallScenario
 from llove.demo.scenarios.mindmap import MindmapScenario
 from llove.demo.scenarios.multimodal import MultimodalSPCScenario
