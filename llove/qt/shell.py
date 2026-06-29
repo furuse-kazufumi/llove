@@ -63,6 +63,8 @@ class LoveShell(QtWidgets.QMainWindow):
             return {"run_dir": str(self.run_dir)}
         if type_id == "viz.run_monitor":
             return {"run_dir": str(self.run_dir)}
+        if type_id == "viz.qd_archive":
+            return {"run_dir": str(self.run_dir)}
         return {}
 
     def open_window(
