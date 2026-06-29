@@ -17,6 +17,11 @@ reset = "⟲ リセット"
 help = "? ヘルプ"
 quit = "✕ 終了"
 
+[ui.choice]
+# 対話的な選択肢でユーザーが選んだときに残す監査行
+# (--log の JSONL で実際に通った経路を再生できる)。
+audit = "決定: {label}"
+
 [ui.help]
 title = "[bold]💗 llove — ヘルプ[/bold]\n[bold yellow]ESC キー (または h / q / 閉じるボタン) で元の画面に戻ります。[/bold yellow]\n"
 body = """
