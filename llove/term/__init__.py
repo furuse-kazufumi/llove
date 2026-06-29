@@ -20,6 +20,13 @@ from llove.term.builtins import (
     make_default_context,
     register_builtins,
 )
+from llove.term.choice import (
+    ChoiceAsker,
+    ChoiceOption,
+    ChoicePrompt,
+    make_prompt,
+    render_choice,
+)
 from llove.term.command import (
     DEFAULT_REGISTRY,
     Command,
