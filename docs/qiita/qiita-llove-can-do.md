@@ -226,7 +226,7 @@ LoveApp.ask_choice()  ─push_screen→  ChoiceScreen(中央に被さるモー�
 
 誇張せず、**実コードの根拠に立った最短経路**は次の 3 段です(今回の `incident` はその第 0 歩)。
 
-1. **Command Palette を生かす(最小工数・最大変化)**:LoveApp 起動時に `register_builtins` を呼び、`:demo`/`:play`/`:open`/`:fold`/`:layout` を実アクションに bind するだけで、**台本再生中でもユーザーがコマンドで分岐・操作**できるようになります。部品は完成済み、繋ぐだけ。
+1. **Command Palette を生かす(最小工数・最大変化)**:LoveApp 起動時に `register_builtins` を呼び、`:demo`/`:play`/`:open`/`:fold`/`:layout` を実アクションに bind するだけで、**台本再生中でもユーザーがコマンドで分岐・操作**できるようになります。部品は完成済み、繋ぐだけ。 ✅ **本セッションで実装済み**:`:help` / `:demo <name>`(**走行中にシナリオを hot-swap** = カートリッジ・ロード)/ `:play shogi` / `:theme` / `:identity` を実配線しました(`:open`/`:fold`/`:layout`/`:peer` は到達先が無いので正直に未配線のまま)。これで `:` から別の“カートリッジ”を起動できます。
 2. **将棋に `HumanPlayer` を 1 つ**:合法手判定は完成しているので、Textual の入力から着手を選ぶ `HumanPlayer` を 1 つ実装すれば、「観戦専用の固定再生」が「**人間が指す対局**」に変わり、出荷分に初めて user_choice の実例が乗ります。
 3. **`CognitiveMeshPanel` に承認 UI**:`llive` 側の「隔離保留・能動発話」に対して、**承認/却下/隔離解除のボタン**を足し、人間の判断を返せるようにする。これが「**llove が選択肢を差し出し、人が選ぶ**(おせっかいに話しかける)」という FullSense 哲学に最も直結する方向です。
 
