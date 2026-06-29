@@ -100,6 +100,18 @@ def _build_run_monitor(config: dict[str, Any]) -> QtWidgets.QWidget:
     return RunMonitorPanel(config.get("run_dir", "."))
 
 
+def _build_qd_archive(config: dict[str, Any]) -> QtWidgets.QWidget:
+    """Build a QD-archive panel; tail ``qd_metrics_path`` (``metrics_*_qd.jsonl``) if given."""
+    panel = QdArchivePanel()
+    path = config.get("qd_metrics_path")
+    if path:
+        controller = MetricsTailController(path, parent=panel)
+        controller.rows_ready.connect(panel.feed_rows)
+        controller.start()
+        panel.controller = controller  # type: ignore[attr-defined]
+    return panel
+
+
 def register_qt_window_types() -> None:
     """Register the Qt panels into the shared WindowType Registry (idempotent)."""
     register_window_type(
