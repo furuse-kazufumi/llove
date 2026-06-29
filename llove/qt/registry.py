@@ -174,6 +174,16 @@ def register_qt_window_types() -> None:
             builder=_build_run_monitor,
         )
     )
+    register_window_type(
+        WindowType(
+            id="viz.qd_archive",
+            display_name="QD Archive",
+            category="visualization",
+            description="Quality-diversity archive: cumulative vs occupied niches per generation (P6).",
+            default_size=(900, 450),  # px (Qt)
+            builder=_build_qd_archive,
+        )
+    )
 
 
 __all__ = ["register_qt_window_types"]
