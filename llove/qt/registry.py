@@ -15,6 +15,7 @@ from typing import Any
 from PySide6 import QtWidgets
 
 from llove.core.viewmodels.genome_heatmap import find_latest_snapshot, load_snapshot_file
+from llove.core.viewmodels.qd_archive import find_qd_metrics
 from llove.qt.diversity_panel import DiversityTrajectoryPanel
 from llove.qt.fitness_panel import FitnessTrajectoryPanel
 from llove.qt.genome_heatmap_panel import GenomeHeatmapPanel
