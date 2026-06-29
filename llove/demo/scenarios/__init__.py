@@ -68,6 +68,8 @@ __all__ = [
     "CostBudgetScenario",
     "DemoScenario",
     "FirewallScenario",
+    "IncidentScenario",
+    "InteractiveScenario",
     "LLMBackendsScenario",
     "MCPCallScenario",
     "MindmapScenario",
