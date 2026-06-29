@@ -53,6 +53,31 @@ def run_fitness_panel(metrics_path: str | Path, argv: list[str] | None = None) -
     return app.exec()
 
 
+def build_qd_window(
+    qd_metrics_path: str | Path,
+    interval_ms: int = 500,
+) -> tuple[QtWidgets.QMainWindow, QdArchivePanel, MetricsTailController]:
+    """Build the QD-archive window + panel + tail controller, wired but not started."""
+    window = QtWidgets.QMainWindow()
+    window.setWindowTitle(f"llove — QD archive · {Path(qd_metrics_path).name}")
+    panel = QdArchivePanel()
+    controller = MetricsTailController(qd_metrics_path, interval_ms=interval_ms)
+    controller.rows_ready.connect(panel.feed_rows)
+    window.setCentralWidget(panel)
+    controller.setParent(window)
+    return window, panel, controller
+
+
+def run_qd_panel(qd_metrics_path: str | Path, argv: list[str] | None = None) -> int:
+    """Open the live QD-archive panel for a ``metrics_*_qd.jsonl`` file."""
+    app = _app(argv)
+    window, _panel, controller = build_qd_window(qd_metrics_path)
+    controller.start()
+    window.resize(900, 450)
+    window.show()
+    return app.exec()
+
+
 def run_shell(run_dir: str | Path, argv: list[str] | None = None) -> int:
     """Open the Stage 2 dockable shell for a run directory and run the loop."""
     from llove.qt.shell import LoveShell
