@@ -26,6 +26,7 @@ from llove.demo.scenarios.rag import RAGStoresScenario
 from llove.demo.scenarios.reliability import ReliabilityScenario
 from llove.demo.scenarios.scada import SCADAScenario
 from llove.demo.scenarios.shogi import ShogiScenario
+from llove.demo.scenarios.triage import TriageScenario
 from llove.demo.scenarios.vision import VisionScenario
 
 # Registry — order matters for the menu display.
