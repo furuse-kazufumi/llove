@@ -71,7 +71,9 @@ def test_render_choice_marks_default_and_numbers() -> None:
     p = make_prompt("どうする?", [("explain", "説明"), ("observe", "観測")], default_id="observe")
     lines = render_choice(p)
     assert lines[0] == "どうする?"
-    assert lines[1].startswith(" 1. 説明")
+    # Non-selected rows use a space marker (aligns numbers under the ▸ row).
+    assert lines[1].lstrip().startswith("1. 説明")
+    assert not lines[1].startswith("▸")
     assert lines[2].startswith("▸ 2. 観測")
 
 
