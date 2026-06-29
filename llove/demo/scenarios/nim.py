@@ -1,8 +1,8 @@
 """nim — an interactive Nim cartridge (single-heap subtraction game).
 
-Classic **Nim** in its simplest single-heap form. A pile starts with 15–21
+Classic **Nim** in its simplest single-heap form. A pile starts with 15-21
 objects; on each turn a player removes 1, 2, or 3 of them. Whoever takes the
-**last** object **wins** (normal play, not misère).
+**last** object **wins** (normal play, not misere).
 
 You move first against a deterministic CPU that plays the optimal modulo-4
 strategy — it tries to hand you a heap that is a multiple of four, the losing
@@ -56,7 +56,7 @@ def _optimal_take(heap: int) -> int:
 
 
 class NimScenario(InteractiveScenario):
-    """Single-heap Nim: take 1–3, last to take wins, vs a mod-4 CPU."""
+    """Single-heap Nim: take 1-3, last to take wins, vs a mod-4 CPU."""
 
     name = "nim"
     i18n_key = "nim"

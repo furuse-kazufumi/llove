@@ -91,15 +91,18 @@ def test_nim_i18n_resolves_under_en_and_ja() -> None:
 
     orig = active_locale()
     try:
+        # title/description resolve lazily under the *active* locale, so we
+        # capture each while its locale is active.
         set_locale("en")
-        s_en = get_scenario("nim")
-        assert s_en.title and s_en.title != "scenario.nim.title"
-        assert s_en.description and s_en.description != "scenario.nim.description"
+        s = get_scenario("nim")
+        en_title, en_desc = s.title, s.description
+        assert en_title and en_title != "scenario.nim.title"
+        assert en_desc and en_desc != "scenario.nim.description"
         set_locale("ja")
-        s_ja = get_scenario("nim")
-        assert s_ja.title and s_ja.title != "scenario.nim.title"
-        assert s_ja.description and s_ja.description != "scenario.nim.description"
-        assert s_en.title != s_ja.title
+        ja_title, ja_desc = s.title, s.description
+        assert ja_title and ja_title != "scenario.nim.title"
+        assert ja_desc and ja_desc != "scenario.nim.description"
+        assert en_title != ja_title
     finally:
         set_locale(orig)
 

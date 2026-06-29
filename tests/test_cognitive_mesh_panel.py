@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from llove.mcp.client import TimelineEvent
 from llove.views.llive.cognitive_mesh_panel import (
     COG_EVENT_TYPES,

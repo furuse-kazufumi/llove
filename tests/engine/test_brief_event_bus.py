@@ -37,7 +37,7 @@ def test_buffer_drops_oldest_on_overflow() -> None:
     bus = BriefEventBus(maxlen=3)
     for i in range(5):
         bus.emit("annotation", {"i": i}, namespace="oka")
-    buf = list(bus._buf)  # noqa: SLF001
+    buf = list(bus._buf)
     assert len(buf) == 3
     assert [ev.data["i"] for ev in buf] == [2, 3, 4]
 
@@ -61,14 +61,14 @@ def test_subscribers_receive_emitted_events() -> None:
     async def run() -> list[BriefEvent]:
         bus = BriefEventBus(maxlen=64)
         q: asyncio.Queue[BriefEvent] = asyncio.Queue(maxsize=16)
-        bus._register(q)  # noqa: SLF001
+        bus._register(q)
         bus.emit("annotation", {"k": "v"}, namespace="oka")
         bus.emit("brief_done", {"status": "ok"})
         received: list[BriefEvent] = []
         for _ in range(2):
             ev = await asyncio.wait_for(q.get(), timeout=0.5)
             received.append(ev)
-        bus._unregister(q)  # noqa: SLF001
+        bus._unregister(q)
         return received
 
     events = asyncio.run(run())
@@ -83,13 +83,13 @@ def test_slow_subscriber_does_not_block_publisher() -> None:
     async def run() -> int:
         bus = BriefEventBus(maxlen=1024)
         slow: asyncio.Queue[BriefEvent] = asyncio.Queue(maxsize=2)
-        bus._register(slow)  # noqa: SLF001
+        bus._register(slow)
         # emit 10 events into a queue that holds only 2 — overflow should
         # be silently dropped at the subscriber side, not raised.
         for i in range(10):
             bus.emit("annotation", {"i": i}, namespace="oka")
-        bus._unregister(slow)  # noqa: SLF001
-        return bus._seq  # noqa: SLF001
+        bus._unregister(slow)
+        return bus._seq
 
     final_seq = asyncio.run(run())
     assert final_seq == 10  # all 10 emit() calls succeeded

@@ -12,7 +12,7 @@ SSE is tested by:
 from __future__ import annotations
 
 import json
-from typing import Iterator
+from collections.abc import Iterator
 
 import pytest
 
@@ -20,7 +20,6 @@ fastapi = pytest.importorskip("fastapi")
 from fastapi.testclient import TestClient  # noqa: E402
 
 from llove.engine.brief_event_bus import (
-    BriefEventBus,
     get_default_bus,
     reset_default_bus,
 )
