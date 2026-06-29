@@ -52,9 +52,20 @@ class QdArchiveVM:
         return True
 
     def feed_line(self, line: str) -> bool:
-        """Parse a raw QD metrics line then ``feed`` it; ``False`` if unusable."""
-        row = parse_metrics_row(line)
-        if row is None:
+        """Parse a raw QD metrics JSONL line then ``feed`` it; ``False`` if unusable.
+
+        The QD metrics file uses different score keys (``scalar_best``) than the
+        fitness ``metrics.jsonl``, so this parses the line directly rather than
+        reusing the fitness row parser; ``feed`` does the field validation.
+        """
+        line = line.strip()
+        if not line:
+            return False
+        try:
+            row = json.loads(line)
+        except (json.JSONDecodeError, ValueError):
+            return False
+        if not isinstance(row, dict):
             return False
         return self.feed(row)
 
