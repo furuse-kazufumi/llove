@@ -82,4 +82,18 @@ class QdArchiveVM:
         }
 
 
-__all__ = ["QdArchiveVM"]
+def find_qd_metrics(run_dir: str | Path) -> Path | None:
+    """Return a QD metrics file (``metrics_*_qd.jsonl``) in ``run_dir``, or ``None``.
+
+    QD runs name the file after their config (e.g. ``metrics_scalar_qd.jsonl`` /
+    ``metrics_novelty_std_qd.jsonl``), so there is no fixed name; pick the
+    lexicographically-first match for a stable default.
+    """
+    directory = Path(run_dir)
+    if not directory.is_dir():
+        return None
+    matches = sorted(directory.glob("metrics_*_qd.jsonl"))
+    return matches[0] if matches else None
+
+
+__all__ = ["QdArchiveVM", "find_qd_metrics"]
