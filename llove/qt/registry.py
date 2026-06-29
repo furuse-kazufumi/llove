@@ -111,7 +111,9 @@ def _build_qd_archive(config: dict[str, Any]) -> QtWidgets.QWidget:
             found = find_qd_metrics(run_dir)
             path = str(found) if found is not None else None
     if path:
-        controller = MetricsTailController(path, parent=panel)
+        # QD rows use different score keys than metrics.jsonl, so tail as plain
+        # JSONL (not the fitness-specific MetricsTailController which would drop them).
+        controller = JsonlTailController(path, parent=panel)
         controller.rows_ready.connect(panel.feed_rows)
         controller.start()
         panel.controller = controller  # type: ignore[attr-defined]
