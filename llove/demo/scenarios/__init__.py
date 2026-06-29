@@ -51,6 +51,7 @@ SCENARIOS: dict[str, type[DemoScenario]] = {
     "mindmap": MindmapScenario,
     "coin_toss": CoinTossScenario,
     "shogi": ShogiScenario,
+    "nim": NimScenario,
 }
 
 
