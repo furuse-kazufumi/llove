@@ -66,6 +66,10 @@ def __getattr__(name: str):  # PEP 562 lazy import
 
 __all__ = [
     "DEFAULT_REGISTRY",
+    "ChoiceAsker",
+    "ChoiceOption",
+    "ChoicePrompt",
+    "ChoiceScreen",
     "Command",
     "CommandContext",
     "CommandHandler",
@@ -80,6 +84,7 @@ __all__ = [
     "dispatch",
     "filter_suggestions",
     "make_default_context",
+    "make_prompt",
     "parse_line",
     "register_builtins",
     "register_command",
