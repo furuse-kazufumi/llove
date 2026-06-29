@@ -365,6 +365,7 @@ class LoveApp(App):
                     self._log_file.close()
                 self._log_file = self._log_path.open("w", encoding="utf-8")
             self._source = self._source.__class__()
+            self._wire_interactive_asker()
             self._task = asyncio.create_task(self._consume())
 
     def action_toggle_pause(self) -> None:
