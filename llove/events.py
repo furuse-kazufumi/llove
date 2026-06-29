@@ -24,6 +24,7 @@ class EventKind(StrEnum):
     LLM_CALL = "llm_call"
     TRACE_SPAN = "trace_span"
     NARRATION = "narration"  # demo / tutorial commentary text for the narration pane
+    CHOICE = "choice"  # an interactive decision-point: prompt + options the user picks from
     INFO = "info"
 
 
