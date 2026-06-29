@@ -54,3 +54,17 @@ def test_series_aligned() -> None:
     s = vm.series()
     assert set(s) >= {"generation", "archive_cells", "occupied_cells"}
     assert len(s["generation"]) == len(s["archive_cells"]) == len(s["occupied_cells"]) == 1
+
+
+def test_find_qd_metrics(tmp_path: object) -> None:
+    from pathlib import Path
+
+    from llove.core.viewmodels.qd_archive import find_qd_metrics
+
+    d = Path(str(tmp_path))
+    assert find_qd_metrics(d) is None
+    (d / "metrics.jsonl").write_text("{}\n", encoding="utf-8")
+    assert find_qd_metrics(d) is None  # a plain metrics.jsonl is not a QD file
+    (d / "metrics_scalar_qd.jsonl").write_text("{}\n", encoding="utf-8")
+    found = find_qd_metrics(d)
+    assert found is not None and found.name == "metrics_scalar_qd.jsonl"
