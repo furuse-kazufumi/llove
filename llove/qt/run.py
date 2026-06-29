@@ -56,12 +56,16 @@ def run_fitness_panel(metrics_path: str | Path, argv: list[str] | None = None) -
 def build_qd_window(
     qd_metrics_path: str | Path,
     interval_ms: int = 500,
-) -> tuple[QtWidgets.QMainWindow, QdArchivePanel, MetricsTailController]:
-    """Build the QD-archive window + panel + tail controller, wired but not started."""
+) -> tuple[QtWidgets.QMainWindow, QdArchivePanel, JsonlTailController]:
+    """Build the QD-archive window + panel + tail controller, wired but not started.
+
+    Tails the QD metrics as plain JSONL (``JsonlTailController``); the QD rows use
+    different score keys than ``metrics.jsonl`` so the fitness reader would drop them.
+    """
     window = QtWidgets.QMainWindow()
     window.setWindowTitle(f"llove — QD archive · {Path(qd_metrics_path).name}")
     panel = QdArchivePanel()
-    controller = MetricsTailController(qd_metrics_path, interval_ms=interval_ms)
+    controller = JsonlTailController(qd_metrics_path, interval_ms=interval_ms)
     controller.rows_ready.connect(panel.feed_rows)
     window.setCentralWidget(panel)
     controller.setParent(window)
