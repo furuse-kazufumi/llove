@@ -82,6 +82,7 @@ __all__ = [
     "ReliabilityScenario",
     "SCADAScenario",
     "ShogiScenario",
+    "TriageScenario",
     "VisionScenario",
     "get_scenario",
     "narrate",
