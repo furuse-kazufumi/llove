@@ -1,15 +1,17 @@
 """App-level integration: an interactive scenario prompts via ChoiceScreen.
 
-Verifies the asker is injected for InteractiveScenario sources (and *not* for
-ordinary sources), that the modal appears while the scenario awaits, and that
-picking an option lets the run continue and records the decision in the audit
-pane.
+Verifies the asker is injected for InteractiveScenario sources, that the modal
+appears while the scenario awaits a decision, that picking an option lets the
+run continue, and that the decision is recorded in the JSONL log (so a --log
+run replays the exact path taken).
 """
 
 from __future__ import annotations
 
 import asyncio
+import json
 from collections.abc import AsyncIterator
+from pathlib import Path
 
 import pytest
 
@@ -50,8 +52,7 @@ class _StaticSource(DataSource):
 
 @pytest.mark.asyncio
 async def test_interactive_scenario_prompts_and_branches() -> None:
-    scenario = _AskOnce()
-    app = LoveApp(scenario, with_narration=True)
+    app = LoveApp(_AskOnce(), with_narration=True)
     async with app.run_test(size=(120, 40)) as pilot:
         await pilot.pause(0.1)
         # The scenario is suspended on the choice-point modal.
@@ -69,18 +70,26 @@ async def test_non_interactive_source_gets_no_modal() -> None:
     async with app.run_test(size=(120, 40)) as pilot:
         await pilot.pause(0.05)
         assert not isinstance(app.screen, ChoiceScreen)
-        assert app._source._asker is None if isinstance(app._source, InteractiveScenario) else True
 
 
 @pytest.mark.asyncio
-async def test_choice_is_recorded_in_audit_log() -> None:
-    scenario = _AskOnce()
-    app = LoveApp(scenario, with_narration=True)
+async def test_choice_is_recorded_in_jsonl_log(tmp_path: Path) -> None:
+    log = tmp_path / "run.jsonl"
+    app = LoveApp(_AskOnce(), with_narration=True, log_path=log)
     async with app.run_test(size=(120, 40)) as pilot:
         await pilot.pause(0.1)
         assert isinstance(app.screen, ChoiceScreen)
         await pilot.press("1")  # pick Option A
         await pilot.pause(0.1)
-        # The audit view should have recorded the llove.choice decision.
-        rows = "\n".join(getattr(app._audit, "_rows", []))
-        assert "decision" in rows.lower() or "Option A" in rows
+
+    lines = [
+        json.loads(x) for x in log.read_text(encoding="utf-8").splitlines() if x.strip()
+    ]
+    events = [rec.get("payload", {}).get("event") for rec in lines]
+    assert "llove.choice" in events  # the decision was logged
+    assert "branch" in events  # the scenario continued past the choice
+    choice_rec = next(
+        rec for rec in lines if rec.get("payload", {}).get("event") == "llove.choice"
+    )
+    assert choice_rec["payload"]["chosen"] == "a"
+    assert choice_rec["payload"]["chosen_label"] == "Option A"
