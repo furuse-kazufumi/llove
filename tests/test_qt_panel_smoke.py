@@ -93,3 +93,33 @@ def test_qd_archive_panel_plots(qapp: QtWidgets.QApplication) -> None:
     assert len(x) == 3
     assert len(y) == 3
 
+
+def test_qd_reachable_via_shell_and_single_panel(
+    qapp: QtWidgets.QApplication, tmp_path: object
+) -> None:
+    from pathlib import Path
+
+    from llove.qt.run import build_qd_window
+    from llove.qt.shell import LoveShell
+    from llove.window.types import list_window_types
+
+    run_dir = Path(str(tmp_path))
+    qd = run_dir / "metrics_demo_qd.jsonl"
+    qd.write_text(
+        '{"generation":0,"archive_cells":29,"occupied_cells":29}\n'
+        '{"generation":1,"archive_cells":30,"occupied_cells":26}\n',
+        encoding="utf-8",
+    )
+    # (1) shell View-menu path: registered + resolves the QD file from run_dir + feeds it.
+    shell = LoveShell(run_dir)
+    assert "viz.qd_archive" in [w.id for w in list_window_types("visualization")]
+    dock = shell.open_window("viz.qd_archive")
+    assert dock is not None
+    panel = dock.widget()
+    panel.controller.poll_now()  # synchronous read; no event loop
+    assert panel.vm.count == 2
+    # (2) single-panel path (`python -m llove.qt <…_qd.jsonl>`): same tail wiring.
+    _win, panel2, controller2 = build_qd_window(qd)
+    controller2.poll_now()
+    assert panel2.vm.count == 2
+
