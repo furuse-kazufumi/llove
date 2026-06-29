@@ -57,6 +57,10 @@ def __getattr__(name: str):  # PEP 562 lazy import
         from llove.term import palette as _palette
 
         return getattr(_palette, name)
+    if name == "ChoiceScreen":
+        from llove.term import choice_screen as _choice_screen
+
+        return _choice_screen.ChoiceScreen
     raise AttributeError(f"module 'llove.term' has no attribute {name!r}")
 
 
