@@ -17,7 +17,7 @@ from PySide6 import QtWidgets
 
 from llove.qt.fitness_panel import FitnessTrajectoryPanel
 from llove.qt.qd_archive_panel import QdArchivePanel
-from llove.qt.worker import MetricsTailController
+from llove.qt.worker import JsonlTailController, MetricsTailController
 
 
 def build_window(
