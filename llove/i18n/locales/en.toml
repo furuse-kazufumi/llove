@@ -21,6 +21,11 @@ reset = "⟲ Reset"
 help = "? Help"
 quit = "✕ Quit"
 
+[ui.choice]
+# Audit line recorded when the user picks an option at an interactive
+# choice-point (so a --log JSONL replays the exact path taken).
+audit = "decision: {label}"
+
 [ui.help]
 title = "[bold]💗 llove — Help[/bold]\n[bold yellow]Press ESC (or h / q / the Close button) to return.[/bold yellow]\n"
 body = """
