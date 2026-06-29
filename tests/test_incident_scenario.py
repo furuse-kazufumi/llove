@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator, Callable, Coroutine
+from collections.abc import Callable, Coroutine
 from typing import Any
 
 import pytest
@@ -10,7 +10,6 @@ import pytest
 from llove.demo.scenarios import SCENARIOS, get_scenario
 from llove.demo.scenarios.incident import IncidentScenario
 from llove.events import Event, EventKind
-from llove.term.choice import ChoiceOption
 
 
 def test_incident_registered() -> None:
