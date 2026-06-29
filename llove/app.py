@@ -19,6 +19,7 @@ from llove.identity import load_local_identity
 from llove.sources.base import DataSource
 from llove.term.choice import ChoiceOption, ChoicePrompt
 from llove.term.choice_screen import ChoiceScreen
+from llove.term.command import CommandContext, CommandRegistry
 from llove.term.palette import CommandPaletteScreen
 from llove.views.audit_log import AuditLogView
 from llove.views.base import View
