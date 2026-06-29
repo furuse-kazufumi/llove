@@ -34,6 +34,7 @@ SCENARIOS: dict[str, type[DemoScenario]] = {
     "firewall": FirewallScenario,
     "scada": SCADAScenario,
     "incident": IncidentScenario,
+    "triage": TriageScenario,
     "multimodal": MultimodalSPCScenario,
     "rag": RAGStoresScenario,
     "backends": LLMBackendsScenario,
