@@ -20,6 +20,7 @@ from llove.qt.fitness_panel import FitnessTrajectoryPanel
 from llove.qt.genome_heatmap_panel import GenomeHeatmapPanel
 from llove.qt.lineage_panel import LineagePanel
 from llove.qt.persona_dominance_panel import PersonaDominancePanel
+from llove.qt.qd_archive_panel import QdArchivePanel
 from llove.qt.run_monitor_panel import RunMonitorPanel
 from llove.qt.worker import JsonlTailController, MetricsTailController
 from llove.window.types import WindowType, register_window_type
