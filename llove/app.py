@@ -104,6 +104,10 @@ class LoveApp(App):
         # M8.1 — optional Cognitive Mesh panel (env-gated, off by default).
         self._cog_mesh_enabled = os.environ.get(ENV_ENABLE_COG_MESH, "") == "1"
         self._cog_mesh_panel: CognitiveMeshPanel | None = None
+        # Command Palette backing store, built once on first ':' so aliases /
+        # macros / vars persist across opens (None until then).
+        self._cmd_registry: CommandRegistry | None = None
+        self._cmd_ctx: CommandContext | None = None
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
