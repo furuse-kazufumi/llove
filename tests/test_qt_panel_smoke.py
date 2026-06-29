@@ -76,3 +76,20 @@ def test_controller_emits_rows_from_file(
     controller.rows_ready.connect(received.extend)
     controller.poll_now()  # synchronous one-shot read (no event loop needed)
     assert [r["generation"] for r in received] == [0, 1]
+
+
+def test_qd_archive_panel_plots(qapp: QtWidgets.QApplication) -> None:
+    panel = QdArchivePanel()
+    added = panel.feed_rows(
+        [
+            {"generation": 0, "archive_cells": 29, "occupied_cells": 29},
+            {"generation": 1, "archive_cells": 30, "occupied_cells": 26},
+            {"generation": 2, "archive_cells": 31},  # occupied missing -> NaN, still accepted
+        ]
+    )
+    assert added == 3
+    assert panel.vm.count == 3
+    x, y = panel.archive_curve.getData()
+    assert len(x) == 3
+    assert len(y) == 3
+
