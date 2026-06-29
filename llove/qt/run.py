@@ -104,7 +104,16 @@ def main(argv: list[str] | None = None) -> int:
     target = Path(args[1])
     if target.is_dir():
         return run_shell(target, argv=args)
+    if target.name.endswith("_qd.jsonl"):
+        return run_qd_panel(target, argv=args)
     return run_fitness_panel(target, argv=args)
 
 
-__all__ = ["build_window", "main", "run_fitness_panel", "run_shell"]
+__all__ = [
+    "build_qd_window",
+    "build_window",
+    "main",
+    "run_fitness_panel",
+    "run_qd_panel",
+    "run_shell",
+]
