@@ -290,7 +290,7 @@ llove demo
 
 ## ライセンス
 
-MIT © 2026 Kazufumi Furuse
+**Apache-2.0 + Commercial dual-license** © 2026 Kazufumi Furuse（OSS 用途は [LICENSE](LICENSE)、商用は [LICENSE-COMMERCIAL](LICENSE-COMMERCIAL)）
 
 ---
 
