@@ -22,8 +22,8 @@ name = "llmesh-llove"
 version = "0.3.0a1"
 description = "llove — a cute, terminal-first Artifact for inspecting LLMesh data with llove"
 readme = "README.md"
-license = "MIT"
-license-files = ["LICENSE"]
+license = "Apache-2.0"
+license-files = ["LICENSE", "LICENSE-COMMERCIAL", "NOTICE"]
 requires-python = ">=3.11,<3.12"
 authors = [{ name = "Kazufumi Furuse", email = "kazufumi@furuse.work" }]
 keywords = ["llm", "mesh", "tui", "terminal", "dashboard", "artifact", "industrial-iot"]
