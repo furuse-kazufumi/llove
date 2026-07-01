@@ -11,7 +11,7 @@
 [![codecov](https://codecov.io/gh/furuse-kazufumi/llove/branch/main/graph/badge.svg)](https://codecov.io/gh/furuse-kazufumi/llove)
 [![PyPI](https://img.shields.io/pypi/v/llmesh-llove.svg)](https://pypi.org/project/llmesh-llove/)
 [![Python](https://img.shields.io/pypi/pyversions/llmesh-llove.svg)](https://pypi.org/project/llmesh-llove/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 
