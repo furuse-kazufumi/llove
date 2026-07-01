@@ -73,4 +73,4 @@ npm run compile
 
 ## License
 
-MIT — same as llove core.
+Apache-2.0 + Commercial dual-license — same as llove core.
