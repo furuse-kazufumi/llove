@@ -56,7 +56,7 @@ llmesh = [
 ]
 shogi = [
     # Legality checker for the `llove play shogi` command.
-    # GPL-3.0 — kept behind extras so the MIT-licensed core wheel
+    # GPL-3.0 — kept behind extras so the Apache-2.0 core wheel
     # is unaffected unless the user explicitly opts in via
     # `pip install llmesh-llove[shogi]`.
     "python-shogi>=1.1",
