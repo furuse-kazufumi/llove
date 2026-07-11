@@ -78,6 +78,7 @@ class LlmeshPeerClient(LLMClient):
             provider=self.provider,
             model=model,
             usage=usage,
+            latency_ms=latency_ms,
             # peer は on-prem 前提なので既定 0.0. クラウド OpenAI 互換に使う場合は
             # 価格表に載っていれば estimate 側で拾える — ここでは既知価格を優先.
             cost_usd=estimate_cost_usd(model, usage) if _looks_priced(model) else 0.0,
