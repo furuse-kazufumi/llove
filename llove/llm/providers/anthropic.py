@@ -26,6 +26,25 @@ from llove.llm.types import (
 
 DEFAULT_ANTHROPIC_VERSION = "2023-06-01"
 
+#: これらの family を含むモデルは native Messages API が sampling パラメータ
+#: (temperature/top_p/top_k) を **削除** しており, 送ると HTTP 400 を返す
+#: (claude-api skill: Opus 4.7/4.8, Sonnet 5, Fable 5, Mythos 5)。llove の既定
+#: anthropic モデル claude-haiku-4-5 は temperature を許すため既定経路は無害だが,
+#: ユーザーが Opus/Sonnet-5 系を選ぶと毎回 400 → 初手 resign になる。該当モデルでは
+#: temperature を送らない (省略 = API 既定にフォールバック).
+_SAMPLING_FORBIDDEN_MARKERS = (
+    "opus-4-7",
+    "opus-4-8",
+    "sonnet-5",
+    "fable-5",
+    "mythos-5",
+)
+
+
+def _forbids_sampling(model: str) -> bool:
+    """モデルが sampling パラメータ(temperature 等)を拒否するなら True."""
+    return any(marker in model for marker in _SAMPLING_FORBIDDEN_MARKERS)
+
 
 @dataclass
 class AnthropicClient(LLMClient):
