@@ -27,7 +27,7 @@ from llove.llm.config import LLMConfig
 from llove.llm.factory import make_client
 from llove.llm.parsing import extract_move, first_move_token
 from llove.llm.transport import HttpTransport
-from llove.llm.types import ChatMessage, ChatRequest, LLMBackendError, LLMConfigError
+from llove.llm.types import ChatMessage, ChatRequest, LLMError
 
 DEFAULT_SYSTEM_PROMPT = (
     "You are an expert {game} player. Given the current position and the list "
