@@ -174,6 +174,10 @@ class LoveApp(App):
         # macros / vars persist across opens (None until then).
         self._cmd_registry: CommandRegistry | None = None
         self._cmd_ctx: CommandContext | None = None
+        # F20(k) — `:peer` で選択された LLM peer spec ("provider:model")。
+        # config 検証を通った選択のみ保存される (fail-closed)。`:peer` の
+        # 表示や将来のゲーム / シナリオ連携 (make_client) がここを参照する。
+        self.active_peer_spec: str | None = None
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
