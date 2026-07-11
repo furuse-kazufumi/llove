@@ -525,9 +525,8 @@ class LoveApp(App):
         ctx.hooks["get_theme"] = lambda: self.theme
         ctx.hooks["list_themes"] = lambda: sorted(getattr(self, "available_themes", {}))
         ctx.hooks["set_theme"] = self._set_app_theme
-        # cartridge loaders: :demo <name> / :play <game> <p1> <p2>.
+        # cartridge loader: :demo <name> (builtin handler reads this hook).
         ctx.hooks["start_demo"] = self._start_demo
-        ctx.hooks["start_game"] = self._start_game
         # :peer — llove.llm 実配線 (builtins の "hook 未配線" handler を置換)。
         registry.unregister("peer")
         registry.register(
@@ -537,6 +536,18 @@ class LoveApp(App):
                 summary="LLM peer 表示 / 選択 (config 検証のみ, 疎通テストなし)",
                 args_hint="[<provider:model>]",
                 category="llmesh",
+            )
+        )
+        # :play — App レベルの実配線 (builtins の 3 引数固定版を置換)。
+        # active_peer_spec / @peer / 汎用 GameSource を扱うため App が持つ。
+        registry.unregister("play")
+        registry.register(
+            Command(
+                name="play",
+                handler=self._cmd_play_game,
+                summary="実 LLM 対局を起動 (shogi / chess, @peer 相手・省略可)",
+                args_hint="<game> [<p1>] [<p2>]",
+                category="game",
             )
         )
         self._cmd_registry = registry
