@@ -279,12 +279,20 @@ def play_chess(
     if no_tui:
         async def _stream() -> None:
             log_path.parent.mkdir(parents=True, exist_ok=True)
+            stdout_open = True
             with log_path.open("w", encoding="utf-8") as fh:
                 async for ev in run_game(engine, players, max_ply=max_ply):
                     line = ev.model_dump_json()
+                    # The --log file is the signed kifu of record — always write it.
                     fh.write(line + "\n")
                     fh.flush()
-                    click.echo(line)
+                    # A closed downstream pipe (e.g. `| head -3`) must not abort
+                    # the game or truncate the kifu file; stop echoing, keep logging.
+                    if stdout_open:
+                        try:
+                            click.echo(line)
+                        except BrokenPipeError:
+                            stdout_open = False
 
         asyncio.run(_stream())
         return
