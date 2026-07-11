@@ -56,7 +56,7 @@ llove/llm/
 | **ollama クライアント**(`complete`) | **works_now(live 検証済み)** | 実 `ollama` qwen2.5:14b に実 HTTP で completion 成功(text/usage/latency 実測、cost 0.0) |
 | **汎用 `LLMGamePlayer.think`** | **works_now(live 検証済み)** | 実 LLM が legal_moves から合法手を選択(tic-tac-toe で `b1`)。`run_game` 実ループ e2e も緑 |
 | **`make_client`/`make_game_player`/`LLMConfig`** | **works_now(live 検証済み)** | 上記 live スモークで実使用 |
-| **anthropic クライアント** | **works_now(契約正確・fake transport 検証)** — live 未実行 | Messages API 契約(x-api-key/anthropic-version/system/stop_sequences/content[].text/usage)を fake で検証。**実 API は課金のため本セッションでは呼ばず**(キーは存在) |
+| **anthropic クライアント** | **works_now(契約正確・fake transport 検証)** — live 未実行 | Messages API 契約(x-api-key/anthropic-version/system/stop_sequences/content[].text/usage)を fake で検証。**Opus 4.7+/Sonnet 5/Fable 5 は temperature を送ると 400** なので該当モデルでは temperature を省く(claude-api skill 一次情報で確認)。**実 API は課金のため本セッションでは呼ばず**(キーは存在) |
 | **llmesh peer クライアント** | **partial(OpenAI 互換で実装・fake 検証)** — live 未検証 | 稼働中 llmesh を立てて未疎通。エンドポイント形状が将来変わりうる |
 | **shogi `LLMShogiPlayer`** | **works_now(fake transport + fake engine 検証)** — live 未実行 | 汎用プレイヤと同じ client/parsing 経路(それは live 検証済み)を共有 |
 | **backends シナリオ** | **works_now(fake 検証)/ 実行時は実呼出** | テストは offline(DI)。`llove demo --scenario backends` で実バックエンドを叩く |
