@@ -680,7 +680,9 @@ class LoveApp(App):
         p2 = args[2] if len(args) >= 3 else PEER_TOKEN
         try:
             r1, r2 = self._start_game(game, p1, p2)
-        except Exception as e:  # noqa: BLE001 — 起動失敗を漏れなく人間可読に落とす
+        except Exception as e:
+            # 起動失敗 (未知ゲーム / peer 未選択 / 設定不足 / extras 欠如) を
+            # 漏れなく人間可読メッセージに落とす — TUI を落とさない (fail-closed)。
             return CommandResult(ok=False, error=f"対局起動失敗: {e}")
         return CommandResult(ok=True, output=(f"対局開始: {game} ({r1} vs {r2})",))
 
