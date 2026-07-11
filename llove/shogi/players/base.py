@@ -135,34 +135,40 @@ def parse_provider_spec(spec: str) -> tuple[str, str]:
     return provider, model
 
 
-def make_player(spec: str, *, side: str) -> Player:
+def make_player(
+    spec: str,
+    *,
+    side: str,
+    config: object | None = None,
+    transport: object | None = None,
+) -> Player:
     """Resolve a provider spec to a concrete :class:`Player` instance.
 
     Lazy-imports the provider module so that, for example, picking
-    ``mock:script`` does not pull in the ``anthropic`` SDK.
+    ``mock:script`` does not pull in the LLM machinery.
 
     ``side`` is ``"sente"`` or ``"gote"`` — passed to the player so its
-    display name and prompt can address the right side.
+    display name and prompt can address the right side. ``config`` /
+    ``transport`` are forwarded to the LLM factory (tests inject a fake
+    transport; ``config`` defaults to ``LLMConfig.from_env()``).
+
+    MVP2b: ``anthropic`` / ``ollama`` / ``llmesh`` now return a real
+    :class:`llove.shogi.players.llm.LLMShogiPlayer`. Missing API keys /
+    endpoints surface as ``LLMConfigError`` (fail-closed).
     """
-    provider, model = parse_provider_spec(spec)
+    provider, _model = parse_provider_spec(spec)
     if provider == "mock":
         from llove.shogi.players.mock import MockPlayer
-        return MockPlayer(model=model, side=side)
-    if provider == "llmesh":
-        # MVP2b: peer-via-llmesh provider. Reserved here so users get a
-        # specific message instead of "unknown provider".
-        raise ValueError(
-            f"llmesh:{model} player is reserved for MVP2b — peers think via "
-            "the upcoming `shogi.think_move` MCP tool. For now use "
-            "mock / anthropic / ollama."
-        )
-    if provider in ("anthropic", "ollama"):
-        # MVP2b implements these. We surface a clear message instead of
-        # importing modules that don't exist yet.
-        raise NotImplementedError(
-            f"{provider} player lands in MVP2b. MVP2a only ships `mock`. "
-            "Track ROADMAP.md > shogi MVP2b for the schedule."
-        )
+
+        return MockPlayer(model=_model, side=side)
+    if provider in ("anthropic", "ollama", "llmesh"):
+        from llove.llm.config import LLMConfig
+        from llove.llm.transport import HttpTransport
+        from llove.shogi.players.llm import make_shogi_llm_player
+
+        cfg = config if isinstance(config, LLMConfig) else None
+        tr = transport if isinstance(transport, HttpTransport) else None
+        return make_shogi_llm_player(spec, side=side, config=cfg, transport=tr)
     # Should be unreachable thanks to parse_provider_spec validation, but
     # keep the safety net in case _KNOWN_PROVIDERS gains entries.
     raise ValueError(f"no factory for provider {provider!r}")  # pragma: no cover
