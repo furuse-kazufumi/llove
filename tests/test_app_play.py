@@ -159,8 +159,15 @@ async def test_play_chess_loads_game_source() -> None:
         assert "peer set: ollama:qwen2.5:7b" in widget.last_output_text
         widget = await _run_cmd(pilot, app, "play chess")
         assert "対局開始: chess" in widget.last_output_text
+        # 解決済み @peer spec が出力にエコーされる(誤解決の回帰検知)。
+        assert "(ollama:qwen2.5:7b vs ollama:qwen2.5:7b)" in widget.last_output_text
         assert isinstance(app._source, GameSource)
         assert app._source._engine.game == "chess"
+        # 両サイドの player が解決済み peer(provider/model)で構築されている。
+        white = app._source._players["white"]
+        black = app._source._players["black"]
+        assert (white.provider, white.model) == ("ollama", "qwen2.5:7b")
+        assert (black.provider, black.model) == ("ollama", "qwen2.5:7b")
 
 
 @pytest.mark.asyncio
