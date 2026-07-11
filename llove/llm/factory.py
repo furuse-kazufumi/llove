@@ -14,8 +14,6 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from llove.llm.client import LLMClient
 from llove.llm.config import LLMConfig
 from llove.llm.transport import HttpTransport, UrllibHttpTransport
