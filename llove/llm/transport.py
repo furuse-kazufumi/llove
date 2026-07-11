@@ -76,7 +76,18 @@ class UrllibHttpTransport:
         except urllib.error.HTTPError as exc:
             # 4xx/5xx は「応答があった」扱い — プロバイダにステータスを渡す.
             return int(exc.code), (exc.read() if exc.fp else b"")
-        except (urllib.error.URLError, TimeoutError) as exc:
+        except (
+            urllib.error.URLError,
+            http.client.HTTPException,
+            TimeoutError,
+            OSError,
+            ValueError,
+        ) as exc:
+            # 接続不可 / タイムアウト / 応答受信中のドロップ(RemoteDisconnected 等)/
+            # 不正 URL(urllib は "unknown url type" を bare ValueError で投げる)を
+            # すべて LLMBackendError に正規化する — transport は必ず
+            # LLMBackendError しか投げない, という fail-closed 契約を守る.
+            # (URLError/TimeoutError は OSError 部分集合だが可読性のため明示列挙.)
             raise LLMBackendError(f"connection_error: {exc}") from exc
 
 
