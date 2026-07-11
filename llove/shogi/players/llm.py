@@ -14,7 +14,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from llove.llm.client import LLMClient
-from llove.llm.parsing import extract_move, first_move_token
+from llove.llm.parsing import extract_move
 from llove.llm.types import ChatMessage, ChatRequest, LLMBackendError, LLMConfigError
 from llove.shogi.players.base import Move, Player, ThinkResult
 
