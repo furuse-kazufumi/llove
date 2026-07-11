@@ -1,0 +1,100 @@
+"""``provider:model`` spec を具象 :class:`LLMClient` に解決する.
+
+:func:`llove.shogi.players.base.parse_provider_spec` の汎用版. lazy import で
+プロバイダモジュールを必要時のみ読む (mock しか使わないなら anthropic 由来の
+コードにも触れない).
+
+例::
+
+    cfg = LLMConfig.from_env()
+    client = make_client("anthropic:claude-haiku-4-5", config=cfg)
+    client = make_client("ollama:llama3.2", config=cfg)
+    client = make_client("llmesh:my-model", config=cfg)
+"""
+
+from __future__ import annotations
+
+from llove.llm.client import LLMClient
+from llove.llm.config import LLMConfig
+from llove.llm.transport import HttpTransport
+from llove.llm.types import LLMConfigError
+
+KNOWN_PROVIDERS = ("anthropic", "ollama", "llmesh")
+
+#: model 未指定時の既定モデル.
+DEFAULT_MODELS = {
+    "anthropic": "claude-haiku-4-5",
+    "ollama": "llama3.2",
+    "llmesh": "default",
+}
+
+
+def parse_llm_spec(spec: str) -> tuple[str, str]:
+    """``"provider:model"`` を ``(provider, model)`` に分ける.
+
+    model は ``:`` を含んでよい (``ollama:llama3:70b`` → ``("ollama","llama3:70b")``).
+    provider 省略時 (``:`` 無し) は model を既定に落とす. 未知 provider は
+    ``LLMConfigError``.
+    """
+    if ":" in spec:
+        provider, model = spec.split(":", 1)
+    else:
+        provider, model = spec, ""
+    provider = provider.strip().lower()
+    model = model.strip()
+    if provider not in KNOWN_PROVIDERS:
+        known = ", ".join(KNOWN_PROVIDERS)
+        raise LLMConfigError(
+            f"unknown provider {provider!r}. Known: {known}. "
+            "Use e.g. 'anthropic:claude-haiku-4-5' / 'ollama:llama3.2' / 'llmesh:<model>'."
+        )
+    if not model:
+        model = DEFAULT_MODELS[provider]
+    return provider, model
+
+
+def make_client(
+    spec: str,
+    *,
+    config: LLMConfig,
+    transport: HttpTransport | None = None,
+) -> LLMClient:
+    """spec を具象クライアントに解決する (設定不足は ``LLMConfigError``).
+
+    ``transport`` を渡すとテスト用 fake に差し替えられる (省略時は各
+    クライアントの既定 ``UrllibHttpTransport``).
+    """
+    provider, model = parse_llm_spec(spec)
+
+    if provider == "anthropic":
+        st = config.require("anthropic")
+        from llove.llm.providers.anthropic import AnthropicClient
+
+        assert config.anthropic_api_key is not None  # require() が保証
+        kwargs = {"model": model, "api_key": config.anthropic_api_key, "base_url": st.base_url}
+        if transport is not None:
+            kwargs["transport"] = transport
+        return AnthropicClient(**kwargs)  # type: ignore[arg-type]
+
+    if provider == "ollama":
+        st = config.require("ollama")
+        from llove.llm.providers.ollama import OllamaClient
+
+        kwargs = {"model": model, "base_url": st.base_url}
+        if transport is not None:
+            kwargs["transport"] = transport
+        return OllamaClient(**kwargs)  # type: ignore[arg-type]
+
+    if provider == "llmesh":
+        st = config.require("llmesh")
+        from llove.llm.providers.llmesh import LlmeshPeerClient
+
+        kwargs = {"model": model, "base_url": st.base_url, "api_key": config.llmesh_api_key}
+        if transport is not None:
+            kwargs["transport"] = transport
+        return LlmeshPeerClient(**kwargs)  # type: ignore[arg-type]
+
+    raise LLMConfigError(f"no factory for provider {provider!r}")  # pragma: no cover
+
+
+__all__ = ["DEFAULT_MODELS", "KNOWN_PROVIDERS", "make_client", "parse_llm_spec"]

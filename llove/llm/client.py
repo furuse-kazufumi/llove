@@ -12,11 +12,11 @@
 
 from __future__ import annotations
 
+import asyncio
 import time
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 
-from llove.llm.transport import HttpTransport
 from llove.llm.types import ChatRequest, ChatResponse, Usage
 
 # ---------------------------------------------------------------------------
@@ -35,7 +35,7 @@ PRICING_USD_PER_MTOK: dict[str, tuple[float, float]] = {
     "claude-opus-4-8": (15.0, 75.0),
 }
 
-#: モデル名の family マッチ用フォールバック (完全一致に無いとき部分一致).
+#: モデル名の family マッチ用フォールバック (完全一致に無いとき前方一致).
 _FAMILY_PREFIXES: tuple[tuple[str, tuple[float, float]], ...] = (
     ("claude-haiku", (1.0, 5.0)),
     ("claude-sonnet", (3.0, 15.0)),
@@ -87,32 +87,26 @@ class LLMClient(ABC):
         """補完を 1 回行う.
 
         実装の責務:
-        - HTTP 呼び出しは ``asyncio.to_thread`` で同期 transport を包む.
+        - HTTP 呼び出しは ``asyncio.to_thread`` で同期 transport を包む
+          (:func:`timed_call` が補助).
         - HTTP エラー / 空応答 / パース失敗は ``LLMBackendError`` を送出.
-        - ``latency_ms`` / ``cost_usd`` を詰める (:func:`timed_call` が補助).
+        - ``latency_ms`` / ``cost_usd`` を詰める.
         """
 
     async def aclose(self) -> None:
         """HTTP クライアント等の後始末. デフォルト no-op."""
 
 
-async def timed_call(
-    fn: Callable[[], tuple[int, bytes]],
-) -> tuple[int, bytes, int]:
+async def timed_call(fn: Callable[[], tuple[int, bytes]]) -> tuple[int, bytes, int]:
     """同期 transport 呼び出しを別スレッドで実行し, レイテンシ(ms) を測る.
 
-    戻り値 ``(status, body, latency_ms)``. ``time.perf_counter`` で計測.
+    戻り値 ``(status, body, latency_ms)``. ``time.perf_counter`` で計測するので
+    monotonic (システム時計の巻き戻りに影響されない).
     """
-    import asyncio
-
     start = time.perf_counter()
     status, body = await asyncio.to_thread(fn)
     latency_ms = int((time.perf_counter() - start) * 1000)
     return status, body, latency_ms
-
-
-def _unused_transport_hint(_t: HttpTransport) -> None:  # pragma: no cover
-    """型 import を保持するためだけのダミー (mypy unused-import 回避)."""
 
 
 __all__ = [
