@@ -144,8 +144,8 @@ def make_game_player(
     *,
     player_id: str = "",
     game: str = "game",
-    config: object | None = None,
-    transport: object | None = None,
+    config: LLMConfig | None = None,
+    transport: HttpTransport | None = None,
     name: str | None = None,
     system_prompt: str | None = None,
     max_tokens: int = DEFAULT_MAX_TOKENS,
@@ -156,11 +156,8 @@ def make_game_player(
     ``config`` 省略時は ``LLMConfig.from_env()``. ``transport`` はテスト用 fake
     を差し込める. 設定不足は ``make_client`` が ``LLMConfigError`` を投げる.
     """
-    from llove.llm.config import LLMConfig
-    from llove.llm.factory import make_client
-
-    cfg = config if isinstance(config, LLMConfig) else LLMConfig.from_env()
-    client = make_client(spec, config=cfg, transport=transport)  # type: ignore[arg-type]
+    cfg = config if config is not None else LLMConfig.from_env()
+    client = make_client(spec, config=cfg, transport=transport)
     return LLMGamePlayer(
         client,
         player_id=player_id,
