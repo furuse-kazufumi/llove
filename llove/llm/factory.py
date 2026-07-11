@@ -73,28 +73,36 @@ def make_client(
         from llove.llm.providers.anthropic import AnthropicClient
 
         assert config.anthropic_api_key is not None  # require() が保証
-        kwargs = {"model": model, "api_key": config.anthropic_api_key, "base_url": st.base_url}
+        kwargs: dict[str, Any] = {
+            "model": model,
+            "api_key": config.anthropic_api_key,
+            "base_url": st.base_url,
+        }
         if transport is not None:
             kwargs["transport"] = transport
-        return AnthropicClient(**kwargs)  # type: ignore[arg-type]
+        return AnthropicClient(**kwargs)
 
     if provider == "ollama":
         st = config.require("ollama")
         from llove.llm.providers.ollama import OllamaClient
 
-        kwargs = {"model": model, "base_url": st.base_url}
+        okwargs: dict[str, Any] = {"model": model, "base_url": st.base_url}
         if transport is not None:
-            kwargs["transport"] = transport
-        return OllamaClient(**kwargs)  # type: ignore[arg-type]
+            okwargs["transport"] = transport
+        return OllamaClient(**okwargs)
 
     if provider == "llmesh":
         st = config.require("llmesh")
         from llove.llm.providers.llmesh import LlmeshPeerClient
 
-        kwargs = {"model": model, "base_url": st.base_url, "api_key": config.llmesh_api_key}
+        lkwargs: dict[str, Any] = {
+            "model": model,
+            "base_url": st.base_url,
+            "api_key": config.llmesh_api_key,
+        }
         if transport is not None:
-            kwargs["transport"] = transport
-        return LlmeshPeerClient(**kwargs)  # type: ignore[arg-type]
+            lkwargs["transport"] = transport
+        return LlmeshPeerClient(**lkwargs)
 
     raise LLMConfigError(f"no factory for provider {provider!r}")  # pragma: no cover
 

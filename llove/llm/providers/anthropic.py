@@ -128,4 +128,4 @@ def _short(body: bytes, limit: int = 200) -> str:
     return s[:limit]
 
 
-__all__ = ["AnthropicClient", "DEFAULT_ANTHROPIC_VERSION"]
+__all__ = ["DEFAULT_ANTHROPIC_VERSION", "AnthropicClient"]
