@@ -49,6 +49,22 @@ def test_ollama_fallback_env() -> None:
     assert cfg.ollama_base_url == "http://other:1"
 
 
+def test_ollama_host_scheme_less_is_normalized() -> None:
+    # ★#11: ollama ネイティブ形式 "127.0.0.1:11434"(scheme なし)に http:// を補う.
+    cfg = LLMConfig.from_env({"OLLAMA_HOST": "127.0.0.1:11434"})
+    assert cfg.ollama_base_url == "http://127.0.0.1:11434"
+
+
+def test_ollama_host_with_scheme_untouched() -> None:
+    cfg = LLMConfig.from_env({"OLLAMA_HOST": "https://box:11434"})
+    assert cfg.ollama_base_url == "https://box:11434"
+
+
+def test_llmesh_url_scheme_less_is_normalized() -> None:
+    cfg = LLMConfig.from_env({"LLMESH_PEER_URL": "peer:8080"})
+    assert cfg.status("llmesh").base_url == "http://peer:8080"
+
+
 def test_anthropic_not_configured_without_key() -> None:
     cfg = LLMConfig.from_env({})
     st = cfg.status("anthropic")
