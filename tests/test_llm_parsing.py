@@ -88,3 +88,10 @@ def test_first_move_token_multiline_takes_first_line() -> None:
 
 def test_first_move_token_empty() -> None:
     assert first_move_token("   ") is None
+
+
+def test_first_move_token_skips_code_fence_with_language_tag() -> None:
+    # ★#5: ```usi のような言語タグ付きフェンスで囲まれても言語タグを拾わない.
+    assert first_move_token("```usi\n7g7f\n```") == "7g7f"
+    assert first_move_token("```chess\ng1f3\n```") == "g1f3"
+    assert first_move_token("```\n7g7f\n```") == "7g7f"
