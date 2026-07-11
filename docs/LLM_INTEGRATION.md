@@ -175,6 +175,9 @@ LLM は「7g7f が最善です」のように前置き付きで返す。`extract
 - `test_llm_game_player.py` / `test_shogi_llm_player.py` — プレイヤ配線 + `run_game` 統合
 - `test_llm_backends_scenario.py` — 実呼出シナリオ(DI で offline、偽データ非復活を検証)
 - `test_command_palette_peer.py` — `:peer` 配線
+- `test_game_source.py` — `GameSource` が汎用 `run_game` を駆動(chess を完走・stdout tee・欠員 fail-closed)
+- `test_games_registry.py` — ゲームレジストリ(chess 登録・未知拒否・shogi は別スタック)
+- `test_app_play.py` — `:play` 実配線(`@peer` 解決・未知ゲーム・引数検証・chess/shogi 起動を run_test で検証)
 - スイート全体は offline(`conftest.py` の `llm_backends_offline` で backends を DI 固定)。
   **どのテストも実ネットワーク/実 API 課金を踏まない。**
 
