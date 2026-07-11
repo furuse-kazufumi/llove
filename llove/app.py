@@ -369,6 +369,23 @@ class LoveApp(App):
                 self._dispatch(ev)
         except asyncio.CancelledError:
             return
+        except Exception as exc:
+            # fail-closed defense-in-depth: a source's stream() raising anything
+            # else (e.g. a shogi Engine built lazily without the [shogi] extra,
+            # or an unexpected player bug) must SURFACE, not die as an
+            # unretrieved task exception that leaves the TUI blank. Report it in
+            # the audit pane and stop consuming. Never re-raise.
+            self._dispatch(
+                Event(
+                    kind=EventKind.AUDIT,
+                    source_id="llove.source_error",
+                    payload={
+                        "event": "llove.source_error",
+                        "error": str(exc),
+                        "display": f"⚠ source error: {exc}",
+                    },
+                )
+            )
 
     def _emit_identity_event(self) -> None:
         """First event of every run: the local llmesh node identity.
