@@ -7,12 +7,19 @@ shogi :class:`~llove.shogi.engine.Engine`), :class:`GameSource` drives the
 **generic** :func:`llove.games.base.loop.run_game` — any
 :class:`~llove.games.base.engine.GameEngine` (chess today; go / mahjong on the
 roadmap) with a ``{player_id: GamePlayer}`` map. That is what lets a real
-LLM chess game (``:play chess`` / ``llove play chess``) light up the same TUI
-panes as shogi, for free.
+LLM chess game (``:play chess`` / ``llove play chess``) flow into the LoveApp
+pipeline, for free.
+
+Pane parity is *partial* and honest about it: the generic loop emits only
+``AUDIT`` events, so a chess game scrolls the **audit pane**. The shogi play
+loop additionally emits a per-move ``SENSOR`` ``eval_score`` event that nudges
+the SensorStream / SPC panes — those stay in their empty initial state for a
+generic game until a games.base engine emits sensor telemetry of its own.
 
 Like ``ShogiSource`` it can optionally tee every event to stdout as one JSON
-line, so a ``--stream`` mode produces both a watchable TUI *and* a
-machine-readable log on the same run.
+line (``also_stdout``). This is a **best-effort** tee: under a running Textual
+app the framework may capture ``sys.stdout``, so for a guaranteed machine-
+readable stream use ``--no-tui`` (or ``--log`` for the signed JSONL record).
 """
 
 from __future__ import annotations
