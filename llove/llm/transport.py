@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import http.client
 import urllib.error
 import urllib.request
 from collections.abc import Callable
