@@ -199,6 +199,9 @@ class LoveApp(App):
         # Tests inject a fake so `:play` wiring can be exercised without a
         # live LLM server (mirrors make_game_player's transport param).
         self._game_transport: HttpTransport | None = None
+        # Best-effort cleanup tasks (e.g. aclose of a player orphaned by a
+        # failed `:play`). Held so the event loop doesn't GC them mid-flight.
+        self._cleanup_tasks: set[asyncio.Task[None]] = set()
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
