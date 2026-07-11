@@ -143,10 +143,7 @@ async def test_play_chess_loads_game_source() -> None:
     app._game_transport = _fixed_move_transport("e2e4")
     async with app.run_test(size=(120, 40)) as pilot:
         await pilot.pause(0.1)
-        # peer を選択 → :play chess で両者にその peer を据える.
-        assert dispatch(
-            ":peer ollama:qwen2.5:7b", *reversed(app._command_palette_context())
-        ) is not None  # noqa: E501 — 下で正式に検証するのでここはスモークのみ
+        # peer を選択 → :play chess (p1/p2 省略) で両者にその peer を据える.
         widget = await _run_cmd(pilot, app, "peer ollama:qwen2.5:7b")
         assert "peer set: ollama:qwen2.5:7b" in widget.last_output_text
         widget = await _run_cmd(pilot, app, "play chess")
