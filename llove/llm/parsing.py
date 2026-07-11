@@ -82,15 +82,24 @@ def extract_move(text: str, legal_moves: Sequence[str]) -> str | None:
 
 
 def first_move_token(text: str) -> str | None:
-    """先頭行の最初のトークンを飾りを剥がして返す (合法手リストが無い場合の代替).
+    """先頭の意味ある行の最初のトークンを飾りを剥がして返す (合法手リスト不在時の代替).
 
     合法手が渡されない/どれも一致しなかったときに, モデルの生出力を engine へ
     渡して legality oracle に判定させるためのフォールバック. 空なら None.
+    先頭のコードフェンス行 (```` ``` ```` / ```` ```lang ````) と空行はスキップする —
+    さもないと言語タグ (usi/chess) を着手と誤認する.
     """
-    stripped = text.strip().strip(_WRAPPERS).strip()
-    if not stripped:
+    lines = text.strip().splitlines()
+    idx = 0
+    while idx < len(lines):
+        s = lines[idx].strip()
+        if not s or s.startswith("```"):
+            idx += 1
+            continue
+        break
+    if idx >= len(lines):
         return None
-    first_line = stripped.splitlines()[0].strip()
+    first_line = lines[idx].strip().strip(_WRAPPERS).strip()
     parts = first_line.split()
     if not parts:
         return None
