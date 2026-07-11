@@ -372,3 +372,30 @@ async def test_timed_call_returns_status_body_latency() -> None:
     assert status == 200
     assert body == b"ok"
     assert latency_ms >= 0
+
+
+# ---------------------------------------------------------------------------
+# transport の fail-closed 正規化 (★#3)
+# ---------------------------------------------------------------------------
+
+
+def test_urllib_transport_bad_url_raises_backend_error() -> None:
+    from llove.llm.transport import UrllibHttpTransport
+
+    # scheme 無しの不正 URL は urllib が bare ValueError を投げる — transport が
+    # LLMBackendError に正規化することを確認 (素通りするとループをクラッシュさせる).
+    with pytest.raises(LLMBackendError):
+        UrllibHttpTransport(timeout=1.0).request("POST", "badurl", headers={}, body=b"{}")
+
+
+# ---------------------------------------------------------------------------
+# ChatRequest の非先頭 system 拒否 (★#2)
+# ---------------------------------------------------------------------------
+
+
+def test_chat_request_rejects_non_leading_system_message() -> None:
+    with pytest.raises(LLMConfigError, match="system message is only allowed at index 0"):
+        ChatRequest(
+            messages=(ChatMessage("user", "hi"), ChatMessage("system", "be terse")),
+            model="m",
+        )
