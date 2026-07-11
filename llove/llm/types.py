@@ -103,6 +103,16 @@ class ChatRequest:
             raise LLMConfigError("ChatRequest.messages must not be empty")
         if self.max_tokens <= 0:
             raise LLMConfigError(f"max_tokens must be positive, got {self.max_tokens}")
+        # system は先頭 1 つだけ許す. anthropic は system を別トップレベルフィールドに
+        # 抽出する仕様上 messages[0] しか拾えず, 非先頭 system を置くと anthropic では
+        # 黙って脱落し ollama/llmesh では保持される — プロバイダ間で実効プロンプトが
+        # 割れる。fail-closed に「先頭以外の system」を明示拒否して契約を守る.
+        for i, m in enumerate(self.messages):
+            if m.role == "system" and i != 0:
+                raise LLMConfigError(
+                    "system message is only allowed at index 0 "
+                    f"(found at index {i}); providers differ on non-leading system messages"
+                )
 
     def system_text(self) -> str:
         """先頭 system メッセージの content (無ければ空文字)."""
