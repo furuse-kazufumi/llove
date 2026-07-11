@@ -18,7 +18,7 @@ from typing import Any
 
 from llove.llm.client import LLMClient
 from llove.llm.config import LLMConfig
-from llove.llm.transport import HttpTransport
+from llove.llm.transport import HttpTransport, UrllibHttpTransport
 from llove.llm.types import LLMConfigError
 
 KNOWN_PROVIDERS = ("anthropic", "ollama", "llmesh")
