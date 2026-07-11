@@ -20,12 +20,27 @@ _MOVE_CHARS = frozenset(
 #: 応答の端に付きがちな飾り (fallback トークン抽出時に剥がす).
 _WRAPPERS = "`\"'.,;:()[]{}<>!?　「」『』"
 
+#: 着手の直後に付きうる装飾 (王手 +, 詰み #, 好手/疑問手 ! ?). これらは着手末尾の
+#: 「境界」として許容する — チェスの合法手は UCI (装飾なし "d1h5") なのに, モデルは
+#: 一般記法で "d1h5+" と王手注釈を付けることが多く, 装飾を境界と認めないと合法手に
+#: 一致せず誤って resign してしまう。将棋 USI の成り "7g7f+" は装飾でなく手そのもので
+#: 合法手リストにも現れるため, 「より長い合法手優先」の tie-break がそちらを選ぶ.
+_END_DECORATIONS = frozenset("+#!?")
+
 
 def _is_boundary(text: str, index: int) -> bool:
-    """``index`` が範囲外, または着手文字でなければ境界とみなす."""
+    """``index`` が範囲外, または着手文字でなければ境界とみなす (左境界用)."""
     if index < 0 or index >= len(text):
         return True
     return text[index] not in _MOVE_CHARS
+
+
+def _is_end_boundary(text: str, index: int) -> bool:
+    """右境界判定. 範囲外 / 非着手文字 / 装飾文字(+#!?) を境界とみなす."""
+    if index < 0 or index >= len(text):
+        return True
+    ch = text[index]
+    return ch not in _MOVE_CHARS or ch in _END_DECORATIONS
 
 
 def extract_move(text: str, legal_moves: Sequence[str]) -> str | None:
