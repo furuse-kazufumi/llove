@@ -216,11 +216,15 @@ async def test_play_chess_events_reach_the_audit_pane() -> None:
         # 短い対局が流れ切るまで少しポンプする。
         for _ in range(10):
             await pilot.pause(0.05)
-        rows = "\n".join(app._audit._rows)
-        assert "chess game start" in rows  # game.start が描画された
-        # 少なくとも 1 手 + 終局まで audit に届いている。
-        assert app._audit._counts.get(EventKind.AUDIT, 0) >= 2
-        assert "game end" in rows
+        rows = list(app._audit._rows)
+        joined = "\n".join(rows)
+        assert "chess game start" in joined  # game.start が描画された
+        # ★実手が描画されたことを assert(0 手対局でも緑、を防ぐ)。
+        # fixed "e2e4" fake は white が e2e4 を指す → "white: e2e4" 行が出る。
+        assert any("white:" in r and "e2e4" in r for r in rows)
+        # 終局まで audit に届いている。
+        assert "game end" in joined
+        assert app._audit._counts.get(EventKind.AUDIT, 0) >= 3  # start + move + end
 
 
 @pytest.mark.asyncio
