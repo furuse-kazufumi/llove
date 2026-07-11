@@ -92,3 +92,31 @@ def test_require_returns_status_when_ok() -> None:
 def test_status_unknown_provider_raises() -> None:
     with pytest.raises(LLMConfigError, match="unknown provider"):
         LLMConfig.from_env({}).status("gpt5")
+
+
+def test_request_timeout_default() -> None:
+    from llove.llm.transport import DEFAULT_TIMEOUT_S
+
+    assert LLMConfig.from_env({}).request_timeout_s == DEFAULT_TIMEOUT_S
+
+
+def test_request_timeout_from_env() -> None:
+    assert LLMConfig.from_env({"LLOVE_LLM_TIMEOUT": "300"}).request_timeout_s == 300.0
+
+
+def test_request_timeout_invalid_falls_back_to_default() -> None:
+    from llove.llm.transport import DEFAULT_TIMEOUT_S
+
+    assert LLMConfig.from_env({"LLOVE_LLM_TIMEOUT": "abc"}).request_timeout_s == DEFAULT_TIMEOUT_S
+    assert LLMConfig.from_env({"LLOVE_LLM_TIMEOUT": "-5"}).request_timeout_s == DEFAULT_TIMEOUT_S
+
+
+def test_make_client_default_transport_uses_config_timeout() -> None:
+    from llove.llm import make_client
+    from llove.llm.transport import UrllibHttpTransport
+
+    cfg = LLMConfig.from_env({"LLOVE_LLM_TIMEOUT": "123"})
+    client = make_client("ollama:llama3.2", config=cfg)
+    # 省略時は config のタイムアウトを反映した UrllibHttpTransport が組まれる.
+    assert isinstance(client.transport, UrllibHttpTransport)  # type: ignore[attr-defined]
+    assert client.transport.timeout == 123.0  # type: ignore[attr-defined]
