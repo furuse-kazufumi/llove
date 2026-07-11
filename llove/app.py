@@ -186,8 +186,13 @@ class LoveApp(App):
         self._cmd_ctx: CommandContext | None = None
         # F20(k) — `:peer` で選択された LLM peer spec ("provider:model")。
         # config 検証を通った選択のみ保存される (fail-closed)。`:peer` の
-        # 表示や将来のゲーム / シナリオ連携 (make_client) がここを参照する。
+        # 表示や `:play`(@peer 解決) がここを参照する。
         self.active_peer_spec: str | None = None
+        # Test / embedder seam: HTTP transport used when `:play` builds real
+        # LLM players. None → the factory builds a real UrllibHttpTransport.
+        # Tests inject a fake so `:play` wiring can be exercised without a
+        # live LLM server (mirrors make_game_player's transport param).
+        self._game_transport: HttpTransport | None = None
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
