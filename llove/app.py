@@ -53,6 +53,12 @@ _PEER_ENV_HINTS: dict[str, str] = {
 #: (`:play <game>` で p1/p2 を省略したときの既定値でもある.)
 PEER_TOKEN = "@peer"
 
+#: パレット `:play` の汎用ゲーム (chess 等) の ply 上限。generic run_game 既定の
+#: 1000 は batch/CLI 向けの安全網で, 対話 + 実 LLM (課金あり) には過大なので
+#: CLI chess (`--max-ply` 既定 200) に合わせて明示 cap する。shogi 側は
+#: ShogiSource 既定 400 (= shogi CLI 既定) をそのまま使う。
+PALETTE_GENERIC_MAX_PLY = 200
+
 
 def resolve_peer_command(
     args: list[str],
