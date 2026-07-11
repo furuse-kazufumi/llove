@@ -49,6 +49,10 @@ _PEER_ENV_HINTS: dict[str, str] = {
     "llmesh": "LLMESH_PEER_URL",
 }
 
+#: `:play` で「選択中の :peer を相手にする」ことを指す特別トークン.
+#: (`:play <game>` で p1/p2 を省略したときの既定値でもある.)
+PEER_TOKEN = "@peer"
+
 
 def resolve_peer_command(
     args: list[str],
