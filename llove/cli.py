@@ -228,7 +228,8 @@ def play_shogi(
 @click.option(
     "--stream",
     is_flag=True,
-    help="In TUI mode, also stream events to stdout. Pair with --log for tee.",
+    help="In TUI mode, best-effort tee to stdout (the TUI may capture it); "
+    "use --no-tui for a guaranteed stream. --log always writes the JSONL record.",
 )
 def play_chess(
     white: str,
