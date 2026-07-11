@@ -260,11 +260,12 @@ def play_chess(
 
     white_id, black_id = engine.player_ids()  # ["white", "black"]
     try:
-        players = {
+        players: dict[str, GamePlayer] = {
             white_id: make_game_player(white, player_id=white_id, game="chess"),
             black_id: make_game_player(black, player_id=black_id, game="chess"),
         }
-    except Exception as exc:  # noqa: BLE001 — surface config errors as a hint, not a traceback.
+    except Exception as exc:
+        # surface config errors (bad spec / missing key) as a hint, not a traceback.
         click.echo(str(exc), err=True)
         sys.exit(2)
 
