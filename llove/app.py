@@ -33,6 +33,71 @@ from llove.views.spc_chart import SPCChartView
 # 既定無効 (LoveApp の既存 layout は破壊しない).
 ENV_ENABLE_COG_MESH = "LLOVE_ENABLE_COG_MESH"
 
+# ---------------------------------------------------------------------------
+# F20(k) `:peer` — llove.llm 実配線の純粋レゾルバ
+# ---------------------------------------------------------------------------
+
+#: 未設定プロバイダを選ぼうとしたとき案内する環境変数名 (キー値は表示しない).
+_PEER_ENV_HINTS: dict[str, str] = {
+    "anthropic": "ANTHROPIC_API_KEY",
+    "llmesh": "LLMESH_PEER_URL",
+}
+
+
+def resolve_peer_command(
+    args: list[str],
+    config: LLMConfig,
+    current_spec: str | None = None,
+) -> tuple[bool, tuple[str, ...], str | None]:
+    """`:peer` 1 回分を *config* に対して解決する純関数 (I/O・ネットワークなし).
+
+    戻り値は ``(ok, lines, new_spec)``:
+
+    - ``ok``       成功 / fail-closed 失敗
+    - ``lines``    人間可読メッセージ (``ok=False`` では先頭行がエラー本文)
+    - ``new_spec`` 保存すべき新しい peer spec。選択が config 検証を通った
+      ときのみ非 ``None`` — 失敗時は絶対に選択を変えない (fail-closed)。
+
+    検証は **config レベルのみ** (env が静的に揃っているか)。endpoint への
+    疎通テストはしない — 到達可能性は実際に呼んで初めて分かる (honest)。
+    秘密情報は表示しない: API キーは ``api_key=yes/no`` の真偽だけ。
+    """
+    if not args:
+        lines: list[str] = [
+            f"peer: {current_spec}" if current_spec else "peer: (未選択)",
+            "available providers: " + ", ".join(config.available_providers()),
+        ]
+        for provider in KNOWN_PROVIDERS:
+            st = config.status(provider)
+            mark = "✓" if st.configured else "✗"
+            lines.append(
+                f"  {mark} {st.provider}: {st.reason}"
+                f" (api_key={'yes' if st.has_api_key else 'no'})"
+            )
+        lines.append("select: :peer <provider:model> (例: :peer ollama:llama3.2)")
+        return True, tuple(lines), None
+
+    if len(args) > 1:
+        return False, ("usage: :peer [<provider:model>]",), None
+
+    try:
+        provider, model = parse_llm_spec(args[0])
+    except LLMConfigError as exc:
+        # 未知 provider — parse_llm_spec のメッセージが known 一覧と例を含む.
+        return False, (str(exc),), None
+
+    status = config.status(provider)
+    if not status.configured:
+        # fail-closed: 保存せず, 有効化に必要な環境変数を案内する.
+        failure = [f"{provider} is not configured: {status.reason}"]
+        hint = _PEER_ENV_HINTS.get(provider)
+        if hint:
+            failure.append(f"ヒント: 環境変数 {hint} を設定すると {provider} を選択できます")
+        return False, tuple(failure), None
+
+    spec = f"{provider}:{model}"
+    return True, (f"peer set: {spec}",), spec
+
 
 class LoveApp(App):
     """Multi-pane Textual app for llove.
