@@ -533,6 +533,24 @@ class LoveApp(App):
         # command handler turns that into a friendly error.
         self.theme = name
 
+    def _cmd_peer(self, args: list[str], ctx: CommandContext) -> CommandResult:
+        """`:peer` — LLM peer の表示 / 選択 (F20(k) 実配線).
+
+        検証は :func:`resolve_peer_command` (純関数) に委譲し, ここは
+        ``active_peer_spec`` への保存と ``CommandResult`` への変換だけ行う.
+        config は毎回 env から読み直す — セッション中に環境変数を整えた
+        直後の `:peer` がすぐ反映されるように。
+        """
+        ok, lines, new_spec = resolve_peer_command(
+            args, LLMConfig.from_env(), self.active_peer_spec
+        )
+        if ok and new_spec is not None:
+            self.active_peer_spec = new_spec
+        if ok:
+            return CommandResult(ok=True, output=lines)
+        error = lines[0] if lines else "peer command failed"
+        return CommandResult(ok=False, error=error, output=lines[1:])
+
     def _start_demo(self, name: str) -> None:
         """`:demo <name>` — load a demo scenario into the running app."""
         from llove.demo.scenarios import get_scenario
