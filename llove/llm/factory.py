@@ -63,46 +63,45 @@ def make_client(
 ) -> LLMClient:
     """spec を具象クライアントに解決する (設定不足は ``LLMConfigError``).
 
-    ``transport`` を渡すとテスト用 fake に差し替えられる (省略時は各
-    クライアントの既定 ``UrllibHttpTransport``).
+    ``transport`` を渡すとテスト用 fake に差し替えられる. 省略時は
+    ``config.request_timeout_s`` (env ``LLOVE_LLM_TIMEOUT`` で調整可) を反映した
+    ``UrllibHttpTransport`` を組む — 大型ローカルモデルのコールドロードに備える.
     """
     provider, model = parse_llm_spec(spec)
+    tr: HttpTransport = (
+        transport
+        if transport is not None
+        else UrllibHttpTransport(timeout=config.request_timeout_s)
+    )
 
     if provider == "anthropic":
         st = config.require("anthropic")
         from llove.llm.providers.anthropic import AnthropicClient
 
         assert config.anthropic_api_key is not None  # require() が保証
-        kwargs: dict[str, Any] = {
-            "model": model,
-            "api_key": config.anthropic_api_key,
-            "base_url": st.base_url,
-        }
-        if transport is not None:
-            kwargs["transport"] = transport
-        return AnthropicClient(**kwargs)
+        return AnthropicClient(
+            model=model,
+            api_key=config.anthropic_api_key,
+            base_url=st.base_url,
+            transport=tr,
+        )
 
     if provider == "ollama":
         st = config.require("ollama")
         from llove.llm.providers.ollama import OllamaClient
 
-        okwargs: dict[str, Any] = {"model": model, "base_url": st.base_url}
-        if transport is not None:
-            okwargs["transport"] = transport
-        return OllamaClient(**okwargs)
+        return OllamaClient(model=model, base_url=st.base_url, transport=tr)
 
     if provider == "llmesh":
         st = config.require("llmesh")
         from llove.llm.providers.llmesh import LlmeshPeerClient
 
-        lkwargs: dict[str, Any] = {
-            "model": model,
-            "base_url": st.base_url,
-            "api_key": config.llmesh_api_key,
-        }
-        if transport is not None:
-            lkwargs["transport"] = transport
-        return LlmeshPeerClient(**lkwargs)
+        return LlmeshPeerClient(
+            model=model,
+            base_url=st.base_url,
+            api_key=config.llmesh_api_key,
+            transport=tr,
+        )
 
     raise LLMConfigError(f"no factory for provider {provider!r}")  # pragma: no cover
 
