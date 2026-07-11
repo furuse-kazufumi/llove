@@ -238,7 +238,10 @@ async def test_llmesh_no_auth_header_when_keyless() -> None:
 
 
 @pytest.mark.asyncio
-async def test_llmesh_claude_model_gets_cost_estimate() -> None:
+async def test_llmesh_cost_is_none_even_for_claude_named_model() -> None:
+    # モデル名が claude-* でも llmesh 経由では課金元不明 → None(捏造しない)。
+    # 無料ローカルが "claude-haiku-local" を名乗るケースを Anthropic 価格で
+    # 誤課金しないための honest 挙動 (#10 の鏡像バグ対策)。
     body = json.dumps(
         {
             "model": "claude-haiku-4-5",
@@ -253,8 +256,31 @@ async def test_llmesh_claude_model_gets_cost_estimate() -> None:
         transport=make_fake_http_transport(handler),
     )
     resp = await client.complete(_req())
-    # claude 系は価格表で見積もる (>0)
-    assert resp.cost_usd is not None and resp.cost_usd > 0
+    assert resp.cost_usd is None
+
+
+@pytest.mark.asyncio
+async def test_anthropic_omits_temperature_for_sampling_forbidden_models() -> None:
+    # Opus 4.7+/Sonnet 5/Fable 5 は temperature を送ると 400 → body から省く.
+    handler, captured = _capture_handler(200, ANTHROPIC_OK)
+    for model in ("claude-opus-4-8", "claude-sonnet-5", "claude-fable-5"):
+        client = AnthropicClient(
+            model=model, api_key="k", transport=make_fake_http_transport(handler)
+        )
+        await client.complete(_req(model=model))
+        assert "temperature" not in captured["body"], f"{model} must omit temperature"
+
+
+@pytest.mark.asyncio
+async def test_anthropic_includes_temperature_for_allowed_models() -> None:
+    # Haiku 4.5 / Sonnet 4.6 等は temperature を許すのでゲーム用の低温を送る.
+    handler, captured = _capture_handler(200, ANTHROPIC_OK)
+    for model in ("claude-haiku-4-5", "claude-sonnet-4-6", "claude-opus-4-6"):
+        client = AnthropicClient(
+            model=model, api_key="k", transport=make_fake_http_transport(handler)
+        )
+        await client.complete(_req(model=model))
+        assert "temperature" in captured["body"], f"{model} should include temperature"
 
 
 # ---------------------------------------------------------------------------
