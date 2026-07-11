@@ -164,13 +164,9 @@ def make_player(
 
         return MockPlayer(model=_model, side=side)
     if provider in ("anthropic", "ollama", "llmesh"):
-        from llove.llm.config import LLMConfig
-        from llove.llm.transport import HttpTransport
         from llove.shogi.players.llm import make_shogi_llm_player
 
-        cfg = config if isinstance(config, LLMConfig) else None
-        tr = transport if isinstance(transport, HttpTransport) else None
-        return make_shogi_llm_player(spec, side=side, config=cfg, transport=tr)
+        return make_shogi_llm_player(spec, side=side, config=config, transport=transport)
     # Should be unreachable thanks to parse_provider_spec validation, but
     # keep the safety net in case _KNOWN_PROVIDERS gains entries.
     raise ValueError(f"no factory for provider {provider!r}")  # pragma: no cover
