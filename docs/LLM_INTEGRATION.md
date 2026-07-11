@@ -216,4 +216,12 @@ LLM は「7g7f が最善です」のように前置き付きで返す。`extract
   本機能の価値は「実 LLM が実エンジン上で対局を完結できる経路」であって強さではない。
 - **実対局は盤面描画なし**(shogi/chess とも): 着手は audit ペインに notation +
   コメンタリで流れる。盤面レンダリングは demo シナリオ限定(実対局は棋譜=JSONL が正)。
+- **ペイン parity は部分的**: 汎用ループ(chess)は `AUDIT` イベントのみ→audit ペインだけ
+  更新。shogi 実対局は追加で `SENSOR`(eval_score)を出す→SensorStream/SPC ペインも動く。
+  chess でこれらは初期状態のまま。
+- **パレット `:play` のログはアプリのログ設定に従う**: `--log` 付きで起動したアプリ内なら
+  署名棋譜が残るが、`llove demo`(ログ無し)からの `:play` は audit ペインのローリング
+  表示のみで JSONL は残らない。恒久記録が要るなら `llove play chess/shogi`(自動ログ)を使う。
+- **`--stream` は TUI で best-effort**: Textual が `sys.stdout` を捕捉しうるため、確実な
+  機械可読ストリームは `--no-tui`、恒久記録は `--log`(`LoveApp._dispatch` が直接書く)。
 - push は human-go(llove は auto-commit hook が動くが、公開反映はユーザー判断)。
