@@ -32,6 +32,17 @@ DEFAULT_OLLAMA_BASE_URL = "http://localhost:11434"
 _KEYLESS_PROVIDERS = ("ollama",)
 
 
+def _parse_timeout(raw: str | None) -> float:
+    """タイムアウト文字列を秒 (float) に. 不正/非正/未設定は既定にフォールバック."""
+    if raw is None:
+        return DEFAULT_TIMEOUT_S
+    try:
+        v = float(raw)
+    except ValueError:
+        return DEFAULT_TIMEOUT_S
+    return v if v > 0 else DEFAULT_TIMEOUT_S
+
+
 @dataclass(frozen=True)
 class ProviderStatus:
     """1 プロバイダの設定状態.
