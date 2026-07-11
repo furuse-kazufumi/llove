@@ -101,11 +101,12 @@ class LLMConfig:
                     return v
             return None
 
+        ollama_url = _normalize_base_url(_clean("OLLAMA_HOST", "LLOVE_OLLAMA_URL"))
         return cls(
             anthropic_api_key=_clean("ANTHROPIC_API_KEY"),
             anthropic_base_url=_clean("ANTHROPIC_BASE_URL") or DEFAULT_ANTHROPIC_BASE_URL,
-            ollama_base_url=_clean("OLLAMA_HOST", "LLOVE_OLLAMA_URL") or DEFAULT_OLLAMA_BASE_URL,
-            llmesh_base_url=_clean("LLMESH_PEER_URL", "LLOVE_LLMESH_URL"),
+            ollama_base_url=ollama_url or DEFAULT_OLLAMA_BASE_URL,
+            llmesh_base_url=_normalize_base_url(_clean("LLMESH_PEER_URL", "LLOVE_LLMESH_URL")),
             llmesh_api_key=_clean("LLMESH_PEER_API_KEY"),
             request_timeout_s=_parse_timeout(_clean("LLOVE_LLM_TIMEOUT", "LLM_TIMEOUT")),
         )
