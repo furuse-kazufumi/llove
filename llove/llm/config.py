@@ -43,6 +43,19 @@ def _parse_timeout(raw: str | None) -> float:
     return v if v > 0 else DEFAULT_TIMEOUT_S
 
 
+def _normalize_base_url(url: str | None) -> str | None:
+    """scheme の無い host:port に http:// を補う.
+
+    ollama の native 環境変数 ``OLLAMA_HOST`` は ``127.0.0.1:11434`` のように
+    scheme 無しが慣習形式で, そのまま urllib に渡すと ``unknown url type`` に
+    なる (稼働中でも「到達不能」と誤報告)。ollama-python の _parse_host と同様に
+    scheme を補って救う.
+    """
+    if url is None:
+        return None
+    return url if "://" in url else f"http://{url}"
+
+
 @dataclass(frozen=True)
 class ProviderStatus:
     """1 プロバイダの設定状態.
