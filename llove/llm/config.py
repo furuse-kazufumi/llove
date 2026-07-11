@@ -59,6 +59,9 @@ class LLMConfig:
     ollama_base_url: str = DEFAULT_OLLAMA_BASE_URL
     llmesh_base_url: str | None = None
     llmesh_api_key: str | None = None
+    #: HTTP リクエストのタイムアウト秒. 大型ローカルモデル (14B+ CPU) の
+    #: コールドロードは既定 60s を超えうるので ``LLOVE_LLM_TIMEOUT`` で延長可.
+    request_timeout_s: float = DEFAULT_TIMEOUT_S
 
     # -------- 構築 --------
 
@@ -80,6 +83,7 @@ class LLMConfig:
             ollama_base_url=_clean("OLLAMA_HOST", "LLOVE_OLLAMA_URL") or DEFAULT_OLLAMA_BASE_URL,
             llmesh_base_url=_clean("LLMESH_PEER_URL", "LLOVE_LLMESH_URL"),
             llmesh_api_key=_clean("LLMESH_PEER_API_KEY"),
+            request_timeout_s=_parse_timeout(_clean("LLOVE_LLM_TIMEOUT", "LLM_TIMEOUT")),
         )
 
     # -------- 状態照会 --------
