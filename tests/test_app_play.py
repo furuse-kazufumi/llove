@@ -131,6 +131,17 @@ class TestPlayErrorPaths:
         assert "shogi" in err
         assert "chess" in err
 
+    def test_unknown_game_reported_before_peer_when_no_peer_selected(self) -> None:
+        # ':play go'(p1/p2 省略 → @peer)を peer 未選択で叩いても、ゲーム名検証が
+        # 先なので "unsupported game" が出る("no peer selected" より正確)。
+        app = LoveApp(_NullSource())
+        registry, ctx = app._command_palette_context()
+        result = dispatch(":play go", ctx, registry)  # peer 未選択 + p1/p2 省略
+        assert result.ok is False
+        err = result.error or ""
+        assert "unsupported game" in err
+        assert "no peer selected" not in err
+
 
 # ---------------------------------------------------------------------------
 # run_test 実配線 (event loop あり; fake transport seam で LLM サーバ不要)
