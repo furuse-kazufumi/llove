@@ -164,6 +164,27 @@ async def test_play_chess_explicit_specs_loads_game_source() -> None:
 
 
 @pytest.mark.asyncio
+async def test_play_chess_events_reach_the_audit_pane() -> None:
+    # 「TUI で完結」の核心: 対局イベントが実際に audit ペインに描画される。
+    # fixed "e2e4" fake → white が 1 手指し、black は不一致で resign → 即終局。
+    from llove.events import EventKind
+
+    app = LoveApp(get_scenario("scada"), with_narration=True)
+    app._game_transport = _fixed_move_transport("e2e4")
+    async with app.run_test(size=(120, 40)) as pilot:
+        await pilot.pause(0.1)
+        await _run_cmd(pilot, app, "play chess ollama:llama3.2 ollama:llama3.2")
+        # 短い対局が流れ切るまで少しポンプする。
+        for _ in range(10):
+            await pilot.pause(0.05)
+        rows = "\n".join(app._audit._rows)
+        assert "chess game start" in rows  # game.start が描画された
+        # 少なくとも 1 手 + 終局まで audit に届いている。
+        assert app._audit._counts.get(EventKind.AUDIT, 0) >= 2
+        assert "game end" in rows
+
+
+@pytest.mark.asyncio
 async def test_play_shogi_still_works_with_mock() -> None:
     # shogi 経路 (別スタック) が壊れていないこと — mock:script はネットワーク不要.
     app = LoveApp(get_scenario("scada"), with_narration=True)
