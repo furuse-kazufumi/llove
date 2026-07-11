@@ -171,11 +171,14 @@ def test_event_kind_value_is_short_string() -> None:
 
 
 @pytest.mark.asyncio
-async def test_every_scenario_runs_to_completion_under_a_second() -> None:
+async def test_every_scenario_runs_to_completion_under_a_second(llm_backends_offline) -> None:
     from llove.demo.scenarios import SCENARIOS, get_scenario
 
     for name in SCENARIOS:
         scenario = get_scenario(name)
+        if name == "backends":
+            # backends now performs real LLM calls — keep this loop offline.
+            llm_backends_offline(scenario)
         scenario.default_pause = 0.0
         count = 0
         async with asyncio.timeout(2.0):

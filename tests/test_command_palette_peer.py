@@ -14,6 +14,7 @@ from __future__ import annotations
 from collections.abc import AsyncIterator
 
 import pytest
+
 from llove.app import LoveApp, resolve_peer_command
 from llove.events import Event
 from llove.llm import DEFAULT_MODELS, LLMConfig
