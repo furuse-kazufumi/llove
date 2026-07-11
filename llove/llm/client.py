@@ -75,12 +75,17 @@ class LLMClient(ABC):
 
     具象は ``complete`` だけ実装すれば良い. ``provider`` / ``model`` は表示・
     audit 用に必ずセットする.
+
+    注意: 具象は ``@dataclass`` なので, ここで ``provider = "?"`` のような
+    **値付きクラス属性を置くと継承経由で dataclass のフィールド既定値として
+    漏れ**, 「非既定引数が既定引数の後に来る」エラーになる. そのため
+    ここでは値を持たない bare annotation だけを置き, 既定は各具象で決める.
     """
 
-    #: プロバイダ識別子 (``"anthropic"`` / ``"ollama"`` / ``"llmesh"``).
-    provider: str = "?"
-    #: モデル文字列.
-    model: str = ""
+    #: プロバイダ識別子 (``"anthropic"`` / ``"ollama"`` / ``"llmesh"``). 具象が設定.
+    provider: str
+    #: モデル文字列. 具象が設定.
+    model: str
 
     @abstractmethod
     async def complete(self, request: ChatRequest) -> ChatResponse:
