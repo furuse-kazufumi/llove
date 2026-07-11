@@ -123,6 +123,41 @@ TUI パレット:
 対局は audit ペインに着手(notation + コメンタリ)が流れ、`game.end` で完結する
 (実対局は盤面描画なし=demo 限定。棋譜は `--log` の JSONL に署名付きで残る)。
 
+## TUI で実 LLM 対局を完結(`:play` + `GameSource`)
+
+北極星「TUI 内で実 LLM 対局を完結」の実体。2 系統のゲームスタックがあり、両方が
+LoveApp の同じペインに載る:
+
+- **shogi 系**(`llove.shogi`): 独自 `Engine`/`Player(think(engine))`/専用 `run_game`/
+  `ShogiSource`。MVP2a の 1 ファイル単位開発の名残で独立している。
+- **汎用系**(`llove.games.base`): `GameEngine`/`GamePlayer(think(observation))`/汎用
+  `run_game(engine, players)`/`LLMGamePlayer`。chess が `ChessEngine` で実装済み。
+  **今回追加した `GameSource`** が汎用 `run_game` を LoveApp の `DataSource` として
+  駆動する(`ShogiSource` の一般化)。ゲーム名→エンジンは `games/registry.py`。
+
+`:play` の解決(`app.py`):
+
+- `:play <game> [<p1>] [<p2>]` — p1/p2 を省略すると選択中の `:peer` を相手に据える
+  (`@peer` トークンでも明示指定可)。`@peer` は `active_peer_spec` が未選択なら
+  **fail-closed でエラー**(`:peer` を先に、と案内)。
+- `game == "shogi"` は shogi スタック、それ以外(chess)は `registry.make_engine` +
+  `make_game_player` + `GameSource`。未知ゲームは shogi/chess を列挙して拒否。
+- 起動失敗(peer 未選択 / 未知ゲーム / 設定不足 / extras 欠如)は全て人間可読な
+  `CommandResult(ok=False)` に落とし、**TUI を落とさない**。
+
+CLI(パレットと同じ配線・ヘッドレス検証や CI/バッチ eval 用):
+
+```
+llove play chess --white ollama:qwen2.5:14b --black ollama:qwen2.5:14b --max-ply 200
+llove play chess --no-tui --white ollama:qwen2.5:7b --black ollama:qwen2.5:7b --max-ply 8
+```
+
+**実経路 e2e(honest)**: 実 `ollama` qwen2.5:7b 同士で chess を実走 →
+`e2e4 g8f6 d1e2 f6d5 e2g4 …` と **合法手 8 手**を指し、各手を did:key で署名、
+FEN を記録、`max_ply` で終局、JSONL 棋譜を出力(2026-07-11 実測)。
+LLM のチェス棋力自体は低い(合法手リストで幅を絞っても凡手が多い)が、
+「実 LLM が実エンジン上で対局を最後まで完結する」経路は成立している。
+
 ## 着手抽出(parsing)
 
 LLM は「7g7f が最善です」のように前置き付きで返す。`extract_move` は合法手リストとの
