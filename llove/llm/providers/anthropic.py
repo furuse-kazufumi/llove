@@ -61,12 +61,15 @@ class AnthropicClient(LLMClient):
         body: dict[str, Any] = {
             "model": self.model,
             "max_tokens": request.max_tokens,
-            "temperature": request.temperature,
             "messages": [
                 {"role": m.role, "content": m.content}
                 for m in request.non_system_messages()
             ],
         }
+        # temperature を送ると 400 を返すモデル (Opus 4.7+/Sonnet 5/Fable 5) には
+        # 送らない. 許すモデルには低温(ゲーム用の決定性)を渡す.
+        if not _forbids_sampling(self.model):
+            body["temperature"] = request.temperature
         system = request.system_text()
         if system:
             body["system"] = system
