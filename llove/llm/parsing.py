@@ -66,7 +66,7 @@ def extract_move(text: str, legal_moves: Sequence[str]) -> str | None:
             if i < 0:
                 break
             end = i + len(lm)
-            if _is_boundary(text, i - 1) and _is_boundary(text, end):
+            if _is_boundary(text, i - 1) and _is_end_boundary(text, end):
                 # このループ手の最初の「境界付き」出現のみ評価.
                 if (
                     best_index is None
