@@ -606,6 +606,24 @@ class LoveApp(App):
             )
         return self.active_peer_spec
 
+    def _close_player_besteffort(self, player: object) -> None:
+        """Best-effort ``aclose`` of a partially-built player after a build failure.
+
+        ``aclose`` is async and ``_start_game`` is sync; when a loop is running
+        (the live app) we schedule it, otherwise (unmounted tests) we drop it.
+        Every current client uses the default no-op ``aclose`` over a stateless
+        urllib transport, so nothing actually leaks today — this guards a future
+        pooled/session client (httpx etc.) that closes real sockets.
+        """
+        aclose = getattr(player, "aclose", None)
+        if aclose is None:
+            return
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            return
+        loop.create_task(aclose())
+
     def _start_game(self, game: str, p1: str, p2: str) -> tuple[str, str]:
         """`:play <game> [<p1>] [<p2>]` — load a real LLM game into the app.
 
@@ -614,21 +632,45 @@ class LoveApp(App):
         via :class:`~llove.games.base.source.GameSource`. ``@peer`` in either
         slot resolves to the selected ``:peer``. Returns the *resolved*
         ``(p1, p2)`` specs so the palette can report exactly who is playing.
+
+        Order matters: the game name is validated **first** (a pure, dependency-
+        free check) so a typo'd game with no peer selected reports "unsupported
+        game" rather than the less-accurate "no peer selected".
         """
+        from llove.games.registry import available_games, is_registered
+
+        is_shogi = game == "shogi"
+        if not is_shogi and not is_registered(game):
+            known = ", ".join(["shogi", *available_games()])
+            raise ValueError(f"unsupported game: {game!r} (available: {known})")
+
+        # Game name is known-valid — now resolve @peer (may raise if unselected).
         p1 = self._resolve_peer_token(p1)
         p2 = self._resolve_peer_token(p2)
 
-        if game == "shogi":
+        if is_shogi:
             try:
                 from llove.shogi import make_player
+                from llove.shogi.engine import Engine, EngineUnavailable
                 from llove.shogi.source import ShogiSource
-            except ImportError as exc:  # python-shogi not installed
+                # Probe the extra eagerly: Engine() raises EngineUnavailable when
+                # python-shogi is missing (it is imported lazily — only at first
+                # Engine construction inside run_game). Without this, ':play shogi'
+                # would report false success, kill the current view, then die
+                # silently in the consume task. Mirrors the chess path, which
+                # builds its engine up-front via make_engine().
+                Engine()
+            except (ImportError, EngineUnavailable) as exc:
                 raise RuntimeError(
                     f"shogi engine unavailable: {exc}; "
                     "install: pip install 'llmesh-llove[shogi]'"
                 ) from exc
             sente = make_player(p1, side="sente", transport=self._game_transport)
-            gote = make_player(p2, side="gote", transport=self._game_transport)
+            try:
+                gote = make_player(p2, side="gote", transport=self._game_transport)
+            except Exception:
+                self._close_player_besteffort(sente)
+                raise
             self._load_source(ShogiSource(sente, gote))
             return p1, p2
 
@@ -637,11 +679,7 @@ class LoveApp(App):
         from llove.games.base.llm_player import make_game_player
         from llove.games.base.player import GamePlayer
         from llove.games.base.source import GameSource
-        from llove.games.registry import available_games, is_registered, make_engine
-
-        if not is_registered(game):
-            known = ", ".join(["shogi", *available_games()])
-            raise ValueError(f"unsupported game: {game!r} (available: {known})")
+        from llove.games.registry import make_engine
 
         # May raise EngineUnavailable (missing extra) — its message carries the
         # right install hint, surfaced by the :play handler.
@@ -651,17 +689,20 @@ class LoveApp(App):
             raise ValueError(
                 f"{game}: :play supports 1v1 games only (engine has players {pids})"
             )
-        # Build both players; make_game_player may raise LLMConfigError (e.g.
-        # anthropic without a key) — that propagates to the honest error path.
-        players: dict[str, GamePlayer] = {
-            pids[0]: make_game_player(
-                p1, player_id=pids[0], game=game, transport=self._game_transport
-            ),
-            pids[1]: make_game_player(
-                p2, player_id=pids[1], game=game, transport=self._game_transport
-            ),
-        }
-        self._load_source(GameSource(engine, players))
+        # Build both players in order; make_game_player may raise LLMConfigError
+        # (e.g. anthropic without a key). On the second failing, close the first
+        # (best-effort) so a future pooled client doesn't leak.
+        players: dict[str, GamePlayer] = {}
+        try:
+            for pid, spec in ((pids[0], p1), (pids[1], p2)):
+                players[pid] = make_game_player(
+                    spec, player_id=pid, game=game, transport=self._game_transport
+                )
+        except Exception:
+            for built in players.values():
+                self._close_player_besteffort(built)
+            raise
+        self._load_source(GameSource(engine, players, max_ply=PALETTE_GENERIC_MAX_PLY))
         return p1, p2
 
     def _cmd_play_game(self, args: list[str], ctx: CommandContext) -> CommandResult:
