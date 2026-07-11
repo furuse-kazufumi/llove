@@ -111,7 +111,15 @@ TUI パレット:
 ```
 :peer                      # 現選択 + 各 provider の設定状態(✓/✗)
 :peer ollama:qwen2.5:14b   # 選択(config 検証・fail-closed)
+
+:play chess                # 選択中の :peer 同士で chess 対局(p1/p2 省略=@peer)
+:play chess @peer mock:…   # 片側を選択 peer、もう片側を明示指定(mock は shogi のみ)
+:play chess ollama:qwen2.5:14b anthropic:claude-haiku-4-5  # 明示 LLM 対 LLM
+:play shogi @peer mock:script  # shogi は mock 相手のオフライン対局も可
 ```
+
+対局は audit ペインに着手(notation + コメンタリ)が流れ、`game.end` で完結する
+(実対局は盤面描画なし=demo 限定。棋譜は `--log` の JSONL に署名付きで残る)。
 
 ## 着手抽出(parsing)
 
