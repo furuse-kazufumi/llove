@@ -43,9 +43,11 @@ llove/llm/
 | サーフェス | 実装 | 相手 |
 |---|---|---|
 | 汎用ゲーム | `games/base/llm_player.py` `LLMGamePlayer` + `make_game_player` | `run_game` に乗る任意 `GameEngine`(chess 等) |
+| 汎用ゲーム→TUI | `games/base/source.py` `GameSource`(`ShogiSource` の一般化 DataSource) | LoveApp ペインに汎用 `run_game` のイベントを載せる |
 | shogi | `shogi/players/llm.py` `LLMShogiPlayer`、`shogi/players/base.make_player` で配線 | `llove play shogi --sente anthropic:… --gote ollama:…` |
 | シナリオ | `demo/scenarios/backends.py`(合成全廃・実呼出) | 設定済み全バックエンドに同一プロンプト |
-| パレット | `app.py` `:peer`(未配線→実配線) | LLM peer の状態表示・選択(config 検証) |
+| パレット `:peer` | `app.py` `resolve_peer_command`(config 検証・fail-closed) | LLM peer の状態表示・選択 |
+| パレット `:play` | `app.py` `_cmd_play_game`/`_start_game`(builtin 置換・`@peer` 解決) | TUI 内で実 LLM ゲーム対局を起動(shogi/chess) |
 
 ## 状態(正直な区別)
 
