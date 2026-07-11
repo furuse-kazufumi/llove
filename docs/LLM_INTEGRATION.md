@@ -212,4 +212,8 @@ LLM は「7g7f が最善です」のように前置き付きで返す。`extract
 - backends シナリオの `available_providers()` は「設定済み」判定で、疎通は実行時。
 - shogi プレイヤは fake engine でテスト(python-shogi 非依存)。実対局は
   `llove play shogi` で要実機確認。
+- **LLM のボードゲーム棋力は低い**: 合法手リストで幅を絞っても凡手/千日手気味になる。
+  本機能の価値は「実 LLM が実エンジン上で対局を完結できる経路」であって強さではない。
+- **実対局は盤面描画なし**(shogi/chess とも): 着手は audit ペインに notation +
+  コメンタリで流れる。盤面レンダリングは demo シナリオ限定(実対局は棋譜=JSONL が正)。
 - push は human-go(llove は auto-commit hook が動くが、公開反映はユーザー判断)。
