@@ -572,20 +572,104 @@ class LoveApp(App):
 
         self._load_source(get_scenario(name))  # ValueError on unknown -> handler reports it
 
-    def _start_game(self, game: str, p1: str, p2: str) -> None:
-        """`:play <game> <p1> <p2>` — load a real game (shogi today)."""
-        if game != "shogi":
-            raise ValueError(f"unsupported game: {game!r} (only 'shogi' is available)")
+    def _resolve_peer_token(self, spec: str) -> str:
+        """Resolve the ``@peer`` sentinel to the selected ``:peer`` spec.
+
+        Any other value is returned unchanged. Raises ``ValueError`` (caught by
+        the ``:play`` handler and reported honestly) when ``@peer`` is used but
+        no peer has been selected — fail-closed, mirroring ``:peer`` itself.
+        """
+        if spec != PEER_TOKEN:
+            return spec
+        if not self.active_peer_spec:
+            raise ValueError(
+                "no peer selected — run ':peer <provider:model>' first "
+                "(e.g. ':peer ollama:llama3.2'), or pass an explicit spec"
+            )
+        return self.active_peer_spec
+
+    def _start_game(self, game: str, p1: str, p2: str) -> tuple[str, str]:
+        """`:play <game> [<p1>] [<p2>]` — load a real LLM game into the app.
+
+        ``shogi`` runs on its own engine/loop (``llove.shogi``); every other
+        game (``chess`` today) runs on the generic ``llove.games.base`` stack
+        via :class:`~llove.games.base.source.GameSource`. ``@peer`` in either
+        slot resolves to the selected ``:peer``. Returns the *resolved*
+        ``(p1, p2)`` specs so the palette can report exactly who is playing.
+        """
+        p1 = self._resolve_peer_token(p1)
+        p2 = self._resolve_peer_token(p2)
+
+        if game == "shogi":
+            try:
+                from llove.shogi import make_player
+                from llove.shogi.source import ShogiSource
+            except ImportError as exc:  # python-shogi not installed
+                raise RuntimeError(
+                    f"shogi engine unavailable: {exc}; "
+                    "install: pip install 'llmesh-llove[shogi]'"
+                ) from exc
+            sente = make_player(p1, side="sente", transport=self._game_transport)
+            gote = make_player(p2, side="gote", transport=self._game_transport)
+            self._load_source(ShogiSource(sente, gote))
+            return p1, p2
+
+        # Generic games (chess today; go / mahjong on the roadmap) on the
+        # shared llove.games.base stack.
+        from llove.games.base.llm_player import make_game_player
+        from llove.games.base.source import GameSource
+        from llove.games.registry import available_games, is_registered, make_engine
+
+        if not is_registered(game):
+            known = ", ".join(["shogi", *available_games()])
+            raise ValueError(f"unsupported game: {game!r} (available: {known})")
+
+        # May raise EngineUnavailable (missing extra) — its message carries the
+        # right install hint, surfaced by the :play handler.
+        engine = make_engine(game)
+        pids = engine.player_ids()
+        if len(pids) != 2:
+            raise ValueError(
+                f"{game}: :play supports 1v1 games only (engine has players {pids})"
+            )
+        # Build both players; make_game_player may raise LLMConfigError (e.g.
+        # anthropic without a key) — that propagates to the honest error path.
+        players = {
+            pids[0]: make_game_player(
+                p1, player_id=pids[0], game=game, transport=self._game_transport
+            ),
+            pids[1]: make_game_player(
+                p2, player_id=pids[1], game=game, transport=self._game_transport
+            ),
+        }
+        self._load_source(GameSource(engine, players))
+        return p1, p2
+
+    def _cmd_play_game(self, args: list[str], ctx: CommandContext) -> CommandResult:
+        """`:play <game> [<p1>] [<p2>]` — 実 LLM 対局を起動 (F16 + 実 LLM 連携)。
+
+        builtins の 3 引数固定版を App レベルで置換する (`:peer` と同じ流儀)。
+        p1 / p2 を省略すると選択中の ``:peer`` を相手に据える (``@peer`` トークン
+        でも明示指定可)。両者を LLM にすれば LLM 対 LLM、片方を ``mock:*`` (shogi)
+        にすれば人手不要のオフライン対局になる。
+        """
+        if not args or len(args) > 3:
+            return CommandResult(
+                ok=False,
+                error=(
+                    "usage: :play <game> [<p1>] [<p2>]  "
+                    "(p1/p2 省略時は選択中の :peer を使用; 例: ':play chess' / "
+                    "':play shogi @peer mock:script')"
+                ),
+            )
+        game = args[0]
+        p1 = args[1] if len(args) >= 2 else PEER_TOKEN
+        p2 = args[2] if len(args) >= 3 else PEER_TOKEN
         try:
-            from llove.shogi import make_player
-            from llove.shogi.source import ShogiSource
-        except ImportError as exc:  # python-shogi not installed
-            raise RuntimeError(
-                f"shogi engine unavailable: {exc}; install: pip install 'llmesh-llove[shogi]'"
-            ) from exc
-        sente = make_player(p1, side="sente")
-        gote = make_player(p2, side="gote")
-        self._load_source(ShogiSource(sente, gote))
+            r1, r2 = self._start_game(game, p1, p2)
+        except Exception as e:  # noqa: BLE001 — 起動失敗を漏れなく人間可読に落とす
+            return CommandResult(ok=False, error=f"対局起動失敗: {e}")
+        return CommandResult(ok=True, output=(f"対局開始: {game} ({r1} vs {r2})",))
 
     def action_quit_now(self) -> None:
         """Synchronous quit so it can be wired from Button.Pressed."""
