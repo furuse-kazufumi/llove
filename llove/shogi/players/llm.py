@@ -78,15 +78,17 @@ class LLMShogiPlayer(Player):
             return ThinkResult(
                 move=None, resign=True, resign_reason="no legal moves available"
             )
-        request = ChatRequest(
-            messages=self._build_messages(engine.sfen, legal, engine.move_history_usi),
-            model=self.model,
-            max_tokens=self._max_tokens,
-            temperature=self._temperature,
-        )
         try:
+            # プロンプト構築 (ChatRequest 検証) も try 内 — 不正入力の LLMError も
+            # resign に落としてループを巻き込まない (fail-closed).
+            request = ChatRequest(
+                messages=self._build_messages(engine.sfen, legal, engine.move_history_usi),
+                model=self.model,
+                max_tokens=self._max_tokens,
+                temperature=self._temperature,
+            )
             resp = await self._client.complete(request)
-        except (LLMBackendError, LLMConfigError) as exc:
+        except LLMError as exc:
             return ThinkResult(
                 move=None, resign=True, resign_reason=f"backend_error: {exc}"
             )
