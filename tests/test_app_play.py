@@ -120,6 +120,27 @@ class TestPlayErrorPaths:
         # 到達前に失敗 — source は差し替わらない.
         assert isinstance(app._source, _NullSource)
 
+    def test_play_shogi_missing_extra_fails_clean(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        # python-shogi 欠如を模擬: Engine() が EngineUnavailable を投げると、
+        # :play shogi は「偽成功→現ソース破棄→背景で沈黙死」ではなく、ソースを
+        # 一切差し替えずに clean error を返す(eager probe による修正)。
+        import llove.shogi.engine as shogi_engine
+
+        app = LoveApp(_NullSource())
+        registry, ctx = app._command_palette_context()
+
+        def _boom(*a: object, **k: object) -> object:
+            raise shogi_engine.EngineUnavailable("python-shogi is not installed")
+
+        monkeypatch.setattr(shogi_engine, "Engine", _boom)
+        result = dispatch(":play shogi mock:script mock:script", ctx, registry)
+        assert result.ok is False
+        assert "shogi engine unavailable" in (result.error or "")
+        # 到達前に失敗 — 現ソースは差し替わらない(偽成功で view を殺さない)。
+        assert isinstance(app._source, _NullSource)
+
     def test_play_unknown_game_lists_available(self) -> None:
         app = LoveApp(_NullSource())
         registry, ctx = app._command_palette_context()
