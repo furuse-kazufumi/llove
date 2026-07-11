@@ -91,12 +91,17 @@ class LLMShogiPlayer(Player):
                 move=None, resign=True, resign_reason=f"backend_error: {exc}"
             )
 
-        usi = extract_move(resp.text, legal) or first_move_token(resp.text)
-        if not usi:
+        # legal は上で非空を保証済み. 一致 USI が無ければ resign (fail-closed) —
+        # ゴミ手を返して違法ストライクを浪費しない.
+        usi = extract_move(resp.text, legal)
+        if usi is None:
             return ThinkResult(
                 move=None,
                 resign=True,
-                resign_reason="LLM returned no interpretable USI move",
+                resign_reason=(
+                    "LLM did not return a listed legal USI move; said: "
+                    + _commentary(resp.text, "")
+                ),
             )
         return ThinkResult(
             move=Move(
