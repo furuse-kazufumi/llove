@@ -43,6 +43,29 @@ def test_extract_san_check_suffix() -> None:
     assert extract_move("Qh7#", ["Qh7", "Qh7#"]) == "Qh7#"
 
 
+def test_extract_check_suffix_when_legal_list_has_no_suffix() -> None:
+    # ★#4 の核心: chess の合法手は UCI (装飾なし "d1h5") だが, モデルは王手手を
+    # "d1h5+" と書く。装飾 + を右境界として許容し, 合法手 d1h5 に一致させる
+    # (許容しないと正しい手なのに resign してしまう).
+    assert extract_move("d1h5+", ["e2e4", "g1f3", "d1h5"]) == "d1h5"
+    assert extract_move("The move is d1h5#.", ["d1h5", "g1f3"]) == "d1h5"
+    assert extract_move("I play e4!", ["e4", "d4"]) == "e4"
+
+
+def test_extract_prefers_promotion_when_both_legal() -> None:
+    # 将棋 USI: 成り "7g7f+" と不成 "7g7f" が両方合法なら, 装飾でなく手そのものと
+    # して長い "7g7f+" を選ぶ (tie-break が生きる — 順序不問).
+    assert extract_move("7g7f+", ["7g7f", "7g7f+"]) == "7g7f+"
+    assert extract_move("7g7f+", ["7g7f+", "7g7f"]) == "7g7f+"
+
+
+def test_extract_still_rejects_substring_after_suffix_relax() -> None:
+    # 装飾許容後も左境界は厳格 — "Ne4" 中の "e4" は拾わない.
+    assert extract_move("Ne4+", ["e4", "d4"]) is None
+    # 連結された 2 手 "e4e5" から "e4" を拾わない (末尾 'e' は装飾でない).
+    assert extract_move("e4e5", ["e4", "d4"]) is None
+
+
 def test_extract_empty_legal_moves_returns_none() -> None:
     assert extract_move("7g7f", []) is None
 
