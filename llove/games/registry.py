@@ -4,9 +4,15 @@ Scope: this registry covers games built on :mod:`llove.games.base` (the
 generic ``run_game`` + ``GameEngine`` / ``GamePlayer`` stack). **shogi is
 deliberately not here** — it lives in :mod:`llove.shogi` with its own
 ``Engine`` / ``Player`` / loop (a separate stack kept from the MVP2a
-one-file-at-a-time build). Callers that support both (``LoveApp._start_game``,
-``llove play``) special-case shogi and fall through to this registry for
-everything else (chess today; go / mahjong on the v0.7 roadmap).
+one-file-at-a-time build).
+
+Only ``LoveApp._start_game`` dispatches *by name* through this registry: it
+special-cases shogi and falls through to ``make_engine(game)`` for every other
+name, so a game registered here is immediately reachable from ``:play <game>``.
+The CLI (``llove play``) does **not** fall through — it is a fixed set of Click
+subcommands (``shogi``, ``chess``), so adding a game here makes it playable from
+the palette but a matching ``llove play <game>`` subcommand must be added by
+hand (see the sync note on ``_ENGINE_FACTORIES``).
 
 Engine construction is lazy: importing this module does **not** import
 ``python-chess``. ``make_engine("chess")`` constructs a ``ChessEngine``, and
