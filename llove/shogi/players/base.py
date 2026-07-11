@@ -141,8 +141,8 @@ def make_player(
     spec: str,
     *,
     side: str,
-    config: object | None = None,
-    transport: object | None = None,
+    config: LLMConfig | None = None,
+    transport: HttpTransport | None = None,
 ) -> Player:
     """Resolve a provider spec to a concrete :class:`Player` instance.
 
