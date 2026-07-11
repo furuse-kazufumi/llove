@@ -647,7 +647,7 @@ class LoveApp(App):
             )
         # Build both players; make_game_player may raise LLMConfigError (e.g.
         # anthropic without a key) — that propagates to the honest error path.
-        players = {
+        players: dict[str, GamePlayer] = {
             pids[0]: make_game_player(
                 p1, player_id=pids[0], game=game, transport=self._game_transport
             ),
