@@ -202,6 +202,25 @@ LLM は「7g7f が最善です」のように前置き付きで返す。`extract
   `None`(N/A)を返す(honest)。
 - **[LOW] fence 言語タグ誤認**: `first_move_token` が "```usi" の "usi" を着手と誤認 → フェンス行をスキップ。
 
+### 第2ラウンド(TUI 対局 = `:play` + `GameSource`、5 レンズ Workflow / 各 finding を一次コード検証)
+
+「単体テストは緑だが実経路で誤り」型を再度狩り、以下を修正(全て回帰テスト付き):
+
+- **[MED] shogi の dead ImportError ガード**: `_start_game` の `except ImportError` は
+  extras 欠如を捕まえない(`llove.shogi.engine` は python-shogi を遅延 import し
+  `EngineUnavailable`=RuntimeError を投げる)。結果 `:play shogi` が **偽成功→現ビュー破棄
+  →背景 consume タスクで沈黙死**。`Engine()` を eager probe して `ImportError`/
+  `EngineUnavailable` を clean error に(chess 経路と対称化)。
+- **[LOW] @peer 解決がゲーム名検証より先**: peer 未選択で `:play go`(誤字)を叩くと
+  "no peer selected" が出て不正確。ゲーム名検証を先に回して "unsupported game" を優先。
+- **[LOW] palette chess の max_ply=1000**: 汎用ループ既定 1000 が CLI chess(200)と乖離し、
+  対話+課金で暴走リスク。`PALETTE_GENERIC_MAX_PLY=200` を明示。
+- **[LOW] p2 構築失敗時の p1 リーク**: `make_game_player(p2)` が `LLMConfigError`(例: 鍵無し
+  anthropic)で落ちると p1 が未 `aclose`。best-effort クリーンアップを追加(現状は
+  no-op aclose + stateless urllib で実害無いが将来の pooled client 用)。
+- **[LOW] docstring 過大主張**: 「chess も shogi と同じペインが光る」「`--stream` で TUI+stdout」
+  「`llove play` もレジストリに fall-through」を実態に合わせて正直化。
+
 ## 既知の限界(honest)
 
 - anthropic / llmesh peer は **live 疎通未検証**(ollama qwen2.5:14b のみ実サーバで e2e 確認)。
