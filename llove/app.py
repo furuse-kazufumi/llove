@@ -490,8 +490,10 @@ class LoveApp(App):
         Without this the palette opens with an empty registry, so ``:help``
         errors and every command is inert. Here we register the builtins and
         bind the hooks that genuinely work (help / demo / play / theme /
-        identity); the rest (``:open`` / ``:fold`` / ``:layout`` / ``:peer``)
-        keep their honest "not wired yet" responses.
+        identity / peer); the rest (``:open`` / ``:fold`` / ``:layout``)
+        keep their honest "not wired yet" responses. ``:peer`` is re-registered
+        with the real ``llove.llm``-backed handler (config-level validation,
+        fail-closed, no network).
         """
         if self._cmd_registry is not None and self._cmd_ctx is not None:
             return self._cmd_registry, self._cmd_ctx
