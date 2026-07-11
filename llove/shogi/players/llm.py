@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 
 from llove.llm.client import LLMClient
 from llove.llm.parsing import extract_move
-from llove.llm.types import ChatMessage, ChatRequest, LLMBackendError, LLMConfigError
+from llove.llm.types import ChatMessage, ChatRequest, LLMError
 from llove.shogi.players.base import Move, Player, ThinkResult
 
 if TYPE_CHECKING:  # pragma: no cover — type-only
