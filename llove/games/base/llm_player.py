@@ -23,7 +23,10 @@ import json
 from llove.games.base.player import GamePlayer, ThinkResult
 from llove.games.base.types import Move, Observation
 from llove.llm.client import LLMClient
+from llove.llm.config import LLMConfig
+from llove.llm.factory import make_client
 from llove.llm.parsing import extract_move, first_move_token
+from llove.llm.transport import HttpTransport
 from llove.llm.types import ChatMessage, ChatRequest, LLMBackendError, LLMConfigError
 
 DEFAULT_SYSTEM_PROMPT = (
