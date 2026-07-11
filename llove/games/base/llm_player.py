@@ -117,15 +117,28 @@ class LLMGamePlayer(GamePlayer):
                 resign_reason=f"backend_error: {exc}",
             )
 
-        notation = extract_move(resp.text, observation.legal_moves) or first_move_token(
-            resp.text
-        )
-        if not notation:
-            return ThinkResult(
-                move=None,
-                resign=True,
-                resign_reason="LLM returned no interpretable move",
-            )
+        # 合法手が渡されていれば, その中に一致する着手を要求する. 見つからな
+        # ければゴミ手で違法ストライクを浪費するより即 resign (fail-closed).
+        # 合法手が無い (engine が唯一の legality oracle) 場合のみ生トークンを渡す.
+        if observation.legal_moves:
+            notation = extract_move(resp.text, observation.legal_moves)
+            if notation is None:
+                return ThinkResult(
+                    move=None,
+                    resign=True,
+                    resign_reason=(
+                        "LLM did not return a listed legal move; said: "
+                        + self._commentary(resp.text, "")
+                    ),
+                )
+        else:
+            notation = first_move_token(resp.text)
+            if not notation:
+                return ThinkResult(
+                    move=None,
+                    resign=True,
+                    resign_reason="LLM returned an empty response",
+                )
         return ThinkResult(
             move=Move(
                 notation=notation,
