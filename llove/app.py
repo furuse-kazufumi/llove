@@ -16,7 +16,13 @@ from textual.widgets import Button, Footer, Header, Static
 from llove.events import Event, EventKind
 from llove.i18n import t
 from llove.identity import load_local_identity
-from llove.llm import KNOWN_PROVIDERS, LLMConfig, LLMConfigError, parse_llm_spec
+from llove.llm import (
+    KNOWN_PROVIDERS,
+    HttpTransport,
+    LLMConfig,
+    LLMConfigError,
+    parse_llm_spec,
+)
 from llove.sources.base import DataSource
 from llove.term.choice import ChoiceOption, ChoicePrompt
 from llove.term.choice_screen import ChoiceScreen
