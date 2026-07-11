@@ -625,7 +625,10 @@ class LoveApp(App):
             loop = asyncio.get_running_loop()
         except RuntimeError:
             return
-        loop.create_task(aclose())
+        # Keep a reference so the loop doesn't GC the task before it runs.
+        task = loop.create_task(aclose())
+        self._cleanup_tasks.add(task)
+        task.add_done_callback(self._cleanup_tasks.discard)
 
     def _start_game(self, game: str, p1: str, p2: str) -> tuple[str, str]:
         """`:play <game> [<p1>] [<p2>]` — load a real LLM game into the app.
