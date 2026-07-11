@@ -222,8 +222,8 @@ async def test_llmesh_request_shape_and_auth_header() -> None:
     assert resp.text == "resign"
     assert resp.usage.input_tokens == 10
     assert resp.usage.output_tokens == 2
-    # 非 claude モデルは on-prem 前提でコスト 0.0
-    assert resp.cost_usd == 0.0
+    # llmesh peer の課金元は不明(ローカル無料 or 有料クラウド)→ 捏造せず None(N/A)
+    assert resp.cost_usd is None
     assert resp.provider == "llmesh"
 
 
