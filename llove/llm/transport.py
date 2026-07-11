@@ -62,13 +62,15 @@ class UrllibHttpTransport:
         headers: dict[str, str] | None = None,
         body: bytes | None = None,
     ) -> tuple[int, bytes]:
-        req = urllib.request.Request(
-            url,
-            method=method,
-            data=body,
-            headers=headers or {},
-        )
         try:
+            # Request 構築時にも URL 解析が走り, 不正 URL は bare ValueError を投げる
+            # (例: scheme 無し "unknown url type") — try 内に置いて正規化する.
+            req = urllib.request.Request(
+                url,
+                method=method,
+                data=body,
+                headers=headers or {},
+            )
             with urllib.request.urlopen(  # nosec B310 — host-controlled endpoint
                 req, timeout=self.timeout
             ) as resp:
