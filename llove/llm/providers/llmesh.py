@@ -79,16 +79,13 @@ class LlmeshPeerClient(LLMClient):
             model=model,
             usage=usage,
             latency_ms=latency_ms,
-            # peer は on-prem 前提なので既定 0.0. クラウド OpenAI 互換に使う場合は
-            # 価格表に載っていれば estimate 側で拾える — ここでは既知価格を優先.
-            cost_usd=estimate_cost_usd(model, usage) if _looks_priced(model) else 0.0,
+            # llmesh peer の課金元は原理的に不明 — 汎用 OpenAI 互換ゲートウェイは
+            # 無料ローカル(vLLM/LM Studio)にも有料クラウド(OpenAI 本体)にも向けうる。
+            # モデル名から 0.0(無料)や価格を捏造すると honest 契約に反するため
+            # None (= N/A) を返す (feedback_benchmark_honest_disclosure).
+            cost_usd=None,
             raw=doc,
         )
-
-
-def _looks_priced(model: str) -> bool:
-    """価格表に載りうるモデル (claude-*) かの粗い判定."""
-    return model.startswith("claude-")
 
 
 def _extract_text(doc: dict[str, Any]) -> str:
