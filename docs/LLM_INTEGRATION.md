@@ -130,9 +130,34 @@ LLM は「7g7f が最善です」のように前置き付きで返す。`extract
 - スイート全体は offline(`conftest.py` の `llm_backends_offline` で backends を DI 固定)。
   **どのテストも実ネットワーク/実 API 課金を踏まない。**
 
+## 敵対レビューで修正した欠陥(6 レンズ・24 エージェント / 13 CONFIRMED)
+
+「単体テストは緑だが実経路で誤り」型を重点的に狩り、以下を修正済み(全て回帰テスト付き):
+
+- **[HIGH] anthropic temperature**: `temperature` 無条件送信 → Opus 4.7+/Sonnet 5/Fable 5 で
+  HTTP 400。該当モデルでは省くよう修正(既定 haiku-4-5 は許容で無害だった)。
+- **[HIGH] transport 例外の取りこぼし**: `http.client.HTTPException`(RemoteDisconnected 等)・
+  不正 URL の bare `ValueError` が素通り → ループクラッシュ。すべて `LLMBackendError` に
+  正規化(`Request()` 構築も try 内へ)。
+- **[MED] 着手抽出の王手接尾**: chess で "d1h5+"(合法リストは UCI "d1h5")が一致せず誤 resign。
+  装飾(+#!?)を右境界として許容。将棋 USI 成り "7g7f+" は「長い手優先」で正しく選ぶ。
+- **[MED] OLLAMA_HOST scheme-less**: `127.0.0.1:11434`(ollama ネイティブ形式)→ 稼働中でも
+  到達不能誤報。`http://` を補完。
+- **[LOW] fail-closed 完全性**: プロンプト構築を try 内へ + 基底 `LLMError` 捕捉(不正 system_prompt/
+  max_tokens で loop がクラッシュしない)。
+- **[LOW] 非先頭 system 脱落**: `ChatRequest` が非先頭 system を fail-closed で拒否(provider 間の
+  実効プロンプト乖離を防止)。
+- **[LOW] llmesh cost 捏造**: 有料コールを $0 / 無料ローカルを課金と誤報 → 課金元不明の peer は
+  `None`(N/A)を返す(honest)。
+- **[LOW] fence 言語タグ誤認**: `first_move_token` が "```usi" の "usi" を着手と誤認 → フェンス行をスキップ。
+
 ## 既知の限界(honest)
 
-- anthropic / llmesh peer は **live 疎通未検証**(ollama のみ実サーバで確認)。
+- anthropic / llmesh peer は **live 疎通未検証**(ollama qwen2.5:14b のみ実サーバで e2e 確認)。
+  anthropic は temperature ゲーティングを claude-api skill(一次情報)+ fake で検証済みだが、
+  実 API コールは課金のため未実行(ユーザー go 待ち)。
+- 複数合法手が散文で列挙された場合、`extract_move` は最も早い出現を選ぶ(モデルが明示的に
+  却下した手を指しうる)。明確な正解挙動が無いヒューリスティックのため現状維持(低頻度)。
 - backends シナリオの `available_providers()` は「設定済み」判定で、疎通は実行時。
 - shogi プレイヤは fake engine でテスト(python-shogi 非依存)。実対局は
   `llove play shogi` で要実機確認。
