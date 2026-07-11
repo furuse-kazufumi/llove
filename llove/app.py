@@ -513,6 +513,17 @@ class LoveApp(App):
         # cartridge loaders: :demo <name> / :play <game> <p1> <p2>.
         ctx.hooks["start_demo"] = self._start_demo
         ctx.hooks["start_game"] = self._start_game
+        # :peer — llove.llm 実配線 (builtins の "hook 未配線" handler を置換)。
+        registry.unregister("peer")
+        registry.register(
+            Command(
+                name="peer",
+                handler=self._cmd_peer,
+                summary="LLM peer 表示 / 選択 (config 検証のみ, 疎通テストなし)",
+                args_hint="[<provider:model>]",
+                category="llmesh",
+            )
+        )
         self._cmd_registry = registry
         self._cmd_ctx = ctx
         return registry, ctx
