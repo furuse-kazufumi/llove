@@ -54,13 +54,17 @@ async def test_rag_scenario_includes_rag_hits() -> None:
 
 
 @pytest.mark.asyncio
-async def test_backends_scenario_includes_llm_calls() -> None:
+async def test_backends_scenario_includes_llm_calls(llm_backends_offline) -> None:
+    # backends performs real LLM calls now; run it offline via DI. With an
+    # empty env exactly one provider (ollama) is configured, so exactly one
+    # measured LLM_CALL is emitted — no synthetic extras.
     scenario = get_scenario("backends")
+    llm_backends_offline(scenario)
     scenario.default_pause = 0.0
     kinds = []
     async for ev in scenario.events():
         kinds.append(ev.kind)
-    assert kinds.count(EventKind.LLM_CALL) >= 3
+    assert kinds.count(EventKind.LLM_CALL) == 1
 
 
 @pytest.mark.asyncio
