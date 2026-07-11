@@ -244,6 +244,7 @@ def play_chess(
 
     from llove.games.base import run_game
     from llove.games.base.llm_player import make_game_player
+    from llove.games.base.player import GamePlayer
     from llove.games.chess.engine import EngineUnavailable
     from llove.games.registry import make_engine
 
