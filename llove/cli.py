@@ -103,7 +103,7 @@ def demo(
     LoveApp(scenario, with_narration=True, log_path=log_path).run()
 
 
-@main.group(help="Run a real LLM-vs-LLM game (shogi today; chess / go / mahjong on the v0.7 roadmap).")
+@main.group(help="Run a real LLM-vs-LLM game (shogi and chess today; go / mahjong on the v0.7 roadmap).")
 def play() -> None:  # pragma: no cover — Click dispatch
     pass
 
