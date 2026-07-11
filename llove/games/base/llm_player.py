@@ -101,16 +101,19 @@ class LLMGamePlayer(GamePlayer):
     # -------- GamePlayer 契約 --------
 
     async def think(self, observation: Observation) -> ThinkResult:
-        request = ChatRequest(
-            messages=self._build_messages(observation),
-            model=self.model,
-            max_tokens=self._max_tokens,
-            temperature=self._temperature,
-        )
         try:
+            # プロンプト構築 (.format / ChatRequest 検証) も try 内に置く — 不正な
+            # system_prompt や max_tokens<=0 が LLMError を投げてもループを巻き込まず
+            # resign に落とす (fail-closed 契約).
+            request = ChatRequest(
+                messages=self._build_messages(observation),
+                model=self.model,
+                max_tokens=self._max_tokens,
+                temperature=self._temperature,
+            )
             resp = await self._client.complete(request)
-        except (LLMBackendError, LLMConfigError) as exc:
-            # fail-closed: バックエンド失敗はループを巻き込まず resign.
+        except LLMError as exc:
+            # fail-closed: バックエンド/設定失敗はループを巻き込まず resign.
             return ThinkResult(
                 move=None,
                 resign=True,
