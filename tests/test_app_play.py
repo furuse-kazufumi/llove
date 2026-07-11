@@ -228,6 +228,31 @@ async def test_play_chess_events_reach_the_audit_pane() -> None:
 
 
 @pytest.mark.asyncio
+async def test_source_error_surfaces_to_audit_pane_instead_of_silent_death() -> None:
+    # 防御的硬化: source.stream() が例外を投げても背景タスクで沈黙死せず、
+    # audit ペインにエラーが可視化される(空白 TUI を防ぐ)。
+    from llove.events import Event, EventKind
+
+    class _BoomSource(DataSource):
+        name = "boom"
+
+        async def stream(self) -> AsyncIterator[Event]:
+            raise RuntimeError("kaboom")
+            yield  # pragma: no cover — generator 型にするための到達しない yield
+
+    app = LoveApp(get_scenario("scada"), with_narration=True)
+    async with app.run_test(size=(120, 40)) as pilot:
+        await pilot.pause(0.1)
+        app._load_source(_BoomSource())
+        for _ in range(10):
+            await pilot.pause(0.05)
+        rows = "\n".join(app._audit._rows)
+        assert "source error" in rows
+        assert "kaboom" in rows
+        assert app._audit._counts.get(EventKind.AUDIT, 0) >= 1
+
+
+@pytest.mark.asyncio
 async def test_play_shogi_still_works_with_mock() -> None:
     # shogi 経路 (別スタック) が壊れていないこと — mock:script はネットワーク不要.
     app = LoveApp(get_scenario("scada"), with_narration=True)
