@@ -10,8 +10,11 @@ from llove.events import EventKind
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("name", list(SCENARIOS))
-async def test_scenario_yields_events(name: str) -> None:
+async def test_scenario_yields_events(name: str, llm_backends_offline) -> None:
     scenario = get_scenario(name)
+    if name == "backends":
+        # backends now performs real LLM calls — keep the smoke test offline.
+        llm_backends_offline(scenario)
     # Override pause to make the test fast.
     scenario.default_pause = 0.0
     seen = []
