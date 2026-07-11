@@ -629,6 +629,7 @@ class LoveApp(App):
         # Generic games (chess today; go / mahjong on the roadmap) on the
         # shared llove.games.base stack.
         from llove.games.base.llm_player import make_game_player
+        from llove.games.base.player import GamePlayer
         from llove.games.base.source import GameSource
         from llove.games.registry import available_games, is_registered, make_engine
 
