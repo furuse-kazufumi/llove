@@ -22,6 +22,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 
+from llove.llm.transport import DEFAULT_TIMEOUT_S
 from llove.llm.types import LLMConfigError
 
 DEFAULT_ANTHROPIC_BASE_URL = "https://api.anthropic.com"
