@@ -19,6 +19,7 @@
 from __future__ import annotations
 
 from llove.games.base.engine import GameEngine, LegalityResult
+from llove.games.base.llm_player import LLMGamePlayer, make_game_player
 from llove.games.base.loop import GameOutcome, run_game
 from llove.games.base.player import GamePlayer, ThinkResult
 from llove.games.base.types import Move, Observation, TermReason
@@ -27,10 +28,12 @@ __all__ = [
     "GameEngine",
     "GameOutcome",
     "GamePlayer",
+    "LLMGamePlayer",
     "LegalityResult",
     "Move",
     "Observation",
     "TermReason",
     "ThinkResult",
+    "make_game_player",
     "run_game",
 ]
