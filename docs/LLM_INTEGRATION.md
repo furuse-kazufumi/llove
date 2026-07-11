@@ -63,6 +63,9 @@ llove/llm/
 | **shogi `LLMShogiPlayer`** | **works_now(fake transport + fake engine 検証)** — live 未実行 | 汎用プレイヤと同じ client/parsing 経路(それは live 検証済み)を共有 |
 | **backends シナリオ** | **works_now(fake 検証)/ 実行時は実呼出** | テストは offline(DI)。`llove demo --scenario backends` で実バックエンドを叩く |
 | **`:peer` パレット** | **works_now(config レベル)** | 設定検証・選択保存・表示のみ。endpoint 疎通は未確認(設計通り) |
+| **`GameSource`(汎用→TUI)** | **works_now(live 検証済み)** | 実 ollama chess を CLI e2e で完走(署名付き棋譜)。fake transport で GameSource 単体 e2e も緑 |
+| **`:play` パレット(TUI 対局)** | **works_now(live e2e + wiring テスト)** | `:play chess`/`@peer`/未知ゲーム拒否/shogi 経路不変を run_test で検証。実 ollama で対局完走 |
+| **chess(`ChessEngine`)対局** | **works_now(live 検証済み)** | 実 ollama qwen2.5:7b が合法手 8 手を指し max_ply 終局(棋力は低い=honest) |
 
 **「設定済み」≠「到達可能」**: `available_providers()` は静的設定(キー/エンドポイント)の
 充足を返すだけ。ollama は既定 localhost を持つので常に「設定済み」だが、実際に
