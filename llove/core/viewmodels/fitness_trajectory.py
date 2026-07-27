@@ -5,7 +5,7 @@ The evolution engine writes one JSON object per generation, e.g.::
     {"generation": 0, "n_individuals": 32, "best_score": 0.74, "mean_score": 0.50,
      "std_score": 0.11, "median_score": 0.49, "diversity_l2": 28.5, "seed": 0}
 
-(see D:/projects/llive/out/<run>/metrics.jsonl). This view-model parses those raw
+(see C:/dev/projects/llive/out/<run>/metrics.jsonl). This view-model parses those raw
 rows and keeps aligned per-generation series (best / mean / median / std) ready
 for a plot. It is **pure** — no Textual, no Qt — so the Textual front and the new
 Qt front (``llove/qt``) both subscribe to it (design §5.2). Missing optional

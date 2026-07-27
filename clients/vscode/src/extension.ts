@@ -2,9 +2,9 @@
  * llove VS Code extension — Phase-1 PoC skeleton.
  *
  * Strategy reference:
- * - D:/projects/audit/STRATEGY_EAR_LOCAL_LLM_2026-05-17_PART5_ENGINE.md (engine protocol)
- * - D:/projects/audit/STRATEGY_EAR_LOCAL_LLM_2026-05-17_PART4_TABBY.md (competitor analysis)
- * - D:/projects/llmesh/docs/market/customer-personas.md (L1 market personas)
+ * - C:/dev/projects/audit/STRATEGY_EAR_LOCAL_LLM_2026-05-17_PART5_ENGINE.md (engine protocol)
+ * - C:/dev/projects/audit/STRATEGY_EAR_LOCAL_LLM_2026-05-17_PART4_TABBY.md (competitor analysis)
+ * - C:/dev/projects/llmesh/docs/market/customer-personas.md (L1 market personas)
  *
  * Design decisions:
  * - Marketplace-independent distribution by default (VSIX direct, gitee

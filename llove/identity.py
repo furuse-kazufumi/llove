@@ -11,7 +11,7 @@ Discovery order (first match wins; all silent on failure):
 
 1. ``LLOVE_NODE_IDENTITY_FILE`` env var → path to a ``node_identity.json``
    (and an optional sibling ``node.key.bin`` for signing).
-2. ``D:/projects/llmesh/config/node_identity.json`` — the canonical PoC
+2. ``C:/dev/projects/llmesh/config/node_identity.json`` — the canonical PoC
    path on the maintainer's box.
 3. ``~/.llmesh/node_identity.json``                 — the standard install path.
 4. ``$XDG_CONFIG_HOME/llmesh/node_identity.json``   — XDG fallback.
@@ -100,7 +100,7 @@ class LoveIdentity:
 
 _DEFAULT_LOCATIONS: tuple[Path, ...] = (
     # Maintainer's PoC checkout — useful during development.
-    Path("D:/projects/llmesh/config/node_identity.json"),
+    Path("C:/dev/projects/llmesh/config/node_identity.json"),
     # Standard llmesh install path.
     Path.home() / ".llmesh" / "node_identity.json",
 )
@@ -162,7 +162,7 @@ def _try_llmesh_sdk() -> LoveIdentity | None:
     # Same default locations, but this branch reaches for the *.key.bin* file
     # because the SDK can derive every public field from the private key.
     candidates = (
-        Path("D:/projects/llmesh/config/node.key.bin"),
+        Path("C:/dev/projects/llmesh/config/node.key.bin"),
         Path.home() / ".llmesh" / "node.key.bin",
         Path(_xdg_path().parent) / "node.key.bin",
     )

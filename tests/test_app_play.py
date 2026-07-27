@@ -231,7 +231,7 @@ async def test_play_chess_events_reach_the_audit_pane() -> None:
 async def test_source_error_surfaces_to_audit_pane_instead_of_silent_death() -> None:
     # 防御的硬化: source.stream() が例外を投げても背景タスクで沈黙死せず、
     # audit ペインにエラーが可視化される(空白 TUI を防ぐ)。
-    from llove.events import Event, EventKind
+    from llove.events import EventKind
 
     class _BoomSource(DataSource):
         name = "boom"

@@ -3,7 +3,7 @@
 Goal: every llove run starts with a verifiable did:key (when an llmesh
 identity is reachable) or a friendly install hint (when it isn't). These
 tests exercise both branches without depending on the maintainer's local
-``D:/projects/llmesh/config`` checkout.
+``C:/dev/projects/llmesh/config`` checkout.
 """
 
 from __future__ import annotations
@@ -67,7 +67,7 @@ def test_load_local_identity_returns_none_when_nothing_found(
     """No env var, no canonical files → ``None`` (so the caller can fall
     through to the friendly "install llmesh-mcp" hint)."""
     # Point HOME and XDG into an empty tmp dir so the home-based lookups
-    # all miss. The maintainer's D:/projects/llmesh path may exist on the
+    # all miss. The maintainer's C:/dev/projects/llmesh path may exist on the
     # local box, so we patch ``_DEFAULT_LOCATIONS`` to ignore it.
     monkeypatch.delenv("LLOVE_NODE_IDENTITY_FILE", raising=False)
     monkeypatch.setenv("HOME", str(tmp_path))
@@ -163,7 +163,7 @@ def test_real_llmesh_poc_checkout_loads_and_signs(
     """Soft test: when the maintainer's PoC checkout is available at the
     canonical path, the identity must round-trip through Ed25519 sign/verify.
     Skipped on machines without the checkout so CI stays green."""
-    poc = Path("D:/projects/llmesh/config/node_identity.json")
+    poc = Path("C:/dev/projects/llmesh/config/node_identity.json")
     if not poc.is_file():
         pytest.skip("no llmesh PoC checkout on this host")
     monkeypatch.delenv("LLOVE_NODE_IDENTITY_FILE", raising=False)

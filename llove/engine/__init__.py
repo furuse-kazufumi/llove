@@ -13,7 +13,7 @@ already engine-shaped. ``views`` / ``widgets`` / ``window`` / ``term``
 stay in the TUI layer for Phase 1 and are not exposed here.
 
 Strategy reference:
-- ``D:/projects/audit/STRATEGY_EAR_LOCAL_LLM_2026-05-17_PART5_ENGINE.md``
+- ``C:/dev/projects/audit/STRATEGY_EAR_LOCAL_LLM_2026-05-17_PART5_ENGINE.md``
 - ``docs/audits/dogfooding-day0-gap.md``
 
 Public API (v0):
